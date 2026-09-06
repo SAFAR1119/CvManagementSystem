@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace CvManagementSystem.Data;
 
@@ -28,21 +27,8 @@ public class ApplicationDbContextFactory
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             throw new InvalidOperationException(
-                "ConnectionStrings:DefaultConnection was not found.");
+                "Database connection string 'DefaultConnection' was not found.");
         }
-
-        var npgsqlBuilder =
-            new NpgsqlConnectionStringBuilder(connectionString);
-
-        Console.WriteLine();
-        Console.WriteLine("=== EF DATABASE CONFIGURATION ===");
-        Console.WriteLine($"Host:     {npgsqlBuilder.Host}");
-        Console.WriteLine($"Port:     {npgsqlBuilder.Port}");
-        Console.WriteLine($"Database: {npgsqlBuilder.Database}");
-        Console.WriteLine($"Username: {npgsqlBuilder.Username}");
-        Console.WriteLine("Password: [hidden]");
-        Console.WriteLine("=================================");
-        Console.WriteLine();
 
         var optionsBuilder =
             new DbContextOptionsBuilder<ApplicationDbContext>();
