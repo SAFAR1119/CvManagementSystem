@@ -1,0 +1,109 @@
+﻿@page
+@model CvManagementSystem.Areas.Identity.Pages.Account.RegisterModel
+
+@{
+    ViewData["Title"] = "Create Account";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+
+            <div class="text-center mb-4">
+                <span class="badge text-bg-primary mb-3">
+                    CV Management Platform
+                </span>
+
+                <h1 class="fw-bold">
+                    Create your account
+                </h1>
+
+                <p class="text-secondary">
+                    Create a Candidate account and start building your
+                    professional profile.
+                </p>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+
+                    <form method="post">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger"
+                             role="alert">
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Email"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Input.Email"
+                                   class="form-control"
+                                   autocomplete="email"
+                                   placeholder="you@example.com" />
+
+                            <span asp-validation-for="Input.Email"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Password"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Input.Password"
+                                   class="form-control"
+                                   autocomplete="new-password"
+                                   placeholder="Create a password" />
+
+                            <span asp-validation-for="Input.Password"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.ConfirmPassword"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Input.ConfirmPassword"
+                                   class="form-control"
+                                   autocomplete="new-password"
+                                   placeholder="Repeat your password" />
+
+                            <span asp-validation-for="Input.ConfirmPassword"
+                                  class="text-danger">
+                            </span>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+                            Create Account
+                        </button>
+
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <span class="text-secondary">
+                            Already have an account?
+                        </span>
+
+                        <a asp-page="./Login"
+                           asp-route-returnUrl="@Model.ReturnUrl">
+                            Sign in
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

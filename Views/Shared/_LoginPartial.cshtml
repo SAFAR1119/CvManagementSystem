@@ -1,0 +1,37 @@
+@using CvManagementSystem.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <form asp-area="Identity"
+          asp-page="/Account/Logout"
+          asp-route-returnUrl="@Url.Action("Index", "Home")"
+          method="post"
+          class="d-inline">
+        <button type="submit" class="btn btn-link nav-link border-0">
+            Logout
+        </button>
+    </form>
+
+    <a class="nav-link"
+       asp-area="Identity"
+       asp-page="/Account/Manage/Index">
+        Hello @UserManager.GetUserName(User)
+    </a>
+}
+else
+{
+    <a class="nav-link"
+       asp-area="Identity"
+       asp-page="/Account/Register">
+        Register
+    </a>
+
+    <a class="nav-link"
+       asp-area="Identity"
+       asp-page="/Account/Login">
+        Login
+    </a>
+}

@@ -5,14 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Explicitly load User Secrets.
-// This keeps the Supabase password out of appsettings.json and GitHub.
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 
-// MVC
 builder.Services.AddControllersWithViews();
 
-// PostgreSQL + Entity Framework Core
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -25,24 +21,25 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// ASP.NET Core Identity
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
+        options.User.RequireUniqueEmail = true;
+
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireNonAlphanumeric = true;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddRazorPages();
+
 var app = builder.Build();
 
-// Seed application roles
-using (var scope = app.Services.CreateScope())
-{
-    await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
-}
-
-// Error handling
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -54,6 +51,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.MapStaticAssets();
 
