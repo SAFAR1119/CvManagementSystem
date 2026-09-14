@@ -3,6 +3,7 @@ using System;
 using CvManagementSystem.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CvManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260913162420_AddAttributeLibrary")]
+    partial class AddAttributeLibrary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,9 +141,6 @@ namespace CvManagementSystem.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
-                    b.Property<DateTime?>("LastUsedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -148,13 +148,6 @@ namespace CvManagementSystem.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UsageCount")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -190,158 +183,6 @@ namespace CvManagementSystem.Migrations
                     b.HasIndex("AttributeDefinitionId");
 
                     b.ToTable("AttributeOptions");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.CandidateAttributeValue", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttributeDefinitionId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CandidateProfileId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Value")
-                        .HasMaxLength(5000)
-                        .HasColumnType("character varying(5000)");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttributeDefinitionId");
-
-                    b.HasIndex("CandidateProfileId", "AttributeDefinitionId")
-                        .IsUnique();
-
-                    b.ToTable("CandidateAttributeValues");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.CandidateProfile", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Location")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("PhotoUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("CandidateProfiles");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.Project", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CandidateProfileId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("DescriptionMarkdown")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly?>("EndDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CandidateProfileId");
-
-                    b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.ProjectTechnologyTag", b =>
-                {
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TechnologyTagId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ProjectId", "TechnologyTagId");
-
-                    b.HasIndex("TechnologyTagId");
-
-                    b.ToTable("ProjectTechnologyTags");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.TechnologyTag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("TechnologyTags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -498,66 +339,6 @@ namespace CvManagementSystem.Migrations
                     b.Navigation("AttributeDefinition");
                 });
 
-            modelBuilder.Entity("CvManagementSystem.Models.CandidateAttributeValue", b =>
-                {
-                    b.HasOne("CvManagementSystem.Models.AttributeDefinition", "AttributeDefinition")
-                        .WithMany()
-                        .HasForeignKey("AttributeDefinitionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("CvManagementSystem.Models.CandidateProfile", "CandidateProfile")
-                        .WithMany("AttributeValues")
-                        .HasForeignKey("CandidateProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AttributeDefinition");
-
-                    b.Navigation("CandidateProfile");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.CandidateProfile", b =>
-                {
-                    b.HasOne("CvManagementSystem.Models.ApplicationUser", "User")
-                        .WithOne("CandidateProfile")
-                        .HasForeignKey("CvManagementSystem.Models.CandidateProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.Project", b =>
-                {
-                    b.HasOne("CvManagementSystem.Models.CandidateProfile", "CandidateProfile")
-                        .WithMany("Projects")
-                        .HasForeignKey("CandidateProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CandidateProfile");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.ProjectTechnologyTag", b =>
-                {
-                    b.HasOne("CvManagementSystem.Models.Project", "Project")
-                        .WithMany("TechnologyTags")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CvManagementSystem.Models.TechnologyTag", "TechnologyTag")
-                        .WithMany("ProjectTags")
-                        .HasForeignKey("TechnologyTagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-
-                    b.Navigation("TechnologyTag");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -609,11 +390,6 @@ namespace CvManagementSystem.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CvManagementSystem.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("CandidateProfile");
-                });
-
             modelBuilder.Entity("CvManagementSystem.Models.AttributeCategory", b =>
                 {
                     b.Navigation("Attributes");
@@ -622,23 +398,6 @@ namespace CvManagementSystem.Migrations
             modelBuilder.Entity("CvManagementSystem.Models.AttributeDefinition", b =>
                 {
                     b.Navigation("Options");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.CandidateProfile", b =>
-                {
-                    b.Navigation("AttributeValues");
-
-                    b.Navigation("Projects");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.Project", b =>
-                {
-                    b.Navigation("TechnologyTags");
-                });
-
-            modelBuilder.Entity("CvManagementSystem.Models.TechnologyTag", b =>
-                {
-                    b.Navigation("ProjectTags");
                 });
 #pragma warning restore 612, 618
         }

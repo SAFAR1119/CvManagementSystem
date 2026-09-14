@@ -5,22 +5,31 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Keep User Secrets available for later database integration.
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 
+// MVC
 builder.Services.AddControllersWithViews();
 
+// Database configuration remains registered.
+// We are NOT querying the database during application startup.
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
 
-if (string.IsNullOrWhiteSpace(connectionString))
+if (!string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException(
-        "ConnectionStrings:DefaultConnection was not found.");
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    // This is only a temporary development fallback.
+    // Database-backed features will be enabled once Supabase is fixed.
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseInMemoryDatabase("CvManagementDevelopment"));
 }
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
-
+// Identity
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
@@ -39,6 +48,15 @@ builder.Services
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
+
+// IMPORTANT:
+// Role seeding is temporarily disabled.
+// Supabase is currently rejecting the PostgreSQL password.
+//
+// using (var scope = app.Services.CreateScope())
+// {
+//     await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
+// }
 
 if (!app.Environment.IsDevelopment())
 {
