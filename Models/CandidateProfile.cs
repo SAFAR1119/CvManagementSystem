@@ -34,4 +34,7 @@ public class CandidateProfile
 
     public ICollection<Project> Projects { get; set; }
         = new List<Project>();
+
+    public ICollection<Cv> Cvs { get; set; }
+        = new List<Cv>();
 }
