@@ -6,283 +6,354 @@
     var categories =
         ViewBag.Categories
         as List<CvManagementSystem.Models.AttributeCategory>
-        ?? new();
+        ?? new List<CvManagementSystem.Models.AttributeCategory>();
+
+    string? search =
+        ViewBag.Search as string;
+
+    int? selectedCategoryId =
+        ViewBag.CategoryId as int?;
 }
 
 <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
         <div>
-            <h1 class="fw-bold mb-1">
+            <h1 class="h3 mb-1">
                 Attribute Library
             </h1>
 
-            <p class="text-secondary mb-0">
-                Reusable attributes for profiles, positions and CVs.
+            <p class="text-muted mb-0">
+                Manage reusable attributes shared across positions and candidate profiles.
             </p>
         </div>
 
         <a asp-action="Create"
            class="btn btn-primary">
-            New Attribute
+            Create Attribute
         </a>
 
     </div>
 
-    @if (TempData["Error"] != null)
+    @if (TempData["Error"] is string error)
     {
         <div class="alert alert-warning">
-            @TempData["Error"]
+            @error
         </div>
     }
 
-    <form method="get"
-          class="row g-2 mb-3">
+    <div class="card shadow-sm">
 
-        <div class="col-md-6">
-            <input type="text"
-                   name="search"
-                   value="@ViewBag.Search"
-                   class="form-control"
-                   placeholder="Search by attribute name..." />
-        </div>
+        <div class="card-body">
 
-        <div class="col-md-4">
-            <select name="categoryId"
-                    class="form-select">
+            <!-- Search and Filter -->
 
-                <option value="">
-                    All categories
-                </option>
+            <form asp-action="Index"
+                  method="get"
+                  class="row g-2 mb-3">
 
-                @foreach (var category in categories)
-                {
-                    if (ViewBag.CategoryId != null &&
-                        ViewBag.CategoryId == category.Id)
-                    {
-                        <option value="@category.Id" selected>
-                            @category.Name
+                <div class="col-md-5">
+
+                    <input type="text"
+                           name="search"
+                           value="@search"
+                           class="form-control"
+                           placeholder="Search by attribute prefix..." />
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <select name="categoryId"
+                            class="form-select">
+
+                        <option value="">
+                            All categories
                         </option>
-                    }
-                    else
-                    {
-                        <option value="@category.Id">
-                            @category.Name
-                        </option>
-                    }
-                }
 
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <button type="submit"
-                    class="btn btn-outline-primary w-100">
-                Search
-            </button>
-        </div>
-
-    </form>
-
-    <!-- Toolbar -->
-    <form asp-action="Delete"
-          method="post"
-          id="attributeForm">
-
-        @Html.AntiForgeryToken()
-
-        <div class="d-flex align-items-center gap-2 mb-2">
-
-            <button type="button"
-                    class="btn btn-outline-secondary btn-sm"
-                    onclick="editSelected()">
-                Edit Selected
-            </button>
-
-            <button type="submit"
-                    class="btn btn-outline-danger btn-sm"
-                    onclick="return confirmDelete()">
-                Delete Selected
-            </button>
-
-            <span id="selectedCount"
-                  class="text-secondary small">
-                0 selected
-            </span>
-
-        </div>
-
-        <div class="table-responsive">
-
-            <table class="table table-hover align-middle">
-
-                <thead class="table-light">
-
-                    <tr>
-                        <th style="width: 45px;">
-                            <input type="checkbox"
-                                   id="selectAll"
-                                   class="form-check-input" />
-                        </th>
-
-                        <th>Attribute</th>
-                        <th>Category</th>
-                        <th>Type</th>
-                        <th>Last Used</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    @if (Model.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="5"
-                                class="text-center py-5 text-secondary">
-                                No attributes found.
-                            </td>
-                        </tr>
-                    }
-                    else
-                    {
-                        foreach (var item in Model)
+                        @foreach (var category in categories)
                         {
+                            if (selectedCategoryId == category.Id)
+                            {
+                                <option value="@category.Id"
+                                        selected>
+                                    @category.Name
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@category.Id">
+                                    @category.Name
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-outline-primary">
+                        Search
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Clear
+                    </a>
+
+                </div>
+
+            </form>
+
+            <!-- Toolbar -->
+
+            <form asp-action="Delete"
+                  method="post"
+                  id="attributeForm">
+
+                @Html.AntiForgeryToken()
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+
+                    <button type="button"
+                            class="btn btn-outline-primary"
+                            onclick="editSelected()">
+                        Edit Selected
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-outline-danger"
+                            onclick="return confirmDelete()">
+                        Delete Selected
+                    </button>
+
+                    <span id="selectedCount"
+                          class="text-muted small">
+                        0 selected
+                    </span>
+
+                </div>
+
+                <!-- Attribute Table -->
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead>
+
                             <tr>
 
-                                <td>
+                                <th style="width: 45px;">
+
                                     <input type="checkbox"
-                                           name="selectedIds"
-                                           value="@item.Id"
-                                           class="form-check-input row-check"
-                                           data-id="@item.Id" />
-                                </td>
+                                           id="selectAll"
+                                           class="form-check-input" />
 
-                                <td>
-                                    <strong>
-                                        @item.Name
-                                    </strong>
+                                </th>
 
-                                    @if (!string.IsNullOrWhiteSpace(
-                                        item.Description))
-                                    {
-                                        <div class="small text-secondary">
-                                            @item.Description
-                                        </div>
-                                    }
-                                </td>
+                                <th>
+                                    Attribute
+                                </th>
 
-                                <td>
-                                    @item.Category.Name
-                                </td>
+                                <th>
+                                    Category
+                                </th>
 
-                                <td>
-                                    <span class="badge text-bg-secondary">
-                                        @item.DataType
-                                    </span>
-                                </td>
+                                <th>
+                                    Type
+                                </th>
 
-                                <td>
-                                    @if (item.LastUsedAt.HasValue)
-                                    {
-                                        @item.LastUsedAt.Value.ToLocalTime().ToString("dd MMM yyyy")
-                                    }
-                                    else
-                                    {
-                                        <span class="text-secondary">
-                                            Never
-                                        </span>
-                                    }
-                                </td>
+                                <th>
+                                    Last Used
+                                </th>
 
                             </tr>
-                        }
-                    }
 
-                </tbody>
+                        </thead>
 
-            </table>
+                        <tbody>
+
+                            @if (Model.Count == 0)
+                            {
+                                <tr>
+
+                                    <td colspan="5"
+                                        class="text-center text-muted py-5">
+
+                                        No attributes found.
+
+                                    </td>
+
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+
+                                            <input type="checkbox"
+                                                   class="form-check-input row-check"
+                                                   name="selectedIds"
+                                                   value="@item.Id" />
+
+                                        </td>
+
+                                        <td>
+
+                                            <strong>
+                                                @(item.Name)
+                                            </strong>
+
+                                            @if (!string.IsNullOrWhiteSpace(item.Description))
+                                            {
+                                                <div class="small text-muted">
+                                                    @(item.Description)
+                                                </div>
+                                            }
+
+                                        </td>
+
+                                        <td>
+                                            @(item.Category.Name)
+                                        </td>
+
+                                        <td>
+
+                                            <span class="badge text-bg-light">
+                                                @(item.DataType)
+                                            </span>
+
+                                        </td>
+
+                                        <td>
+
+                                            @if (item.LastUsedAt.HasValue)
+                                            {
+                                                @(item.LastUsedAt.Value
+                                                    .ToLocalTime()
+                                                    .ToString("dd MMM yyyy"))
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">
+                                                    Never
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </form>
 
         </div>
 
-    </form>
+    </div>
 
 </div>
 
-@section Scripts {
-    <script>
-        const selectAll =
-            document.getElementById("selectAll");
+<script>
 
-        const rows =
-            document.querySelectorAll(".row-check");
+    const selectAll =
+        document.getElementById("selectAll");
 
-        const selectedCount =
-            document.getElementById("selectedCount");
+    const rowChecks =
+        document.querySelectorAll(".row-check");
 
-        function updateSelectedCount() {
-            const selected =
-                document.querySelectorAll(
-                    ".row-check:checked"
-                ).length;
+    const selectedCount =
+        document.getElementById("selectedCount");
 
-            selectedCount.textContent =
-                `${selected} selected`;
+    function updateSelectedCount() {
 
-            selectAll.checked =
-                rows.length > 0 &&
-                selected === rows.length;
-        }
+        const count =
+            document.querySelectorAll(
+                ".row-check:checked"
+            ).length;
 
-        selectAll.addEventListener("change", function () {
-            rows.forEach(row => {
-                row.checked = selectAll.checked;
+        selectedCount.textContent =
+            count + " selected";
+    }
+
+    selectAll.addEventListener(
+        "change",
+        function () {
+
+            rowChecks.forEach(check => {
+                check.checked = this.checked;
             });
 
             updateSelectedCount();
         });
 
-        rows.forEach(row => {
-            row.addEventListener(
-                "change",
-                updateSelectedCount
-            );
-        });
+    rowChecks.forEach(check => {
 
-        function getSelected() {
-            return Array.from(
-                document.querySelectorAll(".row-check:checked")
+        check.addEventListener(
+            "change",
+            updateSelectedCount
+        );
+
+    });
+
+    function editSelected() {
+
+        const selected =
+            Array.from(
+                document.querySelectorAll(
+                    ".row-check:checked"
+                )
             );
+
+        if (selected.length !== 1) {
+
+            alert(
+                "Select exactly one attribute to edit."
+            );
+
+            return;
         }
 
-        function editSelected() {
-            const selected = getSelected();
+        window.location.href =
+            "/Attributes/Edit/" +
+            selected[0].value;
+    }
 
-            if (selected.length !== 1) {
-                alert("Select exactly one attribute to edit.");
-                return;
-            }
+    function confirmDelete() {
 
-            const id = selected[0].dataset.id;
+        const count =
+            document.querySelectorAll(
+                ".row-check:checked"
+            ).length;
 
-            window.location.href =
-                `/Attributes/Edit/${id}`;
-        }
+        if (count === 0) {
 
-        function confirmDelete() {
-            const selected = getSelected();
-
-            if (selected.length === 0) {
-                alert("Select at least one attribute.");
-                return false;
-            }
-
-            return confirm(
-                `Delete ${selected.length} selected attribute(s)?`
+            alert(
+                "Select at least one attribute."
             );
+
+            return false;
         }
 
-        updateSelectedCount();
-    </script>
-}
+        return confirm(
+            "Delete the selected attribute(s)?"
+        );
+    }
+
+    updateSelectedCount();
+
+</script>

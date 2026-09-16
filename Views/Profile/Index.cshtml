@@ -1,122 +1,368 @@
+@model CvManagementSystem.ViewModels.CandidateProfileViewModel
+
 @{
     ViewData["Title"] = "My Profile";
 }
 
 <div class="container py-4">
 
-    <div class="mb-4">
-        <span class="badge text-bg-primary">
-            Candidate Profile
-        </span>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
-        <h1 class="fw-bold mt-2">
-            My Profile
-        </h1>
+        <div>
+            <h1 class="h3 mb-1">My Profile</h1>
+            <p class="text-muted mb-0">
+                Manage your reusable information, projects and CVs.
+            </p>
+        </div>
 
-        <p class="text-secondary">
-            Manage your personal information, reusable attributes,
-            projects and CVs.
-        </p>
+        <a asp-controller="Positions"
+           asp-action="Index"
+           class="btn btn-outline-primary">
+            Browse Positions
+        </a>
+
     </div>
 
-    <div class="row g-4">
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="alert alert-success">
+            @successMessage
+        </div>
+    }
 
-        <div class="col-md-6">
+    <form asp-action="Save"
+          method="post">
 
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+        @Html.AntiForgeryToken()
 
-                    <h2 class="h5 fw-bold">
-                        Me
-                    </h2>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
 
-                    <p class="text-secondary">
-                        Your core profile information such as name,
-                        location and photo.
-                    </p>
+        <!-- ME -->
 
-                    <a href="#"
-                       class="btn btn-outline-primary">
-                        Edit information
-                    </a>
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+                <strong>Me</strong>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label asp-for="FirstName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="FirstName"
+                               class="form-control" />
+
+                        <span asp-validation-for="FirstName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="LastName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="LastName"
+                               class="form-control" />
+
+                        <span asp-validation-for="LastName"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Location"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="Location"
+                               class="form-control"
+                               placeholder="Dhaka, Bangladesh" />
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="PhotoUrl"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="PhotoUrl"
+                               class="form-control"
+                               placeholder="https://..." />
+
+                        <div class="form-text">
+                            Use an external image URL. The application does not
+                            store uploaded images on the web server.
+                        </div>
+
+                    </div>
 
                 </div>
+
             </div>
 
         </div>
 
-        <div class="col-md-6">
+        <!-- INFO -->
 
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+        <div class="card shadow-sm mb-4">
 
-                    <h2 class="h5 fw-bold">
-                        Info
-                    </h2>
+            <div class="card-header d-flex justify-content-between align-items-center">
 
-                    <p class="text-secondary">
-                        Reusable attributes selected from the
-                        Attribute Library.
-                    </p>
+                <strong>Info</strong>
 
-                    <a href="#"
-                       class="btn btn-outline-primary">
-                        Manage attributes
-                    </a>
+                <span class="badge text-bg-secondary">
+                    @Model.Attributes.Count attributes
+                </span>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Attribute</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var attribute in Model.Attributes)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @(attribute.Name)
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @(attribute.Category)
+                                    </td>
+
+                                    <td>
+                                        <span class="badge text-bg-light">
+                                            @(attribute.DataType)
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <input type="text"
+                                               class="form-control"
+                                               value="@(attribute.Value)"
+                                               placeholder="Enter value..." />
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
 
                 </div>
+
+                <div class="form-text mt-3">
+                    These values are reusable across your generated CVs.
+                </div>
+
             </div>
 
         </div>
 
-        <div class="col-md-6">
+        <!-- PROJECTS -->
 
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+        <div class="card shadow-sm mb-4">
 
-                    <h2 class="h5 fw-bold">
-                        Projects
-                    </h2>
+            <div class="card-header d-flex justify-content-between align-items-center">
 
-                    <p class="text-secondary">
-                        Maintain your professional projects
-                        and technology tags.
-                    </p>
+                <strong>Projects</strong>
 
-                    <a href="#"
-                       class="btn btn-outline-primary">
-                        Manage projects
-                    </a>
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        onclick="alert('Project creation will be connected next.')">
+                    Add Project
+                </button>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+
+                            <tr>
+                                <th>Project</th>
+                                <th>Period</th>
+                                <th>Technology Tags</th>
+                                <th>Description</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var project in Model.Projects)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @project.Name
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @project.Period
+                                    </td>
+
+                                    <td>
+
+                                        @foreach (var tag in project.TechnologyTags)
+                                        {
+                                            <span class="badge text-bg-light me-1">
+                                                @tag
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+                                        @project.DescriptionMarkdown
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
 
                 </div>
+
             </div>
 
         </div>
 
-        <div class="col-md-6">
+        <!-- CVS -->
 
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
+        <div class="card shadow-sm mb-4">
 
-                    <h2 class="h5 fw-bold">
-                        CVs
-                    </h2>
+            <div class="card-header d-flex justify-content-between align-items-center">
 
-                    <p class="text-secondary">
-                        View and manage CVs generated for
-                        available positions.
-                    </p>
+                <strong>CVs</strong>
 
-                    <a href="#"
-                       class="btn btn-outline-primary">
-                        View CVs
-                    </a>
+                <span class="badge text-bg-secondary">
+                    @Model.Cvs.Count
+                </span>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+                                <th>CV</th>
+                                <th>Position</th>
+                                <th>Status</th>
+                                <th>Updated</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var cv in Model.Cvs)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @cv.Title
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @cv.PositionTitle
+                                    </td>
+
+                                    <td>
+
+                                        @if (cv.IsPublished)
+                                        {
+                                            <span class="badge text-bg-success">
+                                                Published
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-secondary">
+                                                Draft
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+                                        @cv.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
 
                 </div>
+
             </div>
 
         </div>
 
-    </div>
+        <div class="d-flex justify-content-end">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Save Profile
+            </button>
+
+        </div>
+
+    </form>
 
 </div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

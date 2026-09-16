@@ -15,6 +15,9 @@ public class Position
 
     public bool IsPublic { get; set; } = true;
 
+    [Range(1, 20)]
+    public int MaxProjects { get; set; } = 3;
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

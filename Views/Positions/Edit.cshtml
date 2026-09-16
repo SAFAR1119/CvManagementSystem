@@ -1,0 +1,149 @@
+@model CvManagementSystem.ViewModels.PositionViewModel
+
+@{
+    ViewData["Title"] = "Edit Position";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Edit Position</h1>
+        <p class="text-muted">
+            Update the position configuration.
+        </p>
+    </div>
+
+    <form asp-action="Edit" method="post">
+
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="Version" type="hidden" />
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+
+                    <input asp-for="Title"
+                           class="form-control" />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+
+                    <textarea asp-for="Description"
+                              class="form-control"
+                              rows="5"></textarea>
+                </div>
+                <div class="row g-3 mb-3">
+
+    <div class="col-md-6">
+
+        <label asp-for="MaxProjects"
+               class="form-label">
+        </label>
+
+        <input asp-for="MaxProjects"
+               type="number"
+               min="1"
+               max="20"
+               class="form-control" />
+
+        <span asp-validation-for="MaxProjects"
+              class="text-danger">
+        </span>
+
+        <div class="form-text">
+            Maximum number of projects included in generated CVs.
+        </div>
+
+    </div>
+
+    <div class="col-md-6 d-flex align-items-center">
+
+        <div class="form-check">
+
+            <input asp-for="IsPublic"
+                   class="form-check-input" />
+
+            <label asp-for="IsPublic"
+                   class="form-check-label">
+            </label>
+
+        </div>
+
+    </div>
+
+</div>
+
+                <div class="form-check">
+
+                    <input asp-for="IsPublic"
+                           class="form-check-input" />
+
+                    <label asp-for="IsPublic"
+                           class="form-check-label">
+                    </label>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <h2 class="h5">
+                    Attributes
+                </h2>
+
+                <div class="alert alert-light border">
+                    Attribute selection will be connected to the reusable
+                    Attribute Library.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <h2 class="h5">
+                    Project Tags
+                </h2>
+
+                <div class="alert alert-light border">
+                    Technology tag selection will be connected later.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Save Changes
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

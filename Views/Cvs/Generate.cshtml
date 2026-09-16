@@ -1,0 +1,186 @@
+@model CvManagementSystem.ViewModels.GeneratedCvViewModel
+
+@{
+    ViewData["Title"] = $"{Model.PositionTitle} CV";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 mb-1">
+                @Model.PositionTitle CV
+            </h1>
+
+            <p class="text-muted mb-0">
+                Generated from your profile and the selected position template.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-controller="Positions"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Back to Positions
+            </a>
+
+            @if (Model.CanPublish)
+            {
+                <button type="button"
+                        class="btn btn-success">
+                    Publish CV
+                </button>
+            }
+            else
+            {
+                <button type="button"
+                        class="btn btn-secondary"
+                        disabled>
+                    Publish CV
+                </button>
+            }
+
+        </div>
+
+    </div>
+
+    @if (Model.MissingRequiredAttributes > 0)
+    {
+        <div class="alert alert-warning">
+            @Model.MissingRequiredAttributes required attribute(s)
+            still need information before this CV can be published.
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="mb-4">
+
+                <h2 class="display-6 mb-1">
+                    @Model.CandidateName
+                </h2>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Location))
+                {
+                    <p class="text-muted mb-0">
+                        @Model.Location
+                    </p>
+                }
+
+            </div>
+
+            <!-- Profile Attributes -->
+
+            <section class="mb-4">
+
+                <h2 class="h5 border-bottom pb-2">
+                    Profile Information
+                </h2>
+
+                <div class="row g-3 mt-1">
+
+                    @foreach (var item in Model.Attributes)
+                    {
+                        var missing =
+                            item.IsMissing;
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3
+                                @(missing && item.IsRequired
+                                    ? "border-danger bg-danger-subtle"
+                                    : "")">
+
+                                <div class="small text-muted mb-1">
+                                    @item.Name
+                                    @if (item.IsRequired)
+                                    {
+                                        <span class="text-danger">*</span>
+                                    }
+                                </div>
+
+                                @if (missing)
+                                {
+                                    <input type="text"
+                                           class="form-control border-danger"
+                                           placeholder="Information required..." />
+                                }
+                                else
+                                {
+                                    <input type="text"
+                                           class="form-control"
+                                           value="@item.Value" />
+                                }
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </section>
+
+            <!-- Projects -->
+
+            <section>
+
+                <h2 class="h5 border-bottom pb-2">
+                    Relevant Projects
+                </h2>
+
+                @if (Model.Projects.Count == 0)
+                {
+                    <p class="text-muted">
+                        No relevant projects are available for this position.
+                    </p>
+                }
+                else
+                {
+                    foreach (var project in Model.Projects
+                        .Take(Model.MaxProjects))
+                    {
+                        <article class="border rounded p-3 mb-3">
+
+                            <div class="d-flex justify-content-between">
+
+                                <h3 class="h6 mb-1">
+                                    @project.Name
+                                </h3>
+
+                                <span class="text-muted small">
+                                    @project.Period
+                                </span>
+
+                            </div>
+
+                            <p class="mb-2">
+                                @project.DescriptionMarkdown
+                            </p>
+
+                            <div class="d-flex flex-wrap gap-1">
+
+                                @foreach (var tag in project.TechnologyTags)
+                                {
+                                    <span class="badge text-bg-light">
+                                        @tag
+                                    </span>
+                                }
+
+                            </div>
+
+                        </article>
+                    }
+                }
+
+            </section>
+
+        </div>
+
+    </div>
+
+</div>

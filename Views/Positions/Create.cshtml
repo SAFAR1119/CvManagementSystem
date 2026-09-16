@@ -1,0 +1,392 @@
+@model CvManagementSystem.ViewModels.PositionViewModel
+
+@{
+    ViewData["Title"] = "Create Position";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">Create Position</h1>
+        <p class="text-muted mb-0">
+            Define the information candidates should provide for this position.
+        </p>
+    </div>
+
+    <form asp-action="Create" method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
+
+        <!-- Basic Information -->
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <strong>Basic Information</strong>
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+
+                    <input asp-for="Title"
+                           class="form-control"
+                           placeholder="Example: Backend Developer" />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description"
+                           class="form-label"></label>
+
+                    <textarea asp-for="Description"
+                              class="form-control"
+                              rows="5"
+                              placeholder="Describe the position..."></textarea>
+
+                    <span asp-validation-for="Description"
+                          class="text-danger"></span>
+                </div>
+                <div class="row g-3">
+
+    <div class="col-md-6">
+
+        <label asp-for="MaxProjects"
+               class="form-label">
+        </label>
+
+        <input asp-for="MaxProjects"
+               type="number"
+               min="1"
+               max="20"
+               class="form-control" />
+
+        <span asp-validation-for="MaxProjects"
+              class="text-danger">
+        </span>
+
+        <div class="form-text">
+            Maximum number of relevant candidate projects included
+            in generated CVs.
+        </div>
+
+    </div>
+
+    <div class="col-md-6 d-flex align-items-center">
+
+        <div class="form-check">
+
+            <input asp-for="IsPublic"
+                   class="form-check-input" />
+
+            <label asp-for="IsPublic"
+                   class="form-check-label">
+            </label>
+
+            <div class="form-text">
+                Public positions can be viewed by visitors.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+                <div class="form-check">
+
+                    <input asp-for="IsPublic"
+                           class="form-check-input" />
+
+                    <label asp-for="IsPublic"
+                           class="form-check-label">
+                    </label>
+
+                    <div class="form-text">
+                        Anonymous users can view public positions.
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Attributes -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Required Candidate Attributes</strong>
+
+                <span id="attributeCount"
+                      class="badge text-bg-secondary">
+                    0 selected
+                </span>
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <input type="text"
+                           id="attributeSearch"
+                           class="form-control"
+                           placeholder="Search attributes..." />
+                </div>
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle"
+                           id="attributeTable">
+
+                        <thead>
+                            <tr>
+                                <th style="width: 45px;"></th>
+                                <th>Attribute</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th style="width: 100px;">Required</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model.AvailableAttributes)
+                            {
+                                var selected =
+                                    Model.SelectedAttributeIds.Contains(item.Id);
+
+                                var required =
+                                    Model.RequiredAttributeIds.Contains(item.Id);
+
+                                <tr>
+                                    <td>
+                                        <input type="checkbox"
+                                               class="form-check-input attribute-check"
+                                               name="SelectedAttributeIds"
+                                               value="@item.Id"
+                                               @(selected ? "checked" : "") />
+                                    </td>
+
+                                    <td>
+                                        <strong>@item.Name</strong>
+                                    </td>
+
+                                    <td>
+                                        @item.Category
+                                    </td>
+
+                                    <td>
+                                        <span class="badge text-bg-light">
+                                            @item.DataType
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <input type="checkbox"
+                                               class="form-check-input required-check"
+                                               name="RequiredAttributeIds"
+                                               value="@item.Id"
+                                               @(required ? "checked" : "") />
+                                    </td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <div class="form-text">
+                    Required attributes must be completed before a candidate
+                    can publish a CV for this position.
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Technology Tags -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Project Technology Tags</strong>
+
+                <span id="tagCount"
+                      class="badge text-bg-secondary">
+                    0 selected
+                </span>
+            </div>
+
+            <div class="card-body">
+
+                <p class="text-muted">
+                    These tags help the system select relevant candidate projects
+                    when generating a CV.
+                </p>
+
+                <div class="row g-2">
+
+                    @foreach (var tag in Model.AvailableTechnologyTags)
+                    {
+                        var selected =
+                            Model.SelectedTechnologyTagIds.Contains(tag.Id);
+
+                        <div class="col-md-4 col-lg-3">
+
+                            <label class="border rounded p-3 d-flex gap-2 align-items-center h-100">
+
+                                <input type="checkbox"
+                                       class="form-check-input technology-check"
+                                       name="SelectedTechnologyTagIds"
+                                       value="@tag.Id"
+                                       @(selected ? "checked" : "") />
+
+                                <span>
+                                    @tag.Name
+                                </span>
+
+                            </label>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Actions -->
+
+        <div class="d-flex gap-2">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Save Position
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const attributeSearch =
+            document.getElementById("attributeSearch");
+
+        const attributeRows =
+            document.querySelectorAll("#attributeTable tbody tr");
+
+        const attributeChecks =
+            document.querySelectorAll(".attribute-check");
+
+        const requiredChecks =
+            document.querySelectorAll(".required-check");
+
+        const technologyChecks =
+            document.querySelectorAll(".technology-check");
+
+        function updateCounts() {
+
+            const selectedAttributes =
+                document.querySelectorAll(
+                    ".attribute-check:checked"
+                ).length;
+
+            document.getElementById("attributeCount")
+                .textContent =
+                selectedAttributes + " selected";
+
+            const selectedTags =
+                document.querySelectorAll(
+                    ".technology-check:checked"
+                ).length;
+
+            document.getElementById("tagCount")
+                .textContent =
+                selectedTags + " selected";
+        }
+
+        attributeSearch.addEventListener("input", function () {
+
+            const search =
+                this.value.trim().toLowerCase();
+
+            attributeRows.forEach(row => {
+
+                const text =
+                    row.innerText.toLowerCase();
+
+                row.style.display =
+                    text.includes(search) ? "" : "none";
+            });
+        });
+
+        attributeChecks.forEach(check => {
+
+            check.addEventListener("change", function () {
+
+                const id = this.value;
+
+                if (!this.checked) {
+
+                    const required =
+                        document.querySelector(
+                            `.required-check[value="${id}"]`
+                        );
+
+                    if (required) {
+                        required.checked = false;
+                    }
+                }
+
+                updateCounts();
+            });
+        });
+
+        requiredChecks.forEach(check => {
+
+            check.addEventListener("change", function () {
+
+                const id = this.value;
+
+                const attribute =
+                    document.querySelector(
+                        `.attribute-check[value="${id}"]`
+                    );
+
+                if (this.checked && attribute) {
+                    attribute.checked = true;
+                }
+
+                updateCounts();
+            });
+        });
+
+        technologyChecks.forEach(check => {
+
+            check.addEventListener(
+                "change",
+                updateCounts
+            );
+        });
+
+        updateCounts();
+
+    </script>
+}

@@ -5,35 +5,40 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Keep User Secrets available for later database integration.
+// Load User Secrets during development.
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 
+// =========================================================
 // MVC
+// =========================================================
+
 builder.Services.AddControllersWithViews();
 
-// Database configuration remains registered.
-// We are NOT querying the database during application startup.
+// =========================================================
+// Database
+// =========================================================
+
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
 
-if (!string.IsNullOrWhiteSpace(connectionString))
+if (string.IsNullOrWhiteSpace(connectionString))
 {
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
-}
-else
-{
-    // This is only a temporary development fallback.
-    // Database-backed features will be enabled once Supabase is fixed.
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseInMemoryDatabase("CvManagementDevelopment"));
+    throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection is not configured.");
 }
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// =========================================================
 // Identity
+// =========================================================
+
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
+
         options.User.RequireUniqueEmail = true;
 
         options.Password.RequiredLength = 8;
@@ -49,14 +54,25 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// IMPORTANT:
-// Role seeding is temporarily disabled.
-// Supabase is currently rejecting the PostgreSQL password.
-//
-// using (var scope = app.Services.CreateScope())
-// {
-//     await IdentitySeeder.SeedRolesAsync(scope.ServiceProvider);
-// }
+// =========================================================
+// Database Seeders
+// =========================================================
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var dbContext =
+        services.GetRequiredService<ApplicationDbContext>();
+
+    await IdentitySeeder.SeedRolesAsync(services,app.Configuration);
+
+    await AttributeLibrarySeeder.SeedAsync(dbContext);
+}
+
+// =========================================================
+// HTTP Pipeline
+// =========================================================
 
 if (!app.Environment.IsDevelopment())
 {
@@ -65,9 +81,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseRouting();
 
 app.UseAuthentication();
+
+app.UseMiddleware<CvManagementSystem.Middleware.BlockedUserMiddleware>();
+
 app.UseAuthorization();
 
 app.MapRazorPages();

@@ -1,0 +1,318 @@
+@model CvManagementSystem.ViewModels.AdminUsersViewModel
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+
+        <h1 class="h3 mb-1">
+            User Management
+        </h1>
+
+        <p class="text-muted mb-0">
+            Manage users, account status and application roles.
+        </p>
+
+    </div>
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-warning">
+            @error
+        </div>
+    }
+
+    <form method="post"
+          id="userManagementForm">
+
+        @Html.AntiForgeryToken()
+
+        <!-- Toolbar -->
+
+        <div class="card shadow-sm mb-3">
+
+            <div class="card-body">
+
+                <div class="d-flex flex-wrap align-items-center gap-2">
+
+                    <span class="fw-semibold">
+                        Selected:
+                    </span>
+
+                    <span id="selectedCount"
+                          class="text-muted">
+                        0
+                    </span>
+
+                    <div class="vr mx-1"></div>
+
+                    <button type="submit"
+                            formaction="/Admin/Block"
+                            class="btn btn-outline-warning">
+                        Block
+                    </button>
+
+                    <button type="submit"
+                            formaction="/Admin/Unblock"
+                            class="btn btn-outline-success">
+                        Unblock
+                    </button>
+
+                    <button type="submit"
+                            formaction="/Admin/Delete"
+                            class="btn btn-outline-danger"
+                            onclick="return confirmDelete()">
+                        Delete
+                    </button>
+
+                    <div class="vr mx-1"></div>
+
+                    <select name="role"
+                            id="role"
+                            class="form-select"
+                            style="width: 180px;">
+
+                        <option value="Candidate">
+                            Candidate
+                        </option>
+
+                        <option value="Recruiter">
+                            Recruiter
+                        </option>
+
+                        <option value="Administrator">
+                            Administrator
+                        </option>
+
+                    </select>
+
+                    <button type="submit"
+                            formaction="/Admin/AssignRole"
+                            class="btn btn-primary">
+                        Assign Role
+                    </button>
+
+                    <button type="submit"
+                            formaction="/Admin/RemoveRole"
+                            class="btn btn-outline-secondary">
+                        Remove Role
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- User table -->
+
+        <div class="card shadow-sm">
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+
+                                <th style="width: 45px;">
+
+                                    <input type="checkbox"
+                                           id="selectAll"
+                                           class="form-check-input" />
+
+                                </th>
+
+                                <th>
+                                    Email
+                                </th>
+
+                                <th>
+                                    Username
+                                </th>
+
+                                <th>
+                                    Roles
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Created
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @if (Model.Users.Count == 0)
+                            {
+                                <tr>
+
+                                    <td colspan="6"
+                                        class="text-center text-muted py-5">
+
+                                        No users found.
+
+                                    </td>
+
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var user in Model.Users)
+                                {
+                                    <tr>
+
+                                        <td>
+
+                                            <input type="checkbox"
+                                                   class="form-check-input user-check"
+                                                   name="selectedIds"
+                                                   value="@user.Id" />
+
+                                        </td>
+
+                                        <td>
+                                            <strong>
+                                                @(user.Email)
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            @(user.UserName ?? "-")
+                                        </td>
+
+                                        <td>
+
+                                            @if (user.Roles.Count == 0)
+                                            {
+                                                <span class="text-muted">
+                                                    No role
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                foreach (var role in user.Roles)
+                                                {
+                                                    <span class="badge text-bg-light me-1">
+                                                        @(role)
+                                                    </span>
+                                                }
+                                            }
+
+                                        </td>
+
+                                        <td>
+
+                                            @if (user.IsBlocked)
+                                            {
+                                                <span class="badge text-bg-danger">
+                                                    Blocked
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge text-bg-success">
+                                                    Active
+                                                </span>
+                                            }
+
+                                        </td>
+
+                                        <td>
+                                            @user.CreatedAt
+                                                .ToLocalTime()
+                                                .ToString("dd MMM yyyy")
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+
+    const selectAll =
+        document.getElementById("selectAll");
+
+    const checks =
+        document.querySelectorAll(".user-check");
+
+    const selectedCount =
+        document.getElementById("selectedCount");
+
+    function updateCount() {
+
+        const count =
+            document.querySelectorAll(
+                ".user-check:checked"
+            ).length;
+
+        selectedCount.textContent =
+            count;
+    }
+
+    selectAll.addEventListener(
+        "change",
+        function () {
+
+            checks.forEach(check => {
+                check.checked = this.checked;
+            });
+
+            updateCount();
+        });
+
+    checks.forEach(check => {
+
+        check.addEventListener(
+            "change",
+            updateCount
+        );
+
+    });
+
+    function confirmDelete() {
+
+        const count =
+            document.querySelectorAll(
+                ".user-check:checked"
+            ).length;
+
+        if (count === 0) {
+            alert("Select at least one user.");
+            return false;
+        }
+
+        return confirm(
+            "Delete the selected user account(s)?"
+        );
+    }
+
+    updateCount();
+
+</script>

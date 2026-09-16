@@ -2,76 +2,193 @@
     ViewData["Title"] = "Positions";
 }
 
-<div class="container py-5">
+<div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="display-6 fw-bold mb-1">
-                Available Positions
-            </h1>
-
-            <p class="text-secondary mb-0">
-                Browse positions and their CV requirements.
+            <h1 class="h3 mb-1">Positions</h1>
+            <p class="text-muted mb-0">
+                Manage recruitment positions and their CV requirements.
             </p>
         </div>
 
-        <span class="badge text-bg-secondary">
-            Coming soon
-        </span>
+        <a asp-action="Create" class="btn btn-primary">
+            Create Position
+        </a>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Position</th>
-                    <th>Description</th>
-                    <th>Access</th>
-                    <th>Updated</th>
-                </tr>
-            </thead>
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-            <tbody>
-                <tr>
-                    <td>
-                        <strong>Backend Developer</strong>
-                    </td>
-                    <td>
-                        .NET and backend development
-                    </td>
-                    <td>
-                        <span class="badge text-bg-success">
-                            Public
-                        </span>
-                    </td>
-                    <td>
-                        Not available yet
-                    </td>
-                </tr>
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <input type="text"
+                           id="positionSearch"
+                           class="form-control"
+                           placeholder="Search positions..." />
+                </div>
 
-                <tr>
-                    <td>
-                        <strong>Business Analyst</strong>
-                    </td>
-                    <td>
-                        Business analysis and communication
-                    </td>
-                    <td>
-                        <span class="badge text-bg-success">
-                            Public
-                        </span>
-                    </td>
-                    <td>
-                        Not available yet
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                <div class="col-md-auto">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="clearSearch()">
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle"
+                       id="positionsTable">
+
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Description</th>
+                            <th>Access</th>
+                            <th>Attributes</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>
+                                <strong>Backend Developer</strong>
+                            </td>
+
+                            <td>
+                                Build and maintain backend services and APIs.
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-success">
+                                    Public
+                                </span>
+                            </td>
+
+                            <td>
+                                6
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-primary">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <strong>Frontend Developer</strong>
+                            </td>
+
+                            <td>
+                                Develop responsive web interfaces and applications.
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-warning">
+                                    Restricted
+                                </span>
+                            </td>
+
+                            <td>
+                                5
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-primary">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <strong>Full Stack Developer</strong>
+                            </td>
+
+                            <td>
+                                Work across frontend and backend application development.
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-success">
+                                    Public
+                                </span>
+                            </td>
+
+                            <td>
+                                8
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-primary">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <strong>Business Analyst</strong>
+                            </td>
+
+                            <td>
+                                Analyze requirements and coordinate software solutions.
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-success">
+                                    Public
+                                </span>
+                            </td>
+
+                            <td>
+                                4
+                            </td>
+
+                            <td>
+                                <span class="badge text-bg-primary">
+                                    Active
+                                </span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-muted small">
+                Position management will become database-backed after PostgreSQL integration.
+            </div>
+
+        </div>
     </div>
-
-    <div class="alert alert-info mt-4">
-        Position management will be connected to the database
-        in the next development phase.
-    </div>
-
 </div>
+
+<script>
+    const searchInput = document.getElementById("positionSearch");
+    const tableRows = document.querySelectorAll("#positionsTable tbody tr");
+
+    searchInput.addEventListener("input", function () {
+        const search = this.value.trim().toLowerCase();
+
+        tableRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+
+            row.style.display =
+                text.includes(search) ? "" : "none";
+        });
+    });
+
+    function clearSearch() {
+        searchInput.value = "";
+
+        tableRows.forEach(row => {
+            row.style.display = "";
+        });
+    }
+</script>

@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Position Details";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Backend Developer</h1>
+
+            <p class="text-muted mb-0">
+                Position details and candidate requirements.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Positions
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h2 class="h5">Description</h2>
+
+            <p>
+                Build and maintain backend services, APIs,
+                database integrations, and application logic.
+            </p>
+
+            <hr />
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <strong>Access</strong>
+                    <div>
+                        <span class="badge text-bg-success">
+                            Public
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Required Attributes</strong>
+                    <div class="mt-1">
+                        6
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <strong>Project Tags</strong>
+                    <div class="mt-1">
+                        Java, .NET, PostgreSQL
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <strong>Discussion</strong>
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted mb-0">
+                Discussion messages will appear here once database persistence
+                is connected.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>

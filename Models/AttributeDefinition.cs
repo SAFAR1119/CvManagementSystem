@@ -26,10 +26,8 @@ public class AttributeDefinition
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Used for optimistic locking.
     public Guid Version { get; set; } = Guid.NewGuid();
 
-    // Used later for "recently used" attribute selection.
     public DateTime? LastUsedAt { get; set; }
 
     public int UsageCount { get; set; }
