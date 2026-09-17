@@ -247,7 +247,280 @@
             }
 
         </div>
+        @{
+    var discussions =
+        ViewBag.Discussions
+        as IReadOnlyList<CvManagementSystem.ViewModels.PositionDiscussionViewModel>
+        ?? new List<CvManagementSystem.ViewModels.PositionDiscussionViewModel>();
+
+    var canPostDiscussion =
+        ViewBag.CanPostDiscussion ?? false;
+
+    var showDiscussionProfileLinks =
+        ViewBag.ShowDiscussionProfileLinks ?? false;
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header">
+        <h2 class="h5 mb-0">
+            Discussion
+        </h2>
+    </div>
+
+    <div class="card-body">
+
+        <div id="discussion-list">
+
+            @if (discussions.Count == 0)
+            {
+                <div id="discussion-empty"
+                     class="text-muted">
+                    No discussion posts yet.
+                </div>
+            }
+            else
+            {
+                @foreach (var post in discussions)
+                {
+                    <article class="border-bottom pb-3 mb-3 discussion-post"
+                             data-discussion-id="@post.Id">
+
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+
+                            <div>
+                                @if (showDiscussionProfileLinks)
+                                {
+                                    <a asp-controller="Profile"
+                                       asp-action="Public"
+                                       asp-route-userId="@post.AuthorId"
+                                       class="fw-semibold text-decoration-none">
+                                        @post.AuthorName
+                                    </a>
+                                }
+                                else
+                                {
+                                    <strong>
+                                        @post.AuthorName
+                                    </strong>
+                                }
+                            </div>
+
+                            <small class="text-muted">
+                                @post.CreatedAt
+                                    .ToLocalTime()
+                                    .ToString("dd MMM yyyy, HH:mm")
+                            </small>
+
+                        </div>
+
+                        <div class="discussion-message">
+                            @Html.Raw(post.RenderedHtml)
+                        </div>
+
+                    </article>
+                }
+            }
+
+        </div>
+
+        @if (canPostDiscussion)
+        {
+            <hr />
+
+            <form asp-controller="Positions"
+                  asp-action="AddDiscussion"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="positionId"
+                       value="@Model.Id" />
+
+                <div class="mb-3">
+                    <label for="discussion-message"
+                           class="form-label">
+                        Add a discussion post
+                    </label>
+
+                    <textarea id="discussion-message"
+                              name="message"
+                              class="form-control"
+                              rows="5"
+                              maxlength="10000"
+                              placeholder="Write your message using Markdown..."></textarea>
+
+                    <div class="form-text">
+                        Markdown formatting is supported.
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Post Discussion
+                </button>
+
+            </form>
+        }
+        else if (User.Identity?.IsAuthenticated != true)
+        {
+            <hr />
+
+            <p class="text-muted mb-0">
+                Sign in to participate in the discussion.
+            </p>
+        }
+
+    </div>
+</div>
 
     </div>
 
 </div>
+
+<script>
+    (() => {
+        const positionId = @Model.Id;
+        const discussionList = document.getElementById("discussion-list");
+
+        if (!discussionList) {
+            return;
+        }
+
+        let lastKnownId = 0;
+
+        document.querySelectorAll(".discussion-post")
+            .forEach(post => {
+                const id = Number(
+                    post.dataset.discussionId || "0"
+                );
+
+                if (id > lastKnownId) {
+                    lastKnownId = id;
+                }
+            });
+
+        async function refreshDiscussions() {
+            try {
+                const response = await fetch(
+                    `/Positions/DiscussionFeed/${positionId}`,
+                    {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        cache: "no-store"
+                    }
+                );
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const posts = await response.json();
+
+                if (!Array.isArray(posts)) {
+                    return;
+                }
+
+                const currentIds = new Set(
+                    Array.from(
+                        discussionList.querySelectorAll(
+                            ".discussion-post"
+                        )
+                    ).map(x =>
+                        Number(
+                            x.dataset.discussionId || "0"
+                        )
+                    )
+                );
+
+                const emptyMessage =
+                    document.getElementById(
+                        "discussion-empty"
+                    );
+
+                if (emptyMessage && posts.length > 0) {
+                    emptyMessage.remove();
+                }
+
+                for (const post of posts) {
+                    const id = Number(post.id);
+
+                    if (currentIds.has(id)) {
+                        continue;
+                    }
+
+                    const article =
+                        document.createElement("article");
+
+                    article.className =
+                        "border-bottom pb-3 mb-3 discussion-post";
+
+                    article.dataset.discussionId = id;
+
+                    const header =
+                        document.createElement("div");
+
+                    header.className =
+                        "d-flex justify-content-between align-items-start mb-2";
+
+                    const author =
+                        document.createElement("div");
+
+                    const authorElement =
+                        document.createElement("strong");
+
+                    authorElement.textContent =
+                        post.authorName || "User";
+
+                    author.appendChild(authorElement);
+
+                    const timestamp =
+                        document.createElement("small");
+
+                    timestamp.className =
+                        "text-muted";
+
+                    timestamp.textContent =
+                        post.createdAt;
+
+                    header.appendChild(author);
+                    header.appendChild(timestamp);
+
+                    const message =
+                        document.createElement("div");
+
+                    message.className =
+                        "discussion-message";
+
+                    /*
+                     * RenderedHtml was produced server-side
+                     * by Markdig with HTML input disabled.
+                     */
+                    message.innerHTML =
+                        post.renderedHtml || "";
+
+                    article.appendChild(header);
+                    article.appendChild(message);
+
+                    discussionList.appendChild(article);
+
+                    if (id > lastKnownId) {
+                        lastKnownId = id;
+                    }
+                }
+
+            } catch (error) {
+                console.debug(
+                    "Discussion refresh failed.",
+                    error
+                );
+            }
+        }
+
+        setInterval(
+            refreshDiscussions,
+            3000
+        );
+    })();
+</script>

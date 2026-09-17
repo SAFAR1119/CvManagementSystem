@@ -1,42 +1,63 @@
 using CvManagementSystem.Data;
+using CvManagementSystem.Middleware;
 using CvManagementSystem.Models;
+using CvManagementSystem.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Load User Secrets during development.
+// ============================================================
+// Configuration
+// ============================================================
+
+// User Secrets are used for the Supabase connection string.
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 
-// =========================================================
-// MVC
-// =========================================================
+// ============================================================
+// Localization
+// ============================================================
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddLocalization(options =>
+{
+    options.ResourcesPath = "Resources";
+});
 
-builder.Services.AddScoped<CvManagementSystem.Services.PositionAccessService>();
+// ============================================================
+// MVC + Razor Pages
+// ============================================================
 
-builder.Services.AddScoped<CvManagementSystem.Services.CvGenerationService>();
+builder.Services
+    .AddControllersWithViews()
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
 
-// =========================================================
+builder.Services.AddRazorPages();
+
+// ============================================================
 // Database
-// =========================================================
+// ============================================================
 
 var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Configuration.GetConnectionString(
+        "DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
     throw new InvalidOperationException(
-        "ConnectionStrings:DefaultConnection is not configured.");
+        "DefaultConnection is not configured.");
 }
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(
+    options =>
+    {
+        options.UseNpgsql(connectionString);
+    });
 
-// =========================================================
+// ============================================================
 // Identity
-// =========================================================
+// ============================================================
 
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
@@ -45,22 +66,97 @@ builder.Services
 
         options.User.RequireUniqueEmail = true;
 
-        options.Password.RequiredLength = 8;
         options.Password.RequireDigit = true;
-        options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 6;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddRazorPages();
+// ============================================================
+// Application Services
+// ============================================================
+
+builder.Services.AddScoped<PositionAccessService>();
+
+builder.Services.AddScoped<CvGenerationService>();
+
+// ============================================================
+// Build Application
+// ============================================================
 
 var app = builder.Build();
 
-// =========================================================
+// ============================================================
+// Supported UI Cultures
+// ============================================================
+
+var supportedCultures = new[]
+{
+    "en-US",
+    "bn-BD"
+};
+
+var localizationOptions =
+    new RequestLocalizationOptions()
+        .SetDefaultCulture("en-US")
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+
+// ============================================================
+// Error Handling
+// ============================================================
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+
+    app.UseHsts();
+}
+
+// ============================================================
+// HTTP Pipeline
+// ============================================================
+
+app.UseHttpsRedirection();
+
+app.UseRequestLocalization(
+    localizationOptions);
+
+app.UseRouting();
+
+app.UseAuthentication();
+
+app.UseMiddleware<BlockedUserMiddleware>();
+
+app.UseAuthorization();
+
+// ============================================================
+// Static Assets
+// ============================================================
+
+app.MapStaticAssets();
+
+// ============================================================
+// MVC Routes
+// ============================================================
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+// ============================================================
+// Identity / Razor Pages
+// ============================================================
+
+app.MapRazorPages();
+
+// ============================================================
 // Database Seeders
-// =========================================================
+// ============================================================
 
 using (var scope = app.Services.CreateScope())
 {
@@ -69,38 +165,16 @@ using (var scope = app.Services.CreateScope())
     var dbContext =
         services.GetRequiredService<ApplicationDbContext>();
 
-    await IdentitySeeder.SeedRolesAsync(services,app.Configuration);
+    await IdentitySeeder.SeedRolesAsync(
+        services,
+        app.Configuration);
 
-    await AttributeLibrarySeeder.SeedAsync(dbContext);
+    await AttributeLibrarySeeder.SeedAsync(
+        dbContext);
 }
 
-// =========================================================
-// HTTP Pipeline
-// =========================================================
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
-app.UseRouting();
-
-app.UseAuthentication();
-
-app.UseMiddleware<CvManagementSystem.Middleware.BlockedUserMiddleware>();
-
-app.UseAuthorization();
-
-app.MapRazorPages();
-
-app.MapStaticAssets();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+// ============================================================
+// Run
+// ============================================================
 
 app.Run();

@@ -162,6 +162,7 @@ public class SearchController : Controller
                 .OrderByDescending(x => x.UpdatedAt)
                 .Take(50)
                 .Select(x => new GlobalSearchCvViewModel
+                
                 {
                     Id = x.Id,
                     Title = x.Title,
@@ -172,8 +173,11 @@ public class SearchController : Controller
                         " " +
                         x.CandidateProfile.LastName,
                     IsPublished = x.IsPublished,
-                    UpdatedAt = x.UpdatedAt
+                    UpdatedAt = x.UpdatedAt,
+                    LikeCount =_context.CvLikes.Count(
+                      like => like.CvId == x.Id),
                 })
+                
                 .ToListAsync();
         }
 

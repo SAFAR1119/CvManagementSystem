@@ -35,6 +35,8 @@ public class CvDetailsViewModel
         = new();
 
     public int LikeCount { get; set; }
+
+    public bool IsLikedByCurrentUser { get; set; }
 }
 
 public class CvAttributeViewModel

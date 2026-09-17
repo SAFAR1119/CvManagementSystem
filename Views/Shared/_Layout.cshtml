@@ -1,209 +1,658 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CvManagementSystem</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/CvManagementSystem.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CvManagementSystem</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                 <ul class="navbar-nav flex-grow-1">
-                     <li class="nav-item">
-                         <a class="nav-link text-dark"
-                              asp-controller="Home"
-                              asp-action="Index">
-                                 Home
-                         </a>
-                      </li>
+﻿@{
+    var currentPath =
+        Context.Request.Path.ToString();
 
-                      <li class="nav-item">
-                          <a class="nav-link text-dark"
-                              asp-controller="Positions"
-                              asp-action="Index">
-                                  Positions
-                            </a>
-                       </li>
-                       @if (User.Identity?.IsAuthenticated == true)
-                       {
-                         <li class="nav-item">
-                             <a class="nav-link"
-                                 asp-controller="Cvs"
-                                 asp-action="Index">
-                                  CVs
-                             </a>
-                           </li>
-                         }
+    var currentQuery =
+        Context.Request.QueryString.ToString();
 
-                         @if (User.Identity?.IsAuthenticated == true &&
-     User.IsInRole("Candidate"))
-    {
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Profile"
-               asp-action="Index">
-                My Profile
-            </a>
-        </li>
+    var returnUrl =
+        currentPath + currentQuery;
 
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Projects"
-               asp-action="Index">
-                My Projects
-            </a>
-        </li>
+    var isAuthenticated =
+        User.Identity?.IsAuthenticated == true;
 
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Cvs"
-               asp-action="Index">
-                My CVs
-            </a>
-        </li>
-    }
+    var isCandidate =
+        isAuthenticated &&
+        User.IsInRole("Candidate");
 
-    @if (User.Identity?.IsAuthenticated == true &&
-     User.IsInRole("Recruiter"))
-    {
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Positions"
-               asp-action="Index">
-                Positions
-            </a>
-        </li>
+    var isRecruiter =
+        isAuthenticated &&
+        User.IsInRole("Recruiter");
 
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Attributes"
-               asp-action="Index">
-                Attribute Library
-            </a>
-        </li>
+    var isAdministrator =
+        isAuthenticated &&
+        User.IsInRole("Administrator");
 
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Cvs"
-               asp-action="Index">
-                Candidate CVs
-            </a>
-        </li>
-    }
+    var currentCulture =
+        Context.Features
+            .Get<IRequestCultureFeature>()?
+            .RequestCulture
+            .UICulture
+            .Name ?? "en-US";
 
-    @if (User.Identity?.IsAuthenticated == true &&
-     User.IsInRole("Administrator"))
-    {
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Admin"
-               asp-action="Users">
-                Users
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Positions"
-               asp-action="Index">
-                Positions
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Attributes"
-               asp-action="Index">
-                Attribute Library
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Cvs"
-               asp-action="Index">
-                CVs
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link"
-               asp-controller="Profile"
-               asp-action="Index">
-                Profile
-            </a>
-        </li>
-    }
+    var currentLanguage =
+        currentCulture.StartsWith(
+            "bn",
+            StringComparison.OrdinalIgnoreCase)
+            ? "বাংলা"
+            : "English";
 }
-                   </ul>
 
-                  <partial name="_LoginPartial" />
+<!DOCTYPE html>
+<html lang="@currentCulture">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - @L["AppName"]
+    </title>
+
+    <!-- Apply the saved theme before the page is rendered -->
+    <script>
+        (() => {
+            const savedTheme =
+                localStorage.getItem("cv-theme") || "light";
+
+            document.documentElement.setAttribute(
+                "data-bs-theme",
+                savedTheme
+            );
+        })();
+    </script>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    @await RenderSectionAsync(
+        "Styles",
+        required: false)
+
+</head>
+
+<body>
+
+    <!-- ===================================================== -->
+    <!-- NAVBAR -->
+    <!-- ===================================================== -->
+
+    <header>
+
+        <nav class="navbar navbar-expand-lg border-bottom shadow-sm">
+
+            <div class="container">
+
+                <!-- Brand -->
+
+                <a class="navbar-brand fw-bold"
+                   asp-controller="Home"
+                   asp-action="Index">
+
+                    @L["AppName"]
+
+                </a>
+
+                <!-- Mobile toggle -->
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+
+                    <span class="navbar-toggler-icon"></span>
+
+                </button>
+
+                <!-- Navbar content -->
+
+                <div class="collapse navbar-collapse"
+                     id="mainNavbar">
+
+                    <!-- Main navigation -->
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <!-- Home -->
+
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Home"
+                               asp-action="Index">
+
+                                @L["Home"]
+
+                            </a>
+
+                        </li>
+
+                        <!-- Positions -->
+                        <!-- Everyone may browse available positions -->
+
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Positions"
+                               asp-action="Index">
+
+                                @L["Positions"]
+
+                            </a>
+
+                        </li>
+
+                        <!-- Candidate navigation -->
+
+                        @if (isCandidate)
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Profile"
+                                   asp-action="Index">
+
+                                    @L["MyProfile"]
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Projects"
+                                   asp-action="Index">
+
+                                    @L["MyProjects"]
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Cvs"
+                                   asp-action="Index">
+
+                                    @L["MyCVs"]
+
+                                </a>
+
+                            </li>
+                        }
+
+                        <!-- Recruiter navigation -->
+
+                        @if (isRecruiter)
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Attributes"
+                                   asp-action="Index">
+
+                                    @L["AttributeLibrary"]
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Cvs"
+                                   asp-action="Index">
+
+                                    @L["CandidateCVs"]
+
+                                </a>
+
+                            </li>
+                        }
+
+                        <!-- Administrator navigation -->
+
+                        @if (isAdministrator)
+                        {
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Admin"
+                                   asp-action="Users">
+
+                                    @L["Users"]
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Attributes"
+                                   asp-action="Index">
+
+                                    @L["AttributeLibrary"]
+
+                                </a>
+
+                            </li>
+
+                            <li class="nav-item">
+
+                                <a class="nav-link"
+                                   asp-controller="Cvs"
+                                   asp-action="Index">
+
+                                    @L["CVs"]
+
+                                </a>
+
+                            </li>
+                        }
+
+                    </ul>
+
+                    <!-- Right side -->
+
+                    <div class="d-flex align-items-lg-center
+                                flex-column flex-lg-row gap-2">
+
+                        <!-- Global search -->
+
+                        <form asp-controller="Search"
+                              asp-action="Index"
+                              method="get"
+                              class="d-flex"
+                              role="search">
+
+                            <input class="form-control form-control-sm me-2"
+                                   type="search"
+                                   name="q"
+                                   value="@Context.Request.Query["q"]"
+                                   placeholder="@L["SearchPlaceholder"]"
+                                   aria-label="@L["Search"]" />
+
+                            <button class="btn btn-outline-primary btn-sm"
+                                    type="submit">
+
+                                @L["Search"]
+
+                            </button>
+
+                        </form>
+
+                        <!-- Language -->
+
+                        <div class="dropdown">
+
+                            <button class="btn btn-outline-secondary btn-sm
+                                           dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+
+                                @currentLanguage
+
+                            </button>
+
+                            <ul class="dropdown-menu dropdown-menu-end">
+
+                                <li>
+
+                                    <a class="dropdown-item"
+                                       asp-controller="Language"
+                                       asp-action="Set"
+                                       asp-route-culture="en-US"
+                                       asp-route-returnUrl="@returnUrl">
+
+                                        English
+
+                                    </a>
+
+                                </li>
+
+                                <li>
+
+                                    <a class="dropdown-item"
+                                       asp-controller="Language"
+                                       asp-action="Set"
+                                       asp-route-culture="bn-BD"
+                                       asp-route-returnUrl="@returnUrl">
+
+                                        বাংলা
+
+                                    </a>
+
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                        <!-- Theme -->
+
+                        <button type="button"
+                                id="themeToggle"
+                                class="btn btn-outline-secondary btn-sm">
+
+                            <span id="themeToggleText">
+                                @L["Dark"]
+                            </span>
+
+                        </button>
+
+                        <!-- Authentication -->
+
+                        @if (isAuthenticated)
+                        {
+                            <div class="dropdown">
+
+                                <button class="btn btn-primary btn-sm
+                                               dropdown-toggle"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+
+                                    @(User.Identity?.Name ?? "Account")
+
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+
+                                    @if (isCandidate)
+                                    {
+                                        <li>
+
+                                            <a class="dropdown-item"
+                                               asp-controller="Profile"
+                                               asp-action="Index">
+
+                                                @L["MyProfile"]
+
+                                            </a>
+
+                                        </li>
+
+                                        <li>
+
+                                            <a class="dropdown-item"
+                                               asp-controller="Cvs"
+                                               asp-action="Index">
+
+                                                @L["MyCVs"]
+
+                                            </a>
+
+                                        </li>
+
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                    }
+
+                                    @if (isRecruiter)
+                                    {
+                                        <li>
+
+                                            <a class="dropdown-item"
+                                               asp-controller="Positions"
+                                               asp-action="Index">
+
+                                                @L["Positions"]
+
+                                            </a>
+
+                                        </li>
+
+                                        <li>
+
+                                            <a class="dropdown-item"
+                                               asp-controller="Attributes"
+                                               asp-action="Index">
+
+                                                @L["AttributeLibrary"]
+
+                                            </a>
+
+                                        </li>
+
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                    }
+
+                                    @if (isAdministrator)
+                                    {
+                                        <li>
+
+                                            <a class="dropdown-item"
+                                               asp-controller="Admin"
+                                               asp-action="Users">
+
+                                                @L["Users"]
+
+                                            </a>
+
+                                        </li>
+
+                                        <li>
+                                            <hr class="dropdown-divider" />
+                                        </li>
+                                    }
+
+                                    <!-- Logout -->
+
+                                    <li>
+
+                                        <form asp-area="Identity"
+                                              asp-page="/Account/Logout"
+                                              asp-route-returnUrl="@Url.Action(
+                                                  "Index",
+                                                  "Home",
+                                                  new { area = "" })"
+                                              method="post"
+                                              class="px-3">
+
+                                            <button type="submit"
+                                                    class="btn btn-link
+                                                           dropdown-item
+                                                           px-0">
+
+                                                @L["Logout"]
+
+                                            </button>
+
+                                        </form>
+
+                                    </li>
+
+                                </ul>
+
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Anonymous user -->
+
+                            <div class="d-flex gap-2">
+
+                                <a class="btn btn-outline-primary btn-sm"
+                                   asp-area="Identity"
+                                   asp-page="/Account/Login">
+
+                                    @L["Login"]
+
+                                </a>
+
+                                <a class="btn btn-primary btn-sm"
+                                   asp-area="Identity"
+                                   asp-page="/Account/Register">
+
+                                    @L["Register"]
+
+                                </a>
+
+                            </div>
+                        }
+
+                    </div>
+
                 </div>
+
             </div>
 
-            <form asp-controller="Search"
-      asp-action="Index"
-      method="get"
-      class="d-flex ms-lg-3 my-2 my-lg-0"
-      role="search">
-
-    <input class="form-control form-control-sm me-2"
-           type="search"
-           name="q"
-           placeholder="Search..."
-           aria-label="Search" />
-
-    <button class="btn btn-outline-primary btn-sm"
-            type="submit">
-        Search
-    </button>
-
-</form>
         </nav>
+
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+
+    <!-- ===================================================== -->
+    <!-- MAIN CONTENT -->
+    <!-- ===================================================== -->
+
+    <main role="main"
+          class="pb-4">
+
+        @RenderBody()
+
+    </main>
+
+
+    <!-- ===================================================== -->
+    <!-- FOOTER -->
+    <!-- ===================================================== -->
+
+    <footer class="border-top py-4 mt-4">
+
         <div class="container">
-            &copy; 2026 - CvManagementSystem - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-    <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-    rel="stylesheet">
-    <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
-</script>
 
-@if (User.IsInRole("Recruiter") ||
-     User.IsInRole("Administrator"))
-{
-    <li class="nav-item">
-        <a class="nav-link"
-           asp-controller="Attributes"
-           asp-action="Index">
-            Attribute Library
-        </a>
-    </li>
-}
+            <div class="d-flex flex-column
+                        flex-md-row
+                        justify-content-between
+                        align-items-center
+                        gap-2">
+
+                <div class="text-muted small">
+
+                    &copy; @DateTime.UtcNow.Year
+                    @L["AppName"]
+
+                </div>
+
+                <div>
+
+                    <a class="text-decoration-none text-muted small"
+                       asp-controller="Home"
+                       asp-action="Privacy">
+
+                        Privacy
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ===================================================== -->
+    <!-- SCRIPTS -->
+    <!-- ===================================================== -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+
+    <!-- ===================================================== -->
+    <!-- THEME -->
+    <!-- ===================================================== -->
+
+    <script>
+        (() => {
+
+            const button =
+                document.getElementById("themeToggle");
+
+            const text =
+                document.getElementById("themeToggleText");
+
+            if (!button || !text) {
+                return;
+            }
+
+            function getTheme() {
+
+                return document.documentElement
+                    .getAttribute("data-bs-theme")
+                    || "light";
+            }
+
+            function updateButton() {
+
+                const theme =
+                    getTheme();
+
+                text.textContent =
+                    theme === "dark"
+                        ? "Light"
+                        : "Dark";
+            }
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const currentTheme =
+                        getTheme();
+
+                    const newTheme =
+                        currentTheme === "dark"
+                            ? "light"
+                            : "dark";
+
+                    document.documentElement
+                        .setAttribute(
+                            "data-bs-theme",
+                            newTheme);
+
+                    localStorage.setItem(
+                        "cv-theme",
+                        newTheme);
+
+                    updateButton();
+
+                });
+
+            updateButton();
+
+        })();
+    </script>
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
+
 </body>
+
 </html>

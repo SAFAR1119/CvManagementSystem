@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppName" xml:space="preserve">
+    <value>CV ম্যানেজমেন্ট সিস্টেম</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>হোম</value>
+  </data>
+  <data name="Positions" xml:space="preserve">
+    <value>পজিশনসমূহ</value>
+  </data>
+  <data name="MyProfile" xml:space="preserve">
+    <value>আমার প্রোফাইল</value>
+  </data>
+  <data name="MyProjects" xml:space="preserve">
+    <value>আমার প্রজেক্ট</value>
+  </data>
+  <data name="MyCVs" xml:space="preserve">
+    <value>আমার সিভি</value>
+  </data>
+  <data name="AttributeLibrary" xml:space="preserve">
+    <value>অ্যাট্রিবিউট লাইব্রেরি</value>
+  </data>
+  <data name="CandidateCVs" xml:space="preserve">
+    <value>প্রার্থীদের সিভি</value>
+  </data>
+  <data name="CVs" xml:space="preserve">
+    <value>সিভি</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>ব্যবহারকারী</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>অনুসন্ধান</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>অনুসন্ধান করুন...</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>ভাষা</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>থিম</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>লাইট</value>
+  </data>
+  <data name="Dark" xml:space="preserve">
+    <value>ডার্ক</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>লগইন</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>রেজিস্টার</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>লগআউট</value>
+  </data>
+  <data name="Candidate" xml:space="preserve">
+    <value>প্রার্থী</value>
+  </data>
+  <data name="Recruiter" xml:space="preserve">
+    <value>রিক্রুটার</value>
+  </data>
+  <data name="Administrator" xml:space="preserve">
+    <value>অ্যাডমিনিস্ট্রেটর</value>
+  </data>
+  <data name="BrowsePositions" xml:space="preserve">
+    <value>পজিশন দেখুন</value>
+  </data>
+  <data name="CreateCV" xml:space="preserve">
+    <value>সিভি তৈরি করুন</value>
+  </data>
+  <data name="GenerateCV" xml:space="preserve">
+    <value>সিভি তৈরি করুন</value>
+  </data>
+  <data name="OpenMyCV" xml:space="preserve">
+    <value>আমার সিভি খুলুন</value>
+  </data>
+  <data name="Discussion" xml:space="preserve">
+    <value>আলোচনা</value>
+  </data>
+  <data name="Like" xml:space="preserve">
+    <value>লাইক</value>
+  </data>
+  <data name="Unlike" xml:space="preserve">
+    <value>আনলাইক</value>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>প্রকাশিত</value>
+  </data>
+  <data name="Draft" xml:space="preserve">
+    <value>খসড়া</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+  <value>ড্যাশবোর্ড</value>
+</data>
+
+<data name="LatestPositions" xml:space="preserve">
+  <value>সাম্প্রতিক পজিশনসমূহ</value>
+</data>
+
+<data name="MostPopularPositions" xml:space="preserve">
+  <value>সবচেয়ে জনপ্রিয় পজিশনসমূহ</value>
+</data>
+
+<data name="TechnologyTags" xml:space="preserve">
+  <value>প্রযুক্তি ট্যাগ</value>
+</data>
+
+<data name="Statistics" xml:space="preserve">
+  <value>পরিসংখ্যান</value>
+</data>
+
+<data name="Position" xml:space="preserve">
+  <value>পজিশন</value>
+</data>
+
+<data name="Description" xml:space="preserve">
+  <value>বিবরণ</value>
+</data>
+
+<data name="SubmittedCVs" xml:space="preserve">
+  <value>জমা দেওয়া সিভি</value>
+</data>
+
+<data name="Updated" xml:space="preserve">
+  <value>আপডেট</value>
+</data>
+
+<data name="ViewAll" xml:space="preserve">
+  <value>সব দেখুন</value>
+</data>
+
+<data name="NoPositionsAvailable" xml:space="preserve">
+  <value>বর্তমানে কোনো পজিশন পাওয়া যাচ্ছে না।</value>
+</data>
+
+<data name="NoSubmittedCVs" xml:space="preserve">
+  <value>এখনও কোনো সিভি জমা দেওয়া হয়নি।</value>
+</data>
+
+<data name="ExplorePositionsAndCVs" xml:space="preserve">
+  <value>প্রযুক্তি অনুযায়ী পজিশন ও সিভি দেখুন।</value>
+</data>
+
+<data name="NoTechnologyTags" xml:space="preserve">
+  <value>এখনও কোনো প্রযুক্তি ট্যাগ পাওয়া যায়নি।</value>
+</data>
+
+<data name="RecentlyCreatedOrUpdated" xml:space="preserve">
+  <value>সম্প্রতি তৈরি বা আপডেট করা পজিশনসমূহ।</value>
+</data>
+
+<data name="HighestSubmittedCVs" xml:space="preserve">
+  <value>সবচেয়ে বেশি জমা দেওয়া সিভি থাকা পজিশনসমূহ।</value>
+</data>
+
+<data name="NewCVs24Hours" xml:space="preserve">
+  <value>গত ২৪ ঘণ্টায় নতুন সিভি</value>
+</data>
+
+<data name="TotalPositions" xml:space="preserve">
+  <value>পজিশন</value>
+</data>
+
+<data name="TotalCandidates" xml:space="preserve">
+  <value>প্রার্থী</value>
+</data>
+
+<data name="TotalRecruiters" xml:space="preserve">
+  <value>রিক্রুটার</value>
+</data>
+
+<data name="TotalSubmittedCVs" xml:space="preserve">
+  <value>জমা দেওয়া সিভি</value>
+</data>
+
+<data name="CVManagementDescription" xml:space="preserve">
+  <value>পুনঃব্যবহারযোগ্য পেশাদার প্রোফাইল তৈরি করুন এবং পজিশনভিত্তিক সিভি তৈরি করুন।</value>
+</data>
+</root>

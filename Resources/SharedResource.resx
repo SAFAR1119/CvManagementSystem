@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppName" xml:space="preserve">
+    <value>CV Management System</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Positions" xml:space="preserve">
+    <value>Positions</value>
+  </data>
+  <data name="MyProfile" xml:space="preserve">
+    <value>My Profile</value>
+  </data>
+  <data name="MyProjects" xml:space="preserve">
+    <value>My Projects</value>
+  </data>
+  <data name="MyCVs" xml:space="preserve">
+    <value>My CVs</value>
+  </data>
+  <data name="AttributeLibrary" xml:space="preserve">
+    <value>Attribute Library</value>
+  </data>
+  <data name="CandidateCVs" xml:space="preserve">
+    <value>Candidate CVs</value>
+  </data>
+  <data name="CVs" xml:space="preserve">
+    <value>CVs</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Search...</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Dark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Login</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Register</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Logout</value>
+  </data>
+  <data name="Candidate" xml:space="preserve">
+    <value>Candidate</value>
+  </data>
+  <data name="Recruiter" xml:space="preserve">
+    <value>Recruiter</value>
+  </data>
+  <data name="Administrator" xml:space="preserve">
+    <value>Administrator</value>
+  </data>
+  <data name="BrowsePositions" xml:space="preserve">
+    <value>Browse Positions</value>
+  </data>
+  <data name="CreateCV" xml:space="preserve">
+    <value>Create a CV</value>
+  </data>
+  <data name="GenerateCV" xml:space="preserve">
+    <value>Generate CV</value>
+  </data>
+  <data name="OpenMyCV" xml:space="preserve">
+    <value>Open My CV</value>
+  </data>
+  <data name="Discussion" xml:space="preserve">
+    <value>Discussion</value>
+  </data>
+  <data name="Like" xml:space="preserve">
+    <value>Like</value>
+  </data>
+  <data name="Unlike" xml:space="preserve">
+    <value>Unlike</value>
+  </data>
+  <data name="Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="Dashboard" xml:space="preserve">
+  <value>Dashboard</value>
+</data>
+
+<data name="LatestPositions" xml:space="preserve">
+  <value>Latest Positions</value>
+</data>
+
+<data name="MostPopularPositions" xml:space="preserve">
+  <value>Most Popular Positions</value>
+</data>
+
+<data name="TechnologyTags" xml:space="preserve">
+  <value>Technology Tags</value>
+</data>
+
+<data name="Statistics" xml:space="preserve">
+  <value>Statistics</value>
+</data>
+
+<data name="Position" xml:space="preserve">
+  <value>Position</value>
+</data>
+
+<data name="Description" xml:space="preserve">
+  <value>Description</value>
+</data>
+
+<data name="SubmittedCVs" xml:space="preserve">
+  <value>Submitted CVs</value>
+</data>
+
+<data name="Updated" xml:space="preserve">
+  <value>Updated</value>
+</data>
+
+<data name="ViewAll" xml:space="preserve">
+  <value>View All</value>
+</data>
+
+<data name="NoPositionsAvailable" xml:space="preserve">
+  <value>No positions are currently available.</value>
+</data>
+
+<data name="NoSubmittedCVs" xml:space="preserve">
+  <value>No submitted CVs yet.</value>
+</data>
+
+<data name="ExplorePositionsAndCVs" xml:space="preserve">
+  <value>Explore positions and CVs by technology.</value>
+</data>
+
+<data name="NoTechnologyTags" xml:space="preserve">
+  <value>No technology tags are available yet.</value>
+</data>
+
+<data name="RecentlyCreatedOrUpdated" xml:space="preserve">
+  <value>Recently created or updated positions.</value>
+</data>
+
+<data name="HighestSubmittedCVs" xml:space="preserve">
+  <value>Positions with the highest number of submitted CVs.</value>
+</data>
+
+<data name="NewCVs24Hours" xml:space="preserve">
+  <value>New CVs · 24 hours</value>
+</data>
+
+<data name="TotalPositions" xml:space="preserve">
+  <value>Positions</value>
+</data>
+
+<data name="TotalCandidates" xml:space="preserve">
+  <value>Candidates</value>
+</data>
+
+<data name="TotalRecruiters" xml:space="preserve">
+  <value>Recruiters</value>
+</data>
+
+<data name="TotalSubmittedCVs" xml:space="preserve">
+  <value>Submitted CVs</value>
+</data>
+
+<data name="CVManagementDescription" xml:space="preserve">
+  <value>Build reusable professional profiles and generate position-specific CVs.</value>
+</data>
+</root>

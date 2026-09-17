@@ -264,6 +264,17 @@ public class CvsController : Controller
             currentUser,
             "Recruiter");
 
+        var isLikedByCurrentUser = false;
+
+if (isRecruiter || isAdmin)
+{
+    isLikedByCurrentUser =
+        await _context.CvLikes.AnyAsync(
+            x =>
+                x.CvId == cv.Id &&
+                x.RecruiterId == currentUser.Id);
+}
+
         var isOwner =
             cv.CandidateProfile.UserId == currentUser.Id;
 
@@ -385,7 +396,8 @@ public class CvsController : Controller
             Projects = projects,
             LikeCount =
                 await _context.CvLikes.CountAsync(
-                    x => x.CvId == cv.Id)
+                    x => x.CvId == cv.Id),
+            IsLikedByCurrentUser = isLikedByCurrentUser
         };
 
         return View(model);
@@ -613,4 +625,91 @@ public class CvsController : Controller
             nameof(Details),
             new { id });
     }
+
+
+    [Authorize(Roles = "Recruiter,Administrator")]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ToggleLike(int id)
+{
+    var currentUser = await _userManager.GetUserAsync(User);
+
+    if (currentUser == null)
+    {
+        return Challenge();
+    }
+
+    var cv = await _context.Cvs
+        .AsNoTracking()
+        .Select(x => new
+        {
+            x.Id,
+            x.IsPublished
+        })
+        .FirstOrDefaultAsync(x => x.Id == id);
+
+    if (cv == null)
+    {
+        return NotFound();
+    }
+
+    if (!cv.IsPublished)
+    {
+        return BadRequest(new
+        {
+            message = "Only published CVs can be liked."
+        });
+    }
+
+    var existingLike = await _context.CvLikes
+        .FirstOrDefaultAsync(
+            x =>
+                x.CvId == id &&
+                x.RecruiterId == currentUser.Id);
+
+    if (existingLike == null)
+    {
+        _context.CvLikes.Add(
+            new CvLike
+            {
+                CvId = id,
+                RecruiterId = currentUser.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+    }
+    else
+    {
+        _context.CvLikes.Remove(existingLike);
+    }
+
+    try
+    {
+        await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateException)
+    {
+        /*
+         * The unique (CvId, RecruiterId) index protects
+         * against duplicate likes if two requests arrive
+         * at approximately the same time.
+         */
+    }
+
+    var liked = await _context.CvLikes
+        .AsNoTracking()
+        .AnyAsync(
+            x =>
+                x.CvId == id &&
+                x.RecruiterId == currentUser.Id);
+
+    var likeCount = await _context.CvLikes
+        .AsNoTracking()
+        .CountAsync(x => x.CvId == id);
+
+    return Json(new
+    {
+        liked,
+        likeCount
+    });
+  }
 }

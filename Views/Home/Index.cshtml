@@ -1,114 +1,164 @@
 ﻿@model CvManagementSystem.ViewModels.HomeViewModel
 
 @{
-    ViewData["Title"] = "Home";
+    ViewData["Title"] = L["Dashboard"];
 }
 
 <div class="container py-4">
 
+    <!-- Hero -->
+
     <div class="mb-5">
+
         <h1 class="display-5 fw-bold mb-2">
-            CV Management System
+            @L["AppName"]
         </h1>
 
         <p class="lead text-muted mb-0">
-            Build reusable professional profiles and generate
-            position-specific CVs.
+            @L["CVManagementDescription"]
         </p>
+
     </div>
+
 
     <!-- Statistics -->
 
     <div class="row g-3 mb-5">
 
         <div class="col-6 col-lg">
+
             <div class="card h-100 shadow-sm">
+
                 <div class="card-body">
+
                     <div class="text-muted small">
-                        New CVs · 24 hours
+                        @L["NewCVs24Hours"]
                     </div>
+
                     <div class="fs-3 fw-bold">
                         @Model.Statistics.NewCvsLast24Hours
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
+
         <div class="col-6 col-lg">
+
             <div class="card h-100 shadow-sm">
+
                 <div class="card-body">
+
                     <div class="text-muted small">
-                        Positions
+                        @L["TotalPositions"]
                     </div>
+
                     <div class="fs-3 fw-bold">
                         @Model.Statistics.TotalPositions
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
+
         <div class="col-6 col-lg">
+
             <div class="card h-100 shadow-sm">
+
                 <div class="card-body">
+
                     <div class="text-muted small">
-                        Candidates
+                        @L["TotalCandidates"]
                     </div>
+
                     <div class="fs-3 fw-bold">
                         @Model.Statistics.TotalCandidates
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
+
         <div class="col-6 col-lg">
+
             <div class="card h-100 shadow-sm">
+
                 <div class="card-body">
+
                     <div class="text-muted small">
-                        Recruiters
+                        @L["TotalRecruiters"]
                     </div>
+
                     <div class="fs-3 fw-bold">
                         @Model.Statistics.TotalRecruiters
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
+
         <div class="col-6 col-lg">
+
             <div class="card h-100 shadow-sm">
+
                 <div class="card-body">
+
                     <div class="text-muted small">
-                        Submitted CVs
+                        @L["TotalSubmittedCVs"]
                     </div>
+
                     <div class="fs-3 fw-bold">
                         @Model.Statistics.TotalSubmittedCvs
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
 
+
     <!-- Latest Positions -->
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between
+                align-items-center mb-3">
 
         <div>
+
             <h2 class="h4 mb-1">
-                Latest Positions
+                @L["LatestPositions"]
             </h2>
 
             <p class="text-muted mb-0">
-                Recently created or updated positions.
+                @L["RecentlyCreatedOrUpdated"]
             </p>
+
         </div>
 
         <a asp-controller="Positions"
            asp-action="Index"
            class="btn btn-outline-primary">
-            View All
+
+            @L["ViewAll"]
+
         </a>
 
     </div>
+
 
     <div class="card shadow-sm mb-5">
 
@@ -117,12 +167,27 @@
             <table class="table table-hover align-middle mb-0">
 
                 <thead class="table-light">
+
                     <tr>
-                        <th>Position</th>
-                        <th>Description</th>
-                        <th>Submitted CVs</th>
-                        <th>Updated</th>
+
+                        <th>
+                            @L["Position"]
+                        </th>
+
+                        <th>
+                            @L["Description"]
+                        </th>
+
+                        <th>
+                            @L["SubmittedCVs"]
+                        </th>
+
+                        <th>
+                            @L["Updated"]
+                        </th>
+
                     </tr>
+
                 </thead>
 
                 <tbody>
@@ -130,10 +195,14 @@
                     @if (Model.LatestPositions.Count == 0)
                     {
                         <tr>
+
                             <td colspan="4"
                                 class="text-center text-muted py-4">
-                                No positions are currently available.
+
+                                @L["NoPositionsAvailable"]
+
                             </td>
+
                         </tr>
                     }
                     else
@@ -143,6 +212,7 @@
                             <tr>
 
                                 <td>
+
                                     <a asp-controller="Positions"
                                        asp-action="Details"
                                        asp-route-id="@position.Id"
@@ -151,14 +221,20 @@
                                         @(position.Title)
 
                                     </a>
+
                                 </td>
 
                                 <td>
+
                                     <span class="text-muted">
-                                        @(string.IsNullOrWhiteSpace(position.Description)
-                                            ? "No description"
+
+                                        @(string.IsNullOrWhiteSpace(
+                                            position.Description)
+                                            ? "—"
                                             : position.Description)
+
                                     </span>
+
                                 </td>
 
                                 <td>
@@ -166,9 +242,12 @@
                                 </td>
 
                                 <td>
+
                                     @position.UpdatedAt
                                         .ToLocalTime()
-                                        .ToString("dd MMM yyyy, HH:mm")
+                                        .ToString(
+                                            "dd MMM yyyy, HH:mm")
+
                                 </td>
 
                             </tr>
@@ -183,17 +262,21 @@
 
     </div>
 
-    <!-- Most Popular -->
+
+    <!-- Most Popular Positions -->
 
     <div class="mb-3">
+
         <h2 class="h4 mb-1">
-            Most Popular Positions
+            @L["MostPopularPositions"]
         </h2>
 
         <p class="text-muted mb-0">
-            Positions with the highest number of submitted CVs.
+            @L["HighestSubmittedCVs"]
         </p>
+
     </div>
+
 
     <div class="card shadow-sm mb-5">
 
@@ -202,11 +285,23 @@
             <table class="table table-hover align-middle mb-0">
 
                 <thead class="table-light">
+
                     <tr>
-                        <th>Position</th>
-                        <th>Submitted CVs</th>
-                        <th>Updated</th>
+
+                        <th>
+                            @L["Position"]
+                        </th>
+
+                        <th>
+                            @L["SubmittedCVs"]
+                        </th>
+
+                        <th>
+                            @L["Updated"]
+                        </th>
+
                     </tr>
+
                 </thead>
 
                 <tbody>
@@ -214,10 +309,14 @@
                     @if (Model.PopularPositions.Count == 0)
                     {
                         <tr>
+
                             <td colspan="3"
                                 class="text-center text-muted py-4">
-                                No submitted CVs yet.
+
+                                @L["NoSubmittedCVs"]
+
                             </td>
+
                         </tr>
                     }
                     else
@@ -227,6 +326,7 @@
                             <tr>
 
                                 <td>
+
                                     <a asp-controller="Positions"
                                        asp-action="Details"
                                        asp-route-id="@position.Id"
@@ -235,6 +335,7 @@
                                         @(position.Title)
 
                                     </a>
+
                                 </td>
 
                                 <td>
@@ -242,9 +343,11 @@
                                 </td>
 
                                 <td>
+
                                     @position.UpdatedAt
                                         .ToLocalTime()
                                         .ToString("dd MMM yyyy")
+
                                 </td>
 
                             </tr>
@@ -259,17 +362,21 @@
 
     </div>
 
+
     <!-- Technology Tags -->
 
     <div class="mb-3">
+
         <h2 class="h4 mb-1">
-            Technology Tags
+            @L["TechnologyTags"]
         </h2>
 
         <p class="text-muted mb-0">
-            Explore positions and CVs by technology.
+            @L["ExplorePositionsAndCVs"]
         </p>
+
     </div>
+
 
     <div class="card shadow-sm mb-5">
 
@@ -278,7 +385,7 @@
             @if (Model.TechnologyTags.Count == 0)
             {
                 <p class="text-muted mb-0">
-                    No technology tags are available yet.
+                    @L["NoTechnologyTags"]
                 </p>
             }
             else
@@ -288,7 +395,11 @@
                     @foreach (var tag in Model.TechnologyTags)
                     {
                         <a href="@tag.Url"
-                           class="badge rounded-pill text-bg-light border text-decoration-none px-3 py-2">
+                           class="badge rounded-pill
+                                  text-bg-light
+                                  border
+                                  text-decoration-none
+                                  px-3 py-2">
 
                             @tag.Name
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CvManagementSystem.Services;
 
 namespace CvManagementSystem.Controllers;
 
@@ -72,12 +73,36 @@ public class ProfileController : Controller
                 attributeSearch,
                 attributeCategoryId);
 
+                
+
         model.IsAdministratorView =
             User.IsInRole("Administrator") &&
             !string.Equals(
                 targetUserId,
                 _userManager.GetUserId(User),
                 StringComparison.Ordinal);
+                
+                var accessiblePositions =
+    await _context.Positions
+        .AsNoTracking()
+        .Include(x => x.AccessRules)
+            .ThenInclude(x => x.AttributeDefinition)
+        .ToListAsync();
+
+var accessiblePositionIds =
+    accessiblePositions
+        .Where(position =>
+            PositionAccessService.IsAuthorized(
+                position,
+                profile))
+        .Select(position => position.Id)
+        .ToHashSet();
+
+        var visibleCvs = profile.Cvs
+    .Where(x => accessiblePositionIds.Contains(x.PositionId))
+    .ToList();
+
+            
 
         return View(model);
     }
@@ -676,4 +701,43 @@ public class ProfileController : Controller
                         : null
             });
     }
+
+    [Authorize(Roles = "Recruiter,Administrator")]
+[HttpGet]
+public async Task<IActionResult> Public(string userId)
+{
+    if (string.IsNullOrWhiteSpace(userId))
+    {
+        return BadRequest();
+    }
+
+    var profile = await _context.CandidateProfiles
+        .AsNoTracking()
+        .Include(x => x.Projects)
+            .ThenInclude(x => x.TechnologyTags)
+                .ThenInclude(x => x.TechnologyTag)
+        .Include(x => x.User)
+        .FirstOrDefaultAsync(x => x.UserId == userId);
+
+    if (profile == null)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        ViewBag.DisplayName =
+            user.UserName ??
+            user.Email ??
+            "User";
+
+        return View("Public", null);
+    }
+
+    return View("Public", profile);
+}
 }

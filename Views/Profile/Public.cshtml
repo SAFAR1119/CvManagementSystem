@@ -1,0 +1,116 @@
+@model CvManagementSystem.Models.CandidateProfile?
+
+@{
+    ViewData["Title"] = "Public Profile";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">
+            Public Profile
+        </h1>
+
+        <p class="text-muted mb-0">
+            Read-only profile information.
+        </p>
+    </div>
+
+    @if (Model == null)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h2 class="h5">
+                    @(ViewBag.DisplayName ?? "User")
+                </h2>
+
+                <p class="text-muted mb-0">
+                    No candidate profile has been created for this account.
+                </p>
+
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+
+                <h2 class="h4">
+                    @(Model.FirstName) @(Model.LastName)
+                </h2>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Location))
+                {
+                    <p class="text-muted mb-0">
+                        @Model.Location
+                    </p>
+                }
+
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+                <h2 class="h5 mb-0">
+                    Projects
+                </h2>
+            </div>
+
+            <div class="card-body">
+
+                @if (Model.Projects.Count == 0)
+                {
+                    <p class="text-muted mb-0">
+                        No projects available.
+                    </p>
+                }
+                else
+                {
+                    @foreach (var project in Model.Projects
+                        .OrderByDescending(x => x.StartDate))
+                    {
+                        <article class="border-bottom pb-3 mb-3">
+
+                            <h3 class="h6">
+                                @project.Name
+                            </h3>
+
+                            <div class="small text-muted mb-2">
+                                @(
+                                    project.EndDate.HasValue
+                                        ? $"{project.StartDate:MMM yyyy} - {project.EndDate.Value:MMM yyyy}"
+                                        : $"{project.StartDate:MMM yyyy} - Present"
+                                )
+                            </div>
+
+                            <div class="mb-2">
+                                @project.DescriptionMarkdown
+                            </div>
+
+                            @if (project.TechnologyTags.Count > 0)
+                            {
+                                <div class="d-flex flex-wrap gap-2">
+
+                                    @foreach (var tag in project.TechnologyTags)
+                                    {
+                                        <span class="badge text-bg-light border">
+                                            @tag.TechnologyTag.Name
+                                        </span>
+                                    }
+
+                                </div>
+                            }
+
+                        </article>
+                    }
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>

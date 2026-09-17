@@ -5,6 +5,46 @@
         $"{Model.PositionTitle} CV";
 }
 
+@if (User.IsInRole("Recruiter") ||
+     User.IsInRole("Administrator"))
+{
+    <div class="d-flex align-items-center gap-3 mb-4">
+
+        <form id="like-form"
+              asp-controller="Cvs"
+              asp-action="ToggleLike"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.Id" />
+
+            <button type="submit"
+                    id="like-button"
+                    class="btn @(Model.IsLikedByCurrentUser
+                        ? "btn-danger"
+                        : "btn-outline-danger")">
+
+                @(Model.IsLikedByCurrentUser
+                    ? "Unlike"
+                    : "Like")
+
+            </button>
+
+        </form>
+
+        <span>
+            <strong id="like-count">
+                @Model.LikeCount
+            </strong>
+            like(s)
+        </span>
+
+    </div>
+}
+
 <div class="container py-4">
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
@@ -478,3 +518,79 @@
     </form>
 
 </div>
+
+<script>
+    (() => {
+        const form =
+            document.getElementById("like-form");
+
+        if (!form) {
+            return;
+        }
+
+        const button =
+            document.getElementById("like-button");
+
+        const count =
+            document.getElementById("like-count");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const formData =
+                new FormData(form);
+
+            try {
+                const response =
+                    await fetch(
+                        form.action,
+                        {
+                            method: "POST",
+                            body: formData
+                        }
+                    );
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const result =
+                    await response.json();
+
+                count.textContent =
+                    result.likeCount;
+
+                if (result.liked)
+                {
+                    button.textContent =
+                        "Unlike";
+
+                    button.classList.remove(
+                        "btn-outline-danger");
+
+                    button.classList.add(
+                        "btn-danger");
+                }
+                else
+                {
+                    button.textContent =
+                        "Like";
+
+                    button.classList.remove(
+                        "btn-danger");
+
+                    button.classList.add(
+                        "btn-outline-danger");
+                }
+
+            }
+            catch (error)
+            {
+                console.error(
+                    "Like request failed.",
+                    error
+                );
+            }
+        });
+    })();
+</script>
