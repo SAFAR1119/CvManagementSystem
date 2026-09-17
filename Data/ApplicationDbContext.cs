@@ -135,7 +135,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 
 builder.Entity<PositionAccessRule>()
     .HasOne(x => x.Position)
-    .WithMany()
+    .WithMany(x => x.AccessRules)
     .HasForeignKey(x => x.PositionId)
     .OnDelete(DeleteBehavior.Cascade);
 

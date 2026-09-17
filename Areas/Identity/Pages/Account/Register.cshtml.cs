@@ -21,6 +21,14 @@ public class RegisterModel : PageModel
     }
 
     [BindProperty]
+    public string SelectedRole { get; set; } = "Candidate";
+    private static readonly string[] RegistrationRoles =
+       {
+         "Candidate",
+          "Recruiter"
+        };
+
+    [BindProperty]
     public InputModel Input { get; set; } = new();
 
     public string? ReturnUrl { get; set; }
@@ -67,6 +75,13 @@ public class RegisterModel : PageModel
     {
         returnUrl ??= Url.Content("~/");
 
+        if (!RegistrationRoles.Contains(SelectedRole))
+          {
+             ModelState.AddModelError(
+             nameof(SelectedRole),
+              "Please select a valid account type.");
+           }
+
         if (!ModelState.IsValid)
         {
             ExternalLogins =
@@ -85,50 +100,25 @@ public class RegisterModel : PageModel
             IsBlocked = false
         };
 
-        var result = await _userManager.CreateAsync(
-            user,
-            Input.Password);
+        var result = await _userManager.CreateAsync(user, Input.Password);
 
-        if (!result.Succeeded)
+if (result.Succeeded)
+{
+    var roleResult = await _userManager.AddToRoleAsync(
+        user,
+        SelectedRole);
+
+    if (!roleResult.Succeeded)
+    {
+        foreach (var error in roleResult.Errors)
         {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    error.Description);
-            }
-
-            ExternalLogins =
-                (await _signInManager
-                    .GetExternalAuthenticationSchemesAsync())
-                .ToList();
-
-            return Page();
+            ModelState.AddModelError(
+                string.Empty,
+                error.Description);
         }
 
-        var roleResult =
-            await _userManager.AddToRoleAsync(
-                user,
-                "Candidate");
-
-        if (!roleResult.Succeeded)
-        {
-            await _userManager.DeleteAsync(user);
-
-            foreach (var error in roleResult.Errors)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    error.Description);
-            }
-
-            ExternalLogins =
-                (await _signInManager
-                    .GetExternalAuthenticationSchemesAsync())
-                .ToList();
-
-            return Page();
-        }
+        return Page();
+    }
 
         await _signInManager.SignInAsync(
             user,
@@ -136,4 +126,17 @@ public class RegisterModel : PageModel
 
         return LocalRedirect(returnUrl);
     }
+
+    foreach (var error in result.Errors)
+    {
+        ModelState.AddModelError(string.Empty, error.Description);
+    }
+
+    ExternalLogins =
+        (await _signInManager
+            .GetExternalAuthenticationSchemesAsync())
+        .ToList();
+
+    return Page();
+  }
 }

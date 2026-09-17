@@ -14,6 +14,10 @@ builder.Configuration.AddUserSecrets<Program>(optional: true);
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<CvManagementSystem.Services.PositionAccessService>();
+
+builder.Services.AddScoped<CvManagementSystem.Services.CvGenerationService>();
+
 // =========================================================
 // Database
 // =========================================================

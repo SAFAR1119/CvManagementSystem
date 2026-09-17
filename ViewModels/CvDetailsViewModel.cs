@@ -1,0 +1,76 @@
+using CvManagementSystem.Models;
+
+namespace CvManagementSystem.ViewModels;
+
+public class CvDetailsViewModel
+{
+    public int Id { get; set; }
+
+    public int PositionId { get; set; }
+
+    public string PositionTitle { get; set; } = string.Empty;
+
+    public string CandidateFirstName { get; set; } = string.Empty;
+
+    public string CandidateLastName { get; set; } = string.Empty;
+
+    public string? Location { get; set; }
+
+    public string? PhotoUrl { get; set; }
+
+    public Guid ProfileVersion { get; set; }
+
+    public bool IsPublished { get; set; }
+
+    public bool IsReadOnly { get; set; }
+
+    public bool CanPublish { get; set; }
+
+    public int MissingRequiredAttributes { get; set; }
+
+    public List<CvAttributeViewModel> Attributes { get; set; }
+        = new();
+
+    public List<CvProjectViewModel> Projects { get; set; }
+        = new();
+
+    public int LikeCount { get; set; }
+}
+
+public class CvAttributeViewModel
+{
+    public int AttributeDefinitionId { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public string Category { get; set; } = string.Empty;
+
+    public AttributeDataType DataType { get; set; }
+
+    public string? Value { get; set; }
+
+    public bool IsRequired { get; set; }
+
+    public Guid Version { get; set; }
+
+    public List<string> Options { get; set; }
+        = new();
+
+    public bool IsMissing =>
+        string.IsNullOrWhiteSpace(Value);
+}
+
+public class CvProjectViewModel
+{
+    public int ProjectId { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public string Period { get; set; } = string.Empty;
+
+    public string DescriptionMarkdown { get; set; }
+        = string.Empty;
+
+    public List<string> TechnologyTags { get; set; }
+        = new();
+}

@@ -1,15 +1,20 @@
+@model dynamic
+
 @{
     ViewData["Title"] = "Position Details";
 }
 
 <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+
         <div>
-            <h1 class="h3 mb-1">Backend Developer</h1>
+            <h1 class="h3 mb-1">
+                @(Model.Title)
+            </h1>
 
             <p class="text-muted mb-0">
-                Position details and candidate requirements.
+                Position template and requirements.
             </p>
         </div>
 
@@ -17,62 +22,229 @@
            class="btn btn-outline-secondary">
             Back to Positions
         </a>
+
     </div>
 
     <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>Basic Information</strong>
+        </div>
+
         <div class="card-body">
 
-            <h2 class="h5">Description</h2>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p>
+                    @(Model.Description)
+                </p>
+            }
 
-            <p>
-                Build and maintain backend services, APIs,
-                database integrations, and application logic.
-            </p>
-
-            <hr />
-
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-4">
-                    <strong>Access</strong>
-                    <div>
+
+                    <div class="small text-muted">
+                        Access
+                    </div>
+
+                    @if (Model.IsPublic)
+                    {
                         <span class="badge text-bg-success">
                             Public
                         </span>
-                    </div>
+                    }
+                    else
+                    {
+                        <span class="badge text-bg-warning">
+                            Restricted
+                        </span>
+                    }
+
                 </div>
 
                 <div class="col-md-4">
-                    <strong>Required Attributes</strong>
-                    <div class="mt-1">
-                        6
+
+                    <div class="small text-muted">
+                        Maximum Projects
                     </div>
+
+                    <strong>
+                        @(Model.MaxProjects)
+                    </strong>
+
                 </div>
 
                 <div class="col-md-4">
-                    <strong>Project Tags</strong>
-                    <div class="mt-1">
-                        Java, .NET, PostgreSQL
+
+                    <div class="small text-muted">
+                        Selected Attributes
                     </div>
+
+                    <strong>
+                        @(Model.Attributes.Count)
+                    </strong>
+
                 </div>
 
             </div>
 
         </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>CV Attributes</strong>
+        </div>
+
+        @if (User.IsInRole("Candidate"))
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-1">Create your CV</h5>
+                <p class="text-muted mb-0">
+                    Generate a CV for this position using your profile information.
+                </p>
+            </div>
+
+            <form asp-controller="Cvs"
+                  asp-action="Generate"
+                  method="post"
+                  class="mb-0">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="positionId"
+                       value="@Model.Id" />
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Generate CV
+                </button>
+            </form>
+        </div>
+    </div>
+}
+
+        <div class="card-body">
+
+            @if (Model.Attributes.Count == 0)
+            {
+                <p class="text-muted mb-0">
+                    No attributes have been selected for this position.
+                </p>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+                                <th>
+                                    Attribute
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Type
+                                </th>
+
+                                <th>
+                                    Required
+                                </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var attribute in Model.Attributes)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @(attribute.Name)
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @(attribute.Category)
+                                    </td>
+
+                                    <td>
+                                        <span class="badge text-bg-light">
+                                            @(attribute.DataType)
+                                        </span>
+                                    </td>
+
+                                    <td>
+
+                                        @if (attribute.IsRequired)
+                                        {
+                                            <span class="badge text-bg-danger">
+                                                Required
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Optional
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
     </div>
 
     <div class="card shadow-sm">
 
         <div class="card-header">
-            <strong>Discussion</strong>
+            <strong>Project Technology Tags</strong>
         </div>
 
         <div class="card-body">
 
-            <p class="text-muted mb-0">
-                Discussion messages will appear here once database persistence
-                is connected.
-            </p>
+            @if (Model.TechnologyTags.Count == 0)
+            {
+                <p class="text-muted mb-0">
+                    No project technology tags have been configured.
+                </p>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2">
+
+                    @foreach (var tag in Model.TechnologyTags)
+                    {
+                        <span class="badge text-bg-light p-2">
+                            @(tag)
+                        </span>
+                    }
+
+                </div>
+            }
 
         </div>
 

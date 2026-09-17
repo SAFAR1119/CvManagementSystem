@@ -84,6 +84,33 @@
                             Create Account
                         </button>
 
+                        <div class="mb-3">
+                          <label asp-for="SelectedRole"
+                              class="form-label">
+                               Account type
+                          </label>
+
+                          <select asp-for="SelectedRole"
+                               class="form-select">
+                             <option value="Candidate">
+                                 Candidate
+                              </option>
+
+                             <option value="Recruiter">
+                                  Recruiter
+                             </option>
+                           </select>
+
+                           <div class="form-text">
+                              Candidates manage profiles, projects and CVs.
+                              Recruiters manage positions and attributes and review candidate CVs.
+                            </div>
+
+                            <span asp-validation-for="SelectedRole"
+                                 class="text-danger">
+                            </span>
+                      </div>
+
                     </form>
 
                     <div class="text-center mt-4">

@@ -2,27 +2,39 @@
 
 @{
     ViewData["Title"] = "Add Project";
+
+    bool isAdministratorView =
+        ViewBag.IsAdministratorView is bool value && value;
 }
 
 <div class="container py-4">
 
     <div class="mb-4">
 
-        <h1 class="h3 mb-1">Add Project</h1>
+        <h1 class="h3 mb-1">
+            Add Project
+        </h1>
 
         <p class="text-muted mb-0">
-            Add a project to your reusable candidate profile.
+            Add a reusable project to your profile.
         </p>
 
     </div>
 
     <form asp-action="Create"
-          method="post">
+          method="post"
+          id="projectCreateForm">
 
         @Html.AntiForgeryToken()
 
+        <input asp-for="UserId"
+               type="hidden" />
+
+        <input asp-for="CandidateProfileId"
+               type="hidden" />
+
         <div asp-validation-summary="ModelOnly"
-             class="text-danger mb-3">
+             class="alert alert-danger">
         </div>
 
         <div class="card shadow-sm mb-4">
@@ -82,7 +94,7 @@
                         </span>
 
                         <div class="form-text">
-                            Leave empty when the project is ongoing.
+                            Leave empty for an ongoing project.
                         </div>
 
                     </div>
@@ -97,18 +109,24 @@
 
                     <textarea asp-for="DescriptionMarkdown"
                               class="form-control"
-                              rows="7"
-                              placeholder="Describe the project. Markdown can be used here."></textarea>
+                              rows="8"
+                              placeholder="Describe the project using Markdown..."></textarea>
 
                     <span asp-validation-for="DescriptionMarkdown"
                           class="text-danger">
                     </span>
+
+                    <div class="form-text">
+                        Markdown formatting is supported.
+                    </div>
 
                 </div>
 
             </div>
 
         </div>
+
+        <!-- Technology Tags -->
 
         <div class="card shadow-sm mb-4">
 
@@ -119,33 +137,30 @@
             <div class="card-body">
 
                 <p class="text-muted">
-                    Select the technologies used in this project.
-                    These tags will later help the CV generator select
-                    relevant projects for a position.
+                    Enter technologies used in this project.
+                    Previously entered tags are suggested automatically.
                 </p>
 
-                <div class="row g-2">
+                <div id="tagContainer"
+                     class="d-flex flex-wrap gap-2 mb-3">
+                </div>
 
-                    @foreach (var tag in Model.AvailableTechnologyTags)
-                    {
-                        <div class="col-6 col-md-4 col-lg-3">
+                <input type="text"
+                       id="tagInput"
+                       class="form-control"
+                       autocomplete="off"
+                       placeholder="Type a technology, e.g. Java..." />
 
-                            <label class="border rounded p-3 d-flex align-items-center gap-2 h-100">
+                <div id="tagSuggestions"
+                     class="list-group mt-2">
+                </div>
 
-                                <input type="checkbox"
-                                       class="form-check-input"
-                                       name="SelectedTechnologyTagIds"
-                                       value="@tag.Id" />
+                <div id="tagHiddenInputs">
+                </div>
 
-                                <span>
-                                    @tag.Name
-                                </span>
-
-                            </label>
-
-                        </div>
-                    }
-
+                <div class="form-text">
+                    Press Enter to add a tag. Select a suggestion to reuse
+                    an existing technology tag.
                 </div>
 
             </div>
@@ -160,6 +175,7 @@
             </button>
 
             <a asp-action="Index"
+               asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
                class="btn btn-outline-secondary">
                 Cancel
             </a>
@@ -169,6 +185,222 @@
     </form>
 
 </div>
+
+<script>
+
+    const tagInput =
+        document.getElementById("tagInput");
+
+    const tagContainer =
+        document.getElementById("tagContainer");
+
+    const tagSuggestions =
+        document.getElementById("tagSuggestions");
+
+    const tagHiddenInputs =
+        document.getElementById("tagHiddenInputs");
+
+    const tags = new Set();
+
+    function addTag(value)
+    {
+        const tag =
+            value.trim();
+
+        if (!tag)
+        {
+            return;
+        }
+
+        const exists =
+            Array.from(tags)
+                .some(
+                    x =>
+                        x.toLowerCase() ===
+                        tag.toLowerCase());
+
+        if (exists)
+        {
+            return;
+        }
+
+        tags.add(tag);
+
+        renderTags();
+
+        tagInput.value = "";
+
+        tagSuggestions.innerHTML = "";
+    }
+
+    function removeTag(value)
+    {
+        tags.delete(value);
+
+        renderTags();
+    }
+
+    function renderTags()
+    {
+        tagContainer.innerHTML = "";
+        tagHiddenInputs.innerHTML = "";
+
+        tags.forEach(
+            tag =>
+            {
+                const badge =
+                    document.createElement("span");
+
+                badge.className =
+                    "badge text-bg-primary d-inline-flex align-items-center gap-2 p-2";
+
+                badge.innerHTML =
+                    `<span>${escapeHtml(tag)}</span>`;
+
+                const remove =
+                    document.createElement("button");
+
+                remove.type = "button";
+
+                remove.className =
+                    "btn-close btn-close-white";
+
+                remove.style.fontSize =
+                    "0.65rem";
+
+                remove.addEventListener(
+                    "click",
+                    () =>
+                        removeTag(tag));
+
+                badge.appendChild(remove);
+
+                tagContainer.appendChild(
+                    badge);
+
+                const hidden =
+                    document.createElement("input");
+
+                hidden.type = "hidden";
+
+                hidden.name =
+                    "TechnologyTags";
+
+                hidden.value =
+                    tag;
+
+                tagHiddenInputs.appendChild(
+                    hidden);
+            });
+    }
+
+    function escapeHtml(value)
+    {
+        const element =
+            document.createElement("div");
+
+        element.textContent =
+            value;
+
+        return element.innerHTML;
+    }
+
+    tagInput.addEventListener(
+        "keydown",
+        function (event)
+        {
+            if (event.key === "Enter")
+            {
+                event.preventDefault();
+
+                addTag(tagInput.value);
+            }
+        });
+
+    let searchTimer;
+
+    tagInput.addEventListener(
+        "input",
+        function ()
+        {
+            clearTimeout(searchTimer);
+
+            const term =
+                this.value.trim();
+
+            if (!term)
+            {
+                tagSuggestions.innerHTML = "";
+                return;
+            }
+
+            searchTimer =
+                setTimeout(
+                    async () =>
+                    {
+                        try
+                        {
+                            const response =
+                                await fetch(
+                                    "/Projects/SearchTags?term=" +
+                                    encodeURIComponent(term));
+
+                            if (!response.ok)
+                            {
+                                return;
+                            }
+
+                            const suggestions =
+                                await response.json();
+
+                            tagSuggestions.innerHTML = "";
+
+                            suggestions.forEach(
+                                tag =>
+                                {
+                                    const item =
+                                        document.createElement(
+                                            "button");
+
+                                    item.type =
+                                        "button";
+
+                                    item.className =
+                                        "list-group-item list-group-item-action";
+
+                                    item.textContent =
+                                        tag;
+
+                                    item.addEventListener(
+                                        "click",
+                                        () =>
+                                            addTag(tag));
+
+                                    tagSuggestions.appendChild(
+                                        item);
+                                });
+                        }
+                        catch
+                        {
+                            tagSuggestions.innerHTML = "";
+                        }
+                    },
+                    250);
+        });
+
+    document
+        .getElementById("projectCreateForm")
+        .addEventListener(
+            "submit",
+            function ()
+            {
+                if (tagInput.value.trim())
+                {
+                    addTag(tagInput.value);
+                }
+            });
+
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

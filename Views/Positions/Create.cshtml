@@ -8,21 +8,28 @@
 
     <div class="mb-4">
         <h1 class="h3 mb-1">Create Position</h1>
+
         <p class="text-muted mb-0">
-            Define the information candidates should provide for this position.
+            Create a reusable CV template for candidates.
         </p>
     </div>
 
-    <form asp-action="Create" method="post">
+    <form asp-action="Create"
+          method="post"
+          id="positionForm">
 
         @Html.AntiForgeryToken()
 
         <div asp-validation-summary="ModelOnly"
-             class="text-danger mb-3"></div>
+             class="alert alert-danger">
+        </div>
 
-        <!-- Basic Information -->
+        <!-- ================================================= -->
+        <!-- BASIC INFORMATION -->
+        <!-- ================================================= -->
 
         <div class="card shadow-sm mb-4">
+
             <div class="card-header">
                 <strong>Basic Information</strong>
             </div>
@@ -30,244 +37,361 @@
             <div class="card-body">
 
                 <div class="mb-3">
-                    <label asp-for="Title" class="form-label"></label>
+
+                    <label asp-for="Title"
+                           class="form-label">
+                    </label>
 
                     <input asp-for="Title"
                            class="form-control"
                            placeholder="Example: Backend Developer" />
 
                     <span asp-validation-for="Title"
-                          class="text-danger"></span>
+                          class="text-danger">
+                    </span>
+
                 </div>
 
                 <div class="mb-3">
+
                     <label asp-for="Description"
-                           class="form-label"></label>
+                           class="form-label">
+                    </label>
 
                     <textarea asp-for="Description"
                               class="form-control"
-                              rows="5"
-                              placeholder="Describe the position..."></textarea>
+                              rows="4"
+                              placeholder="Short description of the position..."></textarea>
 
                     <span asp-validation-for="Description"
-                          class="text-danger"></span>
+                          class="text-danger">
+                    </span>
+
                 </div>
+
                 <div class="row g-3">
 
-    <div class="col-md-6">
+                    <div class="col-md-6">
 
-        <label asp-for="MaxProjects"
-               class="form-label">
-        </label>
+                        <label asp-for="MaxProjects"
+                               class="form-label">
+                        </label>
 
-        <input asp-for="MaxProjects"
-               type="number"
-               min="1"
-               max="20"
-               class="form-control" />
+                        <input asp-for="MaxProjects"
+                               type="number"
+                               min="1"
+                               max="20"
+                               class="form-control" />
 
-        <span asp-validation-for="MaxProjects"
-              class="text-danger">
-        </span>
+                        <span asp-validation-for="MaxProjects"
+                              class="text-danger">
+                        </span>
 
-        <div class="form-text">
-            Maximum number of relevant candidate projects included
-            in generated CVs.
-        </div>
+                        <div class="form-text">
+                            Maximum relevant projects included in generated CVs.
+                        </div>
 
-    </div>
+                    </div>
 
-    <div class="col-md-6 d-flex align-items-center">
+                    <div class="col-md-6 d-flex align-items-center">
 
-        <div class="form-check">
+                        <div>
 
-            <input asp-for="IsPublic"
-                   class="form-check-input" />
+                            <div class="form-check">
 
-            <label asp-for="IsPublic"
-                   class="form-check-label">
-            </label>
+                                <input asp-for="IsPublic"
+                                       class="form-check-input"
+                                       id="isPublic" />
 
-            <div class="form-text">
-                Public positions can be viewed by visitors.
-            </div>
+                                <label asp-for="IsPublic"
+                                       class="form-check-label">
+                                </label>
 
-        </div>
+                            </div>
 
-    </div>
+                            <div class="form-text">
+                                Public positions are available to all authenticated
+                                candidates. Restricted positions use access rules.
+                            </div>
 
-</div>
+                        </div>
 
-                <div class="form-check">
-
-                    <input asp-for="IsPublic"
-                           class="form-check-input" />
-
-                    <label asp-for="IsPublic"
-                           class="form-check-label">
-                    </label>
-
-                    <div class="form-text">
-                        Anonymous users can view public positions.
                     </div>
 
                 </div>
 
             </div>
+
         </div>
 
-        <!-- Attributes -->
+        <!-- ================================================= -->
+        <!-- ATTRIBUTES -->
+        <!-- ================================================= -->
 
         <div class="card shadow-sm mb-4">
 
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Required Candidate Attributes</strong>
+            <div class="card-header">
 
-                <span id="attributeCount"
-                      class="badge text-bg-secondary">
-                    0 selected
-                </span>
-            </div>
+                <div class="d-flex justify-content-between align-items-center">
 
-            <div class="card-body">
+                    <strong>CV Attributes</strong>
 
-                <div class="mb-3">
-                    <input type="text"
-                           id="attributeSearch"
-                           class="form-control"
-                           placeholder="Search attributes..." />
-                </div>
-
-                <div class="table-responsive">
-
-                    <table class="table table-hover align-middle"
-                           id="attributeTable">
-
-                        <thead>
-                            <tr>
-                                <th style="width: 45px;"></th>
-                                <th>Attribute</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th style="width: 100px;">Required</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @foreach (var item in Model.AvailableAttributes)
-                            {
-                                var selected =
-                                    Model.SelectedAttributeIds.Contains(item.Id);
-
-                                var required =
-                                    Model.RequiredAttributeIds.Contains(item.Id);
-
-                                <tr>
-                                    <td>
-                                        <input type="checkbox"
-                                               class="form-check-input attribute-check"
-                                               name="SelectedAttributeIds"
-                                               value="@item.Id"
-                                               @(selected ? "checked" : "") />
-                                    </td>
-
-                                    <td>
-                                        <strong>@item.Name</strong>
-                                    </td>
-
-                                    <td>
-                                        @item.Category
-                                    </td>
-
-                                    <td>
-                                        <span class="badge text-bg-light">
-                                            @item.DataType
-                                        </span>
-                                    </td>
-
-                                    <td>
-                                        <input type="checkbox"
-                                               class="form-check-input required-check"
-                                               name="RequiredAttributeIds"
-                                               value="@item.Id"
-                                               @(required ? "checked" : "") />
-                                    </td>
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
+                    <span id="attributeCount"
+                          class="badge text-bg-secondary">
+                        0 selected
+                    </span>
 
                 </div>
 
-                <div class="form-text">
-                    Required attributes must be completed before a candidate
-                    can publish a CV for this position.
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Technology Tags -->
-
-        <div class="card shadow-sm mb-4">
-
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Project Technology Tags</strong>
-
-                <span id="tagCount"
-                      class="badge text-bg-secondary">
-                    0 selected
-                </span>
             </div>
 
             <div class="card-body">
 
                 <p class="text-muted">
-                    These tags help the system select relevant candidate projects
-                    when generating a CV.
+                    Select reusable attributes from the shared Attribute Library.
+                    Required attributes must be completed before a candidate can
+                    publish the CV.
                 </p>
 
-                <div class="row g-2">
+                @if (Model.AvailableAttributes.Count == 0)
+                {
+                    <div class="alert alert-light border">
+                        No attributes exist in the Attribute Library yet.
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
 
-                    @foreach (var tag in Model.AvailableTechnologyTags)
-                    {
-                        var selected =
-                            Model.SelectedTechnologyTagIds.Contains(tag.Id);
+                        <input type="text"
+                               id="attributeSearch"
+                               class="form-control"
+                               placeholder="Filter attributes..." />
 
-                        <div class="col-md-4 col-lg-3">
+                    </div>
 
-                            <label class="border rounded p-3 d-flex gap-2 align-items-center h-100">
+                    <div class="table-responsive">
 
-                                <input type="checkbox"
-                                       class="form-check-input technology-check"
-                                       name="SelectedTechnologyTagIds"
-                                       value="@tag.Id"
-                                       @(selected ? "checked" : "") />
+                        <table class="table table-hover align-middle"
+                               id="attributeTable">
 
-                                <span>
-                                    @tag.Name
-                                </span>
+                            <thead>
 
-                            </label>
+                                <tr>
 
-                        </div>
-                    }
+                                    <th style="width:45px;">
+
+                                        <input type="checkbox"
+                                               id="selectAllAttributes"
+                                               class="form-check-input" />
+
+                                    </th>
+
+                                    <th>
+                                        Attribute
+                                    </th>
+
+                                    <th>
+                                        Category
+                                    </th>
+
+                                    <th>
+                                        Type
+                                    </th>
+
+                                    <th style="width:100px;">
+                                        Required
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var item in Model.AvailableAttributes)
+                                {
+                                    var selected =
+                                        Model.SelectedAttributeIds.Contains(
+                                            item.Id);
+
+                                    var required =
+                                        Model.RequiredAttributeIds.Contains(
+                                            item.Id);
+
+                                    <tr data-search="@($"{item.Name} {item.Category} {item.DataType}")">
+
+                                        <td>
+
+                                            <input type="checkbox"
+                                                   class="form-check-input attribute-check"
+                                                   name="SelectedAttributeIds"
+                                                   value="@item.Id"
+                                                   @(selected ? "checked" : "") />
+
+                                        </td>
+
+                                        <td>
+                                            <strong>
+                                                @(item.Name)
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            @(item.Category)
+                                        </td>
+
+                                        <td>
+                                            <span class="badge text-bg-light">
+                                                @(item.DataType)
+                                            </span>
+                                        </td>
+
+                                        <td>
+
+                                            <input type="checkbox"
+                                                   class="form-check-input required-check"
+                                                   name="RequiredAttributeIds"
+                                                   value="@item.Id"
+                                                   @(required ? "checked" : "") />
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- PROJECT TAGS -->
+        <!-- ================================================= -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <strong>Project Technology Tags</strong>
+
+                    <span id="tagCount"
+                          class="badge text-bg-secondary">
+                        0 selected
+                    </span>
 
                 </div>
 
             </div>
+
+            <div class="card-body">
+
+                <p class="text-muted">
+                    Candidate projects matching these tags can be considered
+                    when generating the CV.
+                </p>
+
+                @if (Model.AvailableTechnologyTags.Count == 0)
+                {
+                    <div class="alert alert-light border">
+                        No technology tags have been created yet.
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-2">
+
+                        @foreach (var tag in Model.AvailableTechnologyTags)
+                        {
+                            var selected =
+                                Model.SelectedTechnologyTagIds.Contains(
+                                    tag.Id);
+
+                            <div class="col-6 col-md-4 col-lg-3">
+
+                                <label class="border rounded p-3 d-flex gap-2 align-items-center h-100">
+
+                                    <input type="checkbox"
+                                           class="form-check-input technology-check"
+                                           name="SelectedTechnologyTagIds"
+                                           value="@tag.Id"
+                                           @(selected ? "checked" : "") />
+
+                                    <span>
+                                        @(tag.Name)
+                                    </span>
+
+                                </label>
+
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </div>
+
         </div>
 
-        <!-- Actions -->
+        <!-- ================================================= -->
+        <!-- ACCESS RULES -->
+        <!-- ================================================= -->
 
-        <div class="d-flex gap-2">
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+                <strong>Access Rules</strong>
+            </div>
+
+            <div class="card-body">
+
+                <div id="restrictedNotice"
+                     class="alert alert-light border">
+
+                    Public positions do not require access rules.
+                    Select Restricted above to configure candidate filters.
+
+                </div>
+
+                <div id="accessRulesSection"
+                     style="display:none;">
+
+                    <p class="text-muted">
+                        Candidates must satisfy these rules to create a CV
+                        for this position.
+                    </p>
+
+                    <div id="accessRulesContainer"></div>
+
+                    <button type="button"
+                            id="addRuleButton"
+                            class="btn btn-outline-primary">
+                        Add Access Rule
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- ACTIONS -->
+        <!-- ================================================= -->
+
+        <div class="d-flex gap-2 mb-5">
 
             <button type="submit"
                     class="btn btn-primary">
-                Save Position
+                Create Position
             </button>
 
             <a asp-action="Index"
@@ -278,115 +402,641 @@
         </div>
 
     </form>
+
 </div>
 
-@section Scripts {
+<script>
 
-    <partial name="_ValidationScriptsPartial" />
+    // =========================================================
+    // ATTRIBUTE SELECTION
+    // =========================================================
 
-    <script>
+    const attributeChecks =
+        document.querySelectorAll(".attribute-check");
 
-        const attributeSearch =
-            document.getElementById("attributeSearch");
+    const requiredChecks =
+        document.querySelectorAll(".required-check");
 
-        const attributeRows =
-            document.querySelectorAll("#attributeTable tbody tr");
+    const selectAllAttributes =
+        document.getElementById("selectAllAttributes");
 
-        const attributeChecks =
-            document.querySelectorAll(".attribute-check");
+    const attributeCount =
+        document.getElementById("attributeCount");
 
-        const requiredChecks =
-            document.querySelectorAll(".required-check");
+    function updateAttributeCount()
+    {
+        const count =
+            document.querySelectorAll(
+                ".attribute-check:checked"
+            ).length;
 
-        const technologyChecks =
-            document.querySelectorAll(".technology-check");
+        attributeCount.textContent =
+            count + " selected";
+    }
 
-        function updateCounts() {
+    selectAllAttributes.addEventListener(
+        "change",
+        function ()
+        {
+            attributeChecks.forEach(
+                check =>
+                {
+                    check.checked =
+                        this.checked;
+                });
 
-            const selectedAttributes =
-                document.querySelectorAll(
-                    ".attribute-check:checked"
-                ).length;
-
-            document.getElementById("attributeCount")
-                .textContent =
-                selectedAttributes + " selected";
-
-            const selectedTags =
-                document.querySelectorAll(
-                    ".technology-check:checked"
-                ).length;
-
-            document.getElementById("tagCount")
-                .textContent =
-                selectedTags + " selected";
-        }
-
-        attributeSearch.addEventListener("input", function () {
-
-            const search =
-                this.value.trim().toLowerCase();
-
-            attributeRows.forEach(row => {
-
-                const text =
-                    row.innerText.toLowerCase();
-
-                row.style.display =
-                    text.includes(search) ? "" : "none";
-            });
+            updateAttributeCount();
         });
 
-        attributeChecks.forEach(check => {
-
-            check.addEventListener("change", function () {
-
-                const id = this.value;
-
-                if (!this.checked) {
-
-                    const required =
-                        document.querySelector(
-                            `.required-check[value="${id}"]`
-                        );
-
-                    if (required) {
-                        required.checked = false;
-                    }
-                }
-
-                updateCounts();
-            });
-        });
-
-        requiredChecks.forEach(check => {
-
-            check.addEventListener("change", function () {
-
-                const id = this.value;
-
-                const attribute =
-                    document.querySelector(
-                        `.attribute-check[value="${id}"]`
-                    );
-
-                if (this.checked && attribute) {
-                    attribute.checked = true;
-                }
-
-                updateCounts();
-            });
-        });
-
-        technologyChecks.forEach(check => {
-
+    attributeChecks.forEach(
+        check =>
+        {
             check.addEventListener(
                 "change",
-                updateCounts
-            );
+                function ()
+                {
+                    const required =
+                        document.querySelector(
+                            `.required-check[value="${this.value}"]`
+                        );
+
+                    if (!this.checked &&
+                        required)
+                    {
+                        required.checked =
+                            false;
+                    }
+
+                    updateAttributeCount();
+                });
         });
 
-        updateCounts();
+    requiredChecks.forEach(
+        check =>
+        {
+            check.addEventListener(
+                "change",
+                function ()
+                {
+                    if (this.checked)
+                    {
+                        const attribute =
+                            document.querySelector(
+                                `.attribute-check[value="${this.value}"]`
+                            );
 
-    </script>
+                        if (attribute)
+                        {
+                            attribute.checked =
+                                true;
+                        }
+                    }
+
+                    updateAttributeCount();
+                });
+        });
+
+
+    // =========================================================
+    // ATTRIBUTE SEARCH
+    // =========================================================
+
+    const attributeSearch =
+        document.getElementById("attributeSearch");
+
+    if (attributeSearch)
+    {
+        attributeSearch.addEventListener(
+            "input",
+            function ()
+            {
+                const term =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+                document
+                    .querySelectorAll(
+                        "#attributeTable tbody tr"
+                    )
+                    .forEach(
+                        row =>
+                        {
+                            const text =
+                                row.dataset.search
+                                    .toLowerCase();
+
+                            row.style.display =
+                                text.includes(term)
+                                    ? ""
+                                    : "none";
+                        });
+            });
+    }
+
+
+    // =========================================================
+    // TECHNOLOGY TAG COUNT
+    // =========================================================
+
+    const technologyChecks =
+        document.querySelectorAll(
+            ".technology-check");
+
+    const tagCount =
+        document.getElementById("tagCount");
+
+    function updateTagCount()
+    {
+        tagCount.textContent =
+            document.querySelectorAll(
+                ".technology-check:checked"
+            ).length + " selected";
+    }
+
+    technologyChecks.forEach(
+        check =>
+        {
+            check.addEventListener(
+                "change",
+                updateTagCount);
+        });
+
+
+    // =========================================================
+    // ACCESS RULES
+    // =========================================================
+
+    const isPublic =
+        document.getElementById("isPublic");
+
+    const accessRulesSection =
+        document.getElementById(
+            "accessRulesSection");
+
+    const restrictedNotice =
+        document.getElementById(
+            "restrictedNotice");
+
+    const accessRulesContainer =
+        document.getElementById(
+            "accessRulesContainer");
+
+    const addRuleButton =
+        document.getElementById(
+            "addRuleButton");
+
+
+    const attributes =
+    [
+        @foreach (var item in Model.AvailableAttributes)
+        {
+            <text>
+            {
+                id: @item.Id,
+                name: "@Html.Raw(
+                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(item.Name)
+                )",
+                type: "@item.DataType"
+            },
+            </text>
+        }
+    ];
+
+
+    const operators =
+    {
+        String:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"],
+            ["Contains", "Contains"],
+            ["StartsWith", "Starts with"]
+        ],
+
+        Text:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"],
+            ["Contains", "Contains"]
+        ],
+
+        Numeric:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"],
+            ["GreaterThan", "Greater than"],
+            ["GreaterThanOrEqual", "Greater than or equal"],
+            ["LessThan", "Less than"],
+            ["LessThanOrEqual", "Less than or equal"]
+        ],
+
+        Date:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"],
+            ["GreaterThan", "After"],
+            ["GreaterThanOrEqual", "On or after"],
+            ["LessThan", "Before"],
+            ["LessThanOrEqual", "On or before"]
+        ],
+
+        Boolean:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"]
+        ],
+
+        Dropdown:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"],
+            ["Contains", "Contains"]
+        ],
+
+        Image:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"]
+        ],
+
+        Period:
+        [
+            ["Equals", "Equals"],
+            ["NotEquals", "Not equals"]
+        ]
+    };
+
+
+    function updateAccessVisibility()
+    {
+        if (isPublic.checked)
+        {
+            accessRulesSection.style.display =
+                "none";
+
+            restrictedNotice.style.display =
+                "block";
+        }
+        else
+        {
+            accessRulesSection.style.display =
+                "block";
+
+            restrictedNotice.style.display =
+                "none";
+        }
+    }
+
+
+    function createRuleRow(index)
+    {
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "border rounded p-3 mb-3 access-rule";
+
+
+        const attributeColumn =
+            document.createElement("div");
+
+        attributeColumn.className =
+            "mb-3";
+
+
+        const attributeLabel =
+            document.createElement("label");
+
+        attributeLabel.className =
+            "form-label";
+
+        attributeLabel.textContent =
+            "Attribute";
+
+
+        const attributeSelect =
+            document.createElement("select");
+
+        attributeSelect.className =
+            "form-select rule-attribute";
+
+        attributeSelect.name =
+            `AccessRules[${index}].AttributeDefinitionId`;
+
+        attributeSelect.required =
+            true;
+
+
+        const emptyOption =
+            document.createElement("option");
+
+        emptyOption.value =
+            "";
+
+        emptyOption.textContent =
+            "Select attribute...";
+
+        attributeSelect.appendChild(
+            emptyOption);
+
+
+        attributes.forEach(
+            attribute =>
+            {
+                const option =
+                    document.createElement(
+                        "option");
+
+                option.value =
+                    attribute.id;
+
+                option.textContent =
+                    `${attribute.name} (${attribute.type})`;
+
+                option.dataset.type =
+                    attribute.type;
+
+                attributeSelect.appendChild(
+                    option);
+            });
+
+
+        attributeColumn.appendChild(
+            attributeLabel);
+
+        attributeColumn.appendChild(
+            attributeSelect);
+
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "row g-3";
+
+
+        const operatorColumn =
+            document.createElement("div");
+
+        operatorColumn.className =
+            "col-md-4";
+
+
+        const operatorLabel =
+            document.createElement("label");
+
+        operatorLabel.className =
+            "form-label";
+
+        operatorLabel.textContent =
+            "Operator";
+
+
+        const operatorSelect =
+            document.createElement("select");
+
+        operatorSelect.className =
+            "form-select rule-operator";
+
+        operatorSelect.name =
+            `AccessRules[${index}].Operator`;
+
+        operatorSelect.required =
+            true;
+
+
+        const emptyOperator =
+            document.createElement("option");
+
+        emptyOperator.value =
+            "";
+
+        emptyOperator.textContent =
+            "Select operator...";
+
+        operatorSelect.appendChild(
+            emptyOperator);
+
+
+        operatorColumn.appendChild(
+            operatorLabel);
+
+        operatorColumn.appendChild(
+            operatorSelect);
+
+
+        const valueColumn =
+            document.createElement("div");
+
+        valueColumn.className =
+            "col-md-6";
+
+
+        const valueLabel =
+            document.createElement("label");
+
+        valueLabel.className =
+            "form-label";
+
+        valueLabel.textContent =
+            "Value";
+
+
+        const valueInput =
+            document.createElement("input");
+
+        valueInput.type =
+            "text";
+
+        valueInput.className =
+            "form-control rule-value";
+
+        valueInput.name =
+            `AccessRules[${index}].Value`;
+
+        valueInput.required =
+            true;
+
+        valueInput.placeholder =
+            "Filter value...";
+
+
+        valueColumn.appendChild(
+            valueLabel);
+
+        valueColumn.appendChild(
+            valueInput);
+
+
+        const removeColumn =
+            document.createElement("div");
+
+        removeColumn.className =
+            "col-md-2 d-flex align-items-end";
+
+
+        const removeButton =
+            document.createElement("button");
+
+        removeButton.type =
+            "button";
+
+        removeButton.className =
+            "btn btn-outline-danger w-100";
+
+        removeButton.textContent =
+            "Remove";
+
+
+        removeButton.addEventListener(
+            "click",
+            function ()
+            {
+                wrapper.remove();
+                renumberRules();
+            });
+
+
+        removeColumn.appendChild(
+            removeButton);
+
+
+        row.appendChild(
+            operatorColumn);
+
+        row.appendChild(
+            valueColumn);
+
+        row.appendChild(
+            removeColumn);
+
+
+        wrapper.appendChild(
+            attributeColumn);
+
+        wrapper.appendChild(
+            row);
+
+
+        function refreshOperators()
+        {
+            const selected =
+                attributeSelect
+                    .selectedOptions[0];
+
+            const type =
+                selected
+                    ? selected.dataset.type
+                    : null;
+
+            operatorSelect.innerHTML =
+                "";
+
+            const empty =
+                document.createElement(
+                    "option");
+
+            empty.value =
+                "";
+
+            empty.textContent =
+                "Select operator...";
+
+            operatorSelect.appendChild(
+                empty);
+
+            if (!type ||
+                !operators[type])
+            {
+                return;
+            }
+
+            operators[type].forEach(
+                operator =>
+                {
+                    const option =
+                        document.createElement(
+                            "option");
+
+                    option.value =
+                        operator[0];
+
+                    option.textContent =
+                        operator[1];
+
+                    operatorSelect.appendChild(
+                        option);
+                });
+        }
+
+
+        attributeSelect.addEventListener(
+            "change",
+            refreshOperators);
+
+
+        return wrapper;
+    }
+
+
+    function renumberRules()
+    {
+        document
+            .querySelectorAll(
+                ".access-rule")
+            .forEach(
+                (rule, index) =>
+                {
+                    const attribute =
+                        rule.querySelector(
+                            ".rule-attribute");
+
+                    const operator =
+                        rule.querySelector(
+                            ".rule-operator");
+
+                    const value =
+                        rule.querySelector(
+                            ".rule-value");
+
+                    attribute.name =
+                        `AccessRules[${index}].AttributeDefinitionId`;
+
+                    operator.name =
+                        `AccessRules[${index}].Operator`;
+
+                    value.name =
+                        `AccessRules[${index}].Value`;
+                });
+    }
+
+
+    isPublic.addEventListener(
+        "change",
+        updateAccessVisibility);
+
+
+    addRuleButton.addEventListener(
+        "click",
+        function ()
+        {
+            const index =
+                document.querySelectorAll(
+                    ".access-rule"
+                ).length;
+
+            accessRulesContainer.appendChild(
+                createRuleRow(index));
+        });
+
+
+    updateAccessVisibility();
+    updateAttributeCount();
+    updateTagCount();
+
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

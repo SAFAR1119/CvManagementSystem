@@ -1,258 +1,745 @@
+using CvManagementSystem.Data;
+using CvManagementSystem.Models;
 using CvManagementSystem.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CvManagementSystem.Controllers;
 
+[Authorize(Roles = "Candidate,Administrator")]
 public class ProjectsController : Controller
 {
-    [HttpGet]
-    public IActionResult Index()
-    {
-        var projects = BuildDemoProjects();
+    private readonly ApplicationDbContext _context;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-        return View(projects);
+    public ProjectsController(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager)
+    {
+        _context = context;
+        _userManager = userManager;
     }
 
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Index(string? userId)
     {
-        var model = new ProjectViewModel
-        {
-            StartDate = DateOnly.FromDateTime(DateTime.Today)
-        };
+        var targetUserId =
+            await GetTargetUserIdAsync(userId);
 
-        LoadTechnologyTags(model);
+        if (targetUserId == null)
+        {
+            return Forbid();
+        }
+
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var projects =
+            await _context.Projects
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        x.CandidateProfileId ==
+                        profile.Id)
+                .Include(x => x.TechnologyTags)
+                    .ThenInclude(x => x.TechnologyTag)
+                .OrderByDescending(x => x.StartDate)
+                .ThenBy(x => x.Name)
+                .ToListAsync();
+
+        var model =
+            projects
+                .Select(
+                    x =>
+                        new ProjectViewModel
+                        {
+                            Id = x.Id,
+                            CandidateProfileId =
+                                x.CandidateProfileId,
+                            UserId =
+                                targetUserId,
+                            Name = x.Name,
+                            StartDate =
+                                x.StartDate,
+                            EndDate =
+                                x.EndDate,
+                            DescriptionMarkdown =
+                                x.DescriptionMarkdown,
+                            TechnologyTags =
+                                x.TechnologyTags
+                                    .OrderBy(
+                                        t =>
+                                            t.TechnologyTag.Name)
+                                    .Select(
+                                        t =>
+                                            t.TechnologyTag.Name)
+                                    .ToList()
+                        })
+                .ToList();
+
+        SetViewState(targetUserId);
 
         return View(model);
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public IActionResult Create(ProjectViewModel model)
+    [HttpGet]
+    public async Task<IActionResult> Create(
+        string? userId)
     {
-        LoadTechnologyTags(model);
+        var targetUserId =
+            await GetTargetUserIdAsync(userId);
 
-        if (!ModelState.IsValid)
+        if (targetUserId == null)
         {
-            return View(model);
+            return Forbid();
         }
 
-        TempData["Success"] =
-            $"Project '{model.Name}' was prepared successfully.";
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
 
-        return RedirectToAction(nameof(Index));
-    }
-
-    [HttpGet]
-    public IActionResult Edit(int id)
-    {
-        var model = new ProjectViewModel
+        if (profile == null)
         {
-            Id = id,
-            Name = "Employee Management System",
-            StartDate = new DateOnly(2026, 1, 1),
-            EndDate = new DateOnly(2026, 4, 1),
-            DescriptionMarkdown =
-                "A role-based employee management application with dashboards, leave management and payroll features.",
+            return NotFound();
+        }
 
-            SelectedTechnologyTagIds = new List<int>
+        var model =
+            new ProjectViewModel
             {
-                2,
-                5,
-                6
-            }
-        };
+                CandidateProfileId =
+                    profile.Id,
 
-        LoadTechnologyTags(model);
+                UserId =
+                    targetUserId,
+
+                StartDate =
+                    DateOnly.FromDateTime(
+                        DateTime.Today)
+            };
+
+        await LoadAvailableTagsAsync(model);
+
+        SetViewState(targetUserId);
 
         return View(model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Edit(ProjectViewModel model)
+    public async Task<IActionResult> Create(
+        ProjectViewModel model)
     {
-        LoadTechnologyTags(model);
+        var targetUserId =
+            await GetTargetUserIdAsync(
+                model.UserId);
+
+        if (targetUserId == null)
+        {
+            return Forbid();
+        }
+
+        if (model.EndDate.HasValue &&
+            model.EndDate.Value < model.StartDate)
+        {
+            ModelState.AddModelError(
+                nameof(model.EndDate),
+                "End date cannot be earlier than the start date.");
+        }
 
         if (!ModelState.IsValid)
         {
+            await LoadAvailableTagsAsync(model);
+            SetViewState(targetUserId);
+
             return View(model);
         }
 
-        TempData["Success"] =
-            $"Project '{model.Name}' was updated successfully.";
+        var profile =
+            await _context.CandidateProfiles
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
 
-        return RedirectToAction(nameof(Index));
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var tagNames =
+            NormalizeTagNames(
+                model.TechnologyTags);
+
+        var tags =
+            await ResolveTechnologyTagsAsync(
+                tagNames);
+
+        var project =
+            new Project
+            {
+                CandidateProfileId =
+                    profile.Id,
+
+                Name =
+                    model.Name.Trim(),
+
+                StartDate =
+                    model.StartDate,
+
+                EndDate =
+                    model.EndDate,
+
+                DescriptionMarkdown =
+                    model.DescriptionMarkdown.Trim(),
+
+                UpdatedAt =
+                    DateTime.UtcNow
+            };
+
+        foreach (var tag in tags)
+        {
+            project.TechnologyTags.Add(
+                new ProjectTechnologyTag
+                {
+                    Project = project,
+                    TechnologyTag = tag
+                });
+        }
+
+        _context.Projects.Add(project);
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToProjects(
+            targetUserId);
     }
 
     [HttpGet]
-    public IActionResult Details(int id)
+    public async Task<IActionResult> Edit(
+        int id,
+        string? userId)
     {
-        var projects = BuildDemoProjects();
+        var targetUserId =
+            await GetTargetUserIdAsync(
+                userId);
 
-        var project = projects.FirstOrDefault(x => x.Id == id);
+        if (targetUserId == null)
+        {
+            return Forbid();
+        }
+
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var project =
+            await _context.Projects
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        x.Id == id &&
+                        x.CandidateProfileId ==
+                        profile.Id)
+                .Include(x => x.TechnologyTags)
+                    .ThenInclude(
+                        x => x.TechnologyTag)
+                .FirstOrDefaultAsync();
 
         if (project == null)
         {
             return NotFound();
         }
 
-        return View(project);
+        var model =
+            new ProjectViewModel
+            {
+                Id =
+                    project.Id,
+
+                CandidateProfileId =
+                    project.CandidateProfileId,
+
+                UserId =
+                    targetUserId,
+
+                Name =
+                    project.Name,
+
+                StartDate =
+                    project.StartDate,
+
+                EndDate =
+                    project.EndDate,
+
+                DescriptionMarkdown =
+                    project.DescriptionMarkdown,
+
+                TechnologyTags =
+                    project.TechnologyTags
+                        .OrderBy(
+                            x =>
+                                x.TechnologyTag.Name)
+                        .Select(
+                            x =>
+                                x.TechnologyTag.Name)
+                        .ToList()
+            };
+
+        await LoadAvailableTagsAsync(model);
+
+        SetViewState(targetUserId);
+
+        return View(model);
     }
 
-    private static void LoadTechnologyTags(ProjectViewModel model)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        ProjectViewModel model)
+    {
+        var targetUserId =
+            await GetTargetUserIdAsync(
+                model.UserId);
+
+        if (targetUserId == null)
+        {
+            return Forbid();
+        }
+
+        if (model.EndDate.HasValue &&
+            model.EndDate.Value < model.StartDate)
+        {
+            ModelState.AddModelError(
+                nameof(model.EndDate),
+                "End date cannot be earlier than the start date.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await LoadAvailableTagsAsync(model);
+            SetViewState(targetUserId);
+
+            return View(model);
+        }
+
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var project =
+            await _context.Projects
+                .Include(x => x.TechnologyTags)
+                .FirstOrDefaultAsync(
+                    x =>
+                        x.Id == model.Id &&
+                        x.CandidateProfileId ==
+                        profile.Id);
+
+        if (project == null)
+        {
+            return NotFound();
+        }
+
+        project.Name =
+            model.Name.Trim();
+
+        project.StartDate =
+            model.StartDate;
+
+        project.EndDate =
+            model.EndDate;
+
+        project.DescriptionMarkdown =
+            model.DescriptionMarkdown.Trim();
+
+        project.UpdatedAt =
+            DateTime.UtcNow;
+
+        var currentLinks =
+            project.TechnologyTags.ToList();
+
+        _context.ProjectTechnologyTags
+            .RemoveRange(currentLinks);
+
+        project.TechnologyTags.Clear();
+
+        var tagNames =
+            NormalizeTagNames(
+                model.TechnologyTags);
+
+        var tags =
+            await ResolveTechnologyTagsAsync(
+                tagNames);
+
+        foreach (var tag in tags)
+        {
+            project.TechnologyTags.Add(
+                new ProjectTechnologyTag
+                {
+                    Project = project,
+                    TechnologyTag = tag
+                });
+        }
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToProjects(
+            targetUserId);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Details(
+        int id,
+        string? userId)
+    {
+        var targetUserId =
+            await GetTargetUserIdAsync(
+                userId);
+
+        if (targetUserId == null)
+        {
+            return Forbid();
+        }
+
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var project =
+            await _context.Projects
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        x.Id == id &&
+                        x.CandidateProfileId ==
+                        profile.Id)
+                .Include(x => x.TechnologyTags)
+                    .ThenInclude(
+                        x => x.TechnologyTag)
+                .FirstOrDefaultAsync();
+
+        if (project == null)
+        {
+            return NotFound();
+        }
+
+        var model =
+            new ProjectViewModel
+            {
+                Id =
+                    project.Id,
+
+                CandidateProfileId =
+                    project.CandidateProfileId,
+
+                UserId =
+                    targetUserId,
+
+                Name =
+                    project.Name,
+
+                StartDate =
+                    project.StartDate,
+
+                EndDate =
+                    project.EndDate,
+
+                DescriptionMarkdown =
+                    project.DescriptionMarkdown,
+
+                TechnologyTags =
+                    project.TechnologyTags
+                        .OrderBy(
+                            x =>
+                                x.TechnologyTag.Name)
+                        .Select(
+                            x =>
+                                x.TechnologyTag.Name)
+                        .ToList()
+            };
+
+        SetViewState(targetUserId);
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(
+        int[] selectedIds,
+        string? userId)
+    {
+        var targetUserId =
+            await GetTargetUserIdAsync(
+                userId);
+
+        if (targetUserId == null)
+        {
+            return Forbid();
+        }
+
+        if (selectedIds.Length == 0)
+        {
+            TempData["Error"] =
+                "Select at least one project.";
+
+            return RedirectToProjects(
+                targetUserId);
+        }
+
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var projects =
+            await _context.Projects
+                .Where(
+                    x =>
+                        x.CandidateProfileId ==
+                        profile.Id &&
+                        selectedIds.Contains(
+                            x.Id))
+                .ToListAsync();
+
+        _context.Projects.RemoveRange(
+            projects);
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToProjects(
+            targetUserId);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SearchTags(
+        string? term)
+    {
+        if (string.IsNullOrWhiteSpace(term))
+        {
+            return Json(
+                Array.Empty<string>());
+        }
+
+        var prefix =
+            term.Trim();
+
+        var tags =
+            await _context.TechnologyTags
+                .AsNoTracking()
+                .Where(
+                    x =>
+                        EF.Functions.ILike(
+                            x.Name,
+                            prefix + "%"))
+                .OrderBy(x => x.Name)
+                .Take(10)
+                .Select(x => x.Name)
+                .ToListAsync();
+
+        return Json(tags);
+    }
+
+    private async Task<string?>
+        GetTargetUserIdAsync(
+            string? requestedUserId)
+    {
+        var currentUserId =
+            _userManager.GetUserId(User);
+
+        if (string.IsNullOrWhiteSpace(
+                currentUserId))
+        {
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                requestedUserId))
+        {
+            return currentUserId;
+        }
+
+        if (!User.IsInRole(
+                "Administrator"))
+        {
+            return null;
+        }
+
+        var exists =
+            await _userManager.Users
+                .AsNoTracking()
+                .AnyAsync(
+                    x =>
+                        x.Id ==
+                        requestedUserId);
+
+        return exists
+            ? requestedUserId
+            : null;
+    }
+
+    private async Task
+        LoadAvailableTagsAsync(
+            ProjectViewModel model)
     {
         model.AvailableTechnologyTags =
-            new List<SelectableTechnologyTagViewModel>
-            {
-                new()
-                {
-                    Id = 1,
-                    Name = "Java"
-                },
-
-                new()
-                {
-                    Id = 2,
-                    Name = ".NET"
-                },
-
-                new()
-                {
-                    Id = 3,
-                    Name = "C#"
-                },
-
-                new()
-                {
-                    Id = 4,
-                    Name = "JavaScript"
-                },
-
-                new()
-                {
-                    Id = 5,
-                    Name = "Next.js"
-                },
-
-                new()
-                {
-                    Id = 6,
-                    Name = "TypeScript"
-                },
-
-                new()
-                {
-                    Id = 7,
-                    Name = "Spring Boot"
-                },
-
-                new()
-                {
-                    Id = 8,
-                    Name = "NestJS"
-                },
-
-                new()
-                {
-                    Id = 9,
-                    Name = "PostgreSQL"
-                },
-
-                new()
-                {
-                    Id = 10,
-                    Name = "MySQL"
-                },
-
-                new()
-                {
-                    Id = 11,
-                    Name = "MongoDB"
-                },
-
-                new()
-                {
-                    Id = 12,
-                    Name = "Docker"
-                },
-
-                new()
-                {
-                    Id = 13,
-                    Name = "React"
-                }
-            };
+            await _context.TechnologyTags
+                .AsNoTracking()
+                .OrderBy(x => x.Name)
+                .Take(100)
+                .Select(x => x.Name)
+                .ToListAsync();
     }
 
-    private static List<ProjectViewModel> BuildDemoProjects()
+    private async Task<List<TechnologyTag>>
+        ResolveTechnologyTagsAsync(
+            List<string> requestedNames)
     {
-        return new List<ProjectViewModel>
+        if (requestedNames.Count == 0)
         {
-            new()
-            {
-                Id = 1,
-                Name = "Employee Management System",
-                StartDate = new DateOnly(2026, 1, 1),
-                EndDate = new DateOnly(2026, 4, 1),
-                DescriptionMarkdown =
-                    "A role-based employee management application with dashboards, leave management and payroll features.",
-                SelectedTechnologyTagIds = new List<int>
-                {
-                    2,
-                    3,
-                    5,
-                    6
-                }
-            },
+            return new List<TechnologyTag>();
+        }
 
-            new()
-            {
-                Id = 2,
-                Name = "Pawtato API",
-                StartDate = new DateOnly(2026, 2, 1),
-                EndDate = new DateOnly(2026, 6, 1),
-                DescriptionMarkdown =
-                    "A pet digital identity and management API with authentication, pet profiles, QR functionality and notifications.",
-                SelectedTechnologyTagIds = new List<int>
-                {
-                    6,
-                    8,
-                    11,
-                    12
-                }
-            },
+        var normalized =
+            requestedNames
+                .Select(NormalizeTag)
+                .Where(
+                    x => x.Length > 0)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-            new()
-            {
-                Id = 3,
-                Name = "BajarBD Family Mart",
-                StartDate = new DateOnly(2026, 3, 1),
-                EndDate = new DateOnly(2026, 5, 1),
-                DescriptionMarkdown =
-                    "An online family shopping application built with Spring Boot and Thymeleaf.",
-                SelectedTechnologyTagIds = new List<int>
-                {
-                    1,
-                    7,
-                    10
-                }
-            },
+        if (normalized.Count == 0)
+        {
+            return new List<TechnologyTag>();
+        }
 
-            new()
+        var existing =
+            await _context.TechnologyTags
+                .Where(
+                    x =>
+                        normalized.Contains(
+                            x.Name))
+                .ToListAsync();
+
+        var existingNames =
+            existing
+                .Select(x => x.Name)
+                .ToHashSet(
+                    StringComparer.OrdinalIgnoreCase);
+
+        var newTags =
+            normalized
+                .Where(
+                    x =>
+                        !existingNames.Contains(
+                            x))
+                .Select(
+                    x =>
+                        new TechnologyTag
+                        {
+                            Name = x
+                        })
+                .ToList();
+
+        if (newTags.Count > 0)
+        {
+            await _context.TechnologyTags
+                .AddRangeAsync(
+                    newTags);
+        }
+
+        existing.AddRange(newTags);
+
+        return existing
+            .OrderBy(x => x.Name)
+            .ToList();
+    }
+
+    private static List<string>
+        NormalizeTagNames(
+            IEnumerable<string> names)
+    {
+        return names
+            .Select(NormalizeTag)
+            .Where(
+                x => x.Length > 0)
+            .Distinct(
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static string NormalizeTag(
+        string? value)
+    {
+        return value?.Trim()
+            ?? string.Empty;
+    }
+
+    private void SetViewState(
+        string targetUserId)
+    {
+        ViewBag.TargetUserId =
+            targetUserId;
+
+        ViewBag.IsAdministratorView =
+            User.IsInRole("Administrator") &&
+            targetUserId !=
+                _userManager.GetUserId(User);
+    }
+
+    private IActionResult RedirectToProjects(
+        string userId)
+    {
+        var currentUserId =
+            _userManager.GetUserId(User);
+
+        return RedirectToAction(
+            nameof(Index),
+            new
             {
-                Id = 4,
-                Name = "Personal Portfolio",
-                StartDate = new DateOnly(2025, 10, 1),
-                DescriptionMarkdown =
-                    "A responsive personal developer portfolio showcasing projects, experience and technical skills.",
-                SelectedTechnologyTagIds = new List<int>
-                {
-                    6,
-                    5,
-                    13
-                }
-            }
-        };
+                userId =
+                    User.IsInRole("Administrator") &&
+                    userId != currentUserId
+                        ? userId
+                        : null
+            });
     }
 }

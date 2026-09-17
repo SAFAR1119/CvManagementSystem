@@ -6,6 +6,10 @@ public class ProjectViewModel
 {
     public int Id { get; set; }
 
+    public int CandidateProfileId { get; set; }
+
+    public string? UserId { get; set; }
+
     [Required]
     [StringLength(200)]
     [Display(Name = "Project name")]
@@ -22,11 +26,9 @@ public class ProjectViewModel
     [Display(Name = "Description")]
     public string DescriptionMarkdown { get; set; } = string.Empty;
 
-    [Display(Name = "Technology tags")]
-    public List<int> SelectedTechnologyTagIds { get; set; } = new();
+    public List<string> TechnologyTags { get; set; } = new();
 
-    public List<SelectableTechnologyTagViewModel> AvailableTechnologyTags { get; set; }
-        = new();
+    public List<string> AvailableTechnologyTags { get; set; } = new();
 
     public string Period
     {
@@ -34,12 +36,9 @@ public class ProjectViewModel
         {
             var start = StartDate.ToString("MMM yyyy");
 
-            if (!EndDate.HasValue)
-            {
-                return $"{start} - Present";
-            }
-
-            return $"{start} - {EndDate.Value:MMM yyyy}";
+            return EndDate.HasValue
+                ? $"{start} - {EndDate.Value:MMM yyyy}"
+                : $"{start} - Present";
         }
     }
 }

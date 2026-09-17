@@ -29,4 +29,7 @@ public class Position
 
     public ICollection<PositionProjectTag> ProjectTags { get; set; }
         = new List<PositionProjectTag>();
+
+    public ICollection<PositionAccessRule> AccessRules { get; set; }
+        = new List<PositionAccessRule>();
 }

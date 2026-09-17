@@ -1,3 +1,6 @@
+@using Microsoft.AspNetCore.Razor.Language
+@model IReadOnlyList<dynamic>
+
 @{
     ViewData["Title"] = "Positions";
 }
@@ -5,190 +8,482 @@
 <div class="container py-4">
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
         <div>
-            <h1 class="h3 mb-1">Positions</h1>
+            <h1 class="h3 mb-1">
+                Positions
+            </h1>
+
             <p class="text-muted mb-0">
-                Manage recruitment positions and their CV requirements.
+                Browse available recruitment positions.
             </p>
         </div>
 
-        <a asp-action="Create" class="btn btn-primary">
-            Create Position
-        </a>
+        @if (User.IsInRole("Recruiter") ||
+             User.IsInRole("Administrator"))
+        {
+            <a asp-action="Create"
+               class="btn btn-primary">
+                Create Position
+            </a>
+        }
+
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Tag as string))
+    {
+         <div class="alert alert-info">
+             Showing positions for technology tag:
+             <strong>@ViewBag.Tag</strong>
+         </div>
+    }
 
-            <div class="row g-2 mb-3">
-                <div class="col-md-6">
-                    <input type="text"
-                           id="positionSearch"
-                           class="form-control"
-                           placeholder="Search positions..." />
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">
+            @(success)
+        </div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-warning">
+            @(error)
+        </div>
+    }
+
+    @if (User.IsInRole("Recruiter") ||
+         User.IsInRole("Administrator"))
+    {
+        <form asp-action="Delete"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div class="card shadow-sm mb-3">
+
+                <div class="card-body">
+
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+
+                        <button type="button"
+                                id="editSelected"
+                                class="btn btn-outline-primary">
+                            Edit Selected
+                        </button>
+
+                        <button type="button"
+                                id="duplicateSelected"
+                                class="btn btn-outline-secondary">
+                            Duplicate Selected
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-outline-danger"
+                                onclick="return confirmDelete()">
+                            Delete Selected
+                        </button>
+
+                        <span id="selectedCount"
+                              class="text-muted small">
+                            0 selected
+                        </span>
+
+                    </div>
+
                 </div>
 
-                <div class="col-md-auto">
-                    <button type="button"
-                            class="btn btn-outline-secondary"
-                            onclick="clearSearch()">
-                        Clear
-                    </button>
+            </div>
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th style="width:45px;">
+
+                                        <input type="checkbox"
+                                               id="selectAll"
+                                               class="form-check-input" />
+
+                                        <input type="hidden"
+                                           name="tag"
+                                           value="@ViewBag.Tag" />
+
+                                    </th>
+
+                                    <th>
+                                        Position
+                                    </th>
+
+                                    <th>
+                                        Access
+                                    </th>
+
+                                    <th>
+                                        Attributes
+                                    </th>
+
+                                    <th>
+                                        Project Tags
+                                    </th>
+
+                                    <th>
+                                        Max Projects
+                                    </th>
+
+                                    <th>
+                                        Updated
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @if (Model.Count == 0)
+                                {
+                                    <tr>
+
+                                        <td colspan="7"
+                                            class="text-center text-muted py-5">
+
+                                            No positions have been created yet.
+
+                                        </td>
+
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var position in Model)
+                                    {
+                                        <tr>
+
+                                            <td>
+
+                                                @if (User.IsInRole("Recruiter") ||
+                                                     User.IsInRole("Administrator"))
+                                                {
+                                                    <input type="checkbox"
+                                                           class="position-check form-check-input"
+                                                           name="selectedIds"
+                                                           value="@position.Id" />
+                                                }
+
+                                            </td>
+
+                                            <td>
+
+                                                <a asp-action="Details"
+                                                   asp-route-id="@position.Id"
+                                                   class="text-decoration-none">
+
+
+                                                    <strong>
+                                                        @(position.Title)
+                                                    </strong>
+
+                                                </a>
+
+                                                @if (!string.IsNullOrWhiteSpace(
+                                                    position.Description))
+                                                {
+                                                    <div class="small text-muted">
+                                                        @(position.Description)
+                                                    </div>
+                                                }
+
+                                            </td>
+
+                                            <td>
+
+                                                @if (position.IsPublic)
+                                                {
+                                                    <span class="badge text-bg-success">
+                                                        Public
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge text-bg-warning">
+                                                        Restricted
+                                                    </span>
+                                                }
+
+                                            </td>
+
+                                            <td>
+                                                @(position.AttributeCount)
+                                            </td>
+
+                                            <td>
+                                                @(position.ProjectTagCount)
+                                            </td>
+
+                                            <td>
+                                                @(position.MaxProjects)
+                                            </td>
+
+                                            <td>
+                                                @position.UpdatedAt
+                                                    .ToLocalTime()
+                                                    .ToString("dd MMM yyyy HH:mm")
+                                            </td>
+
+                                        </tr>
+                                    }
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
                 </div>
+
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle"
-                       id="positionsTable">
+        </form>
+    }
+    else
+    {
+        <div class="card shadow-sm">
 
-                    <thead>
-                        <tr>
-                            <th>Position</th>
-                            <th>Description</th>
-                            <th>Access</th>
-                            <th>Attributes</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+            <div class="card-body">
 
-                    <tbody>
+                <div class="table-responsive">
 
-                        <tr>
-                            <td>
-                                <strong>Backend Developer</strong>
-                            </td>
+                    <table class="table table-hover align-middle">
 
-                            <td>
-                                Build and maintain backend services and APIs.
-                            </td>
+                        <thead>
 
-                            <td>
-                                <span class="badge text-bg-success">
-                                    Public
-                                </span>
-                            </td>
+                            <tr>
+                                <th>Position</th>
+                                <th>Access</th>
+                                <th>Attributes</th>
+                                <th>Project Tags</th>
+                                <th>Max Projects</th>
+                                <th>Updated</th>
+                            </tr>
 
-                            <td>
-                                6
-                            </td>
+                        </thead>
 
-                            <td>
-                                <span class="badge text-bg-primary">
-                                    Active
-                                </span>
-                            </td>
-                        </tr>
+                        <tbody>
 
-                        <tr>
-                            <td>
-                                <strong>Frontend Developer</strong>
-                            </td>
+                            @if (Model.Count == 0)
+                            {
+                                <tr>
 
-                            <td>
-                                Develop responsive web interfaces and applications.
-                            </td>
+                                    <td colspan="6"
+                                        class="text-center text-muted py-5">
 
-                            <td>
-                                <span class="badge text-bg-warning">
-                                    Restricted
-                                </span>
-                            </td>
+                                        No positions available.
 
-                            <td>
-                                5
-                            </td>
+                                    </td>
 
-                            <td>
-                                <span class="badge text-bg-primary">
-                                    Active
-                                </span>
-                            </td>
-                        </tr>
+                                </tr>
+                            }
+                            else
+                            {
+                                foreach (var position in Model)
+                                {
+                                    <tr>
 
-                        <tr>
-                            <td>
-                                <strong>Full Stack Developer</strong>
-                            </td>
+                                        <td>
 
-                            <td>
-                                Work across frontend and backend application development.
-                            </td>
+                                            <a asp-action="Details"
+                                               asp-route-id="@position.Id"
+                                               class="text-decoration-none">
 
-                            <td>
-                                <span class="badge text-bg-success">
-                                    Public
-                                </span>
-                            </td>
+                                                <strong>
+                                                    @(position.Title)
+                                                </strong>
 
-                            <td>
-                                8
-                            </td>
+                                            </a>
 
-                            <td>
-                                <span class="badge text-bg-primary">
-                                    Active
-                                </span>
-                            </td>
-                        </tr>
+                                        </td>
 
-                        <tr>
-                            <td>
-                                <strong>Business Analyst</strong>
-                            </td>
+                                        <td>
 
-                            <td>
-                                Analyze requirements and coordinate software solutions.
-                            </td>
+                                            @if (position.IsPublic)
+                                            {
+                                                <span class="badge text-bg-success">
+                                                    Public
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge text-bg-warning">
+                                                    Restricted
+                                                </span>
+                                            }
 
-                            <td>
-                                <span class="badge text-bg-success">
-                                    Public
-                                </span>
-                            </td>
+                                        </td>
 
-                            <td>
-                                4
-                            </td>
+                                        <td>
+                                            @(position.AttributeCount)
+                                        </td>
 
-                            <td>
-                                <span class="badge text-bg-primary">
-                                    Active
-                                </span>
-                            </td>
-                        </tr>
+                                        <td>
+                                            @(position.ProjectTagCount)
+                                        </td>
 
-                    </tbody>
-                </table>
-            </div>
+                                        <td>
+                                            @(position.MaxProjects)
+                                        </td>
 
-            <div class="text-muted small">
-                Position management will become database-backed after PostgreSQL integration.
+                                        <td>
+                                            @position.UpdatedAt
+                                                .ToLocalTime()
+                                                .ToString("dd MMM yyyy HH:mm")
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
             </div>
 
         </div>
-    </div>
+    }
+
 </div>
 
-<script>
-    const searchInput = document.getElementById("positionSearch");
-    const tableRows = document.querySelectorAll("#positionsTable tbody tr");
+@if (User.IsInRole("Recruiter") ||
+     User.IsInRole("Administrator"))
+{
+    <script>
 
-    searchInput.addEventListener("input", function () {
-        const search = this.value.trim().toLowerCase();
+        const selectAll =
+            document.getElementById("selectAll");
 
-        tableRows.forEach(row => {
-            const text = row.innerText.toLowerCase();
+        const checks =
+            document.querySelectorAll(
+                ".position-check");
 
-            row.style.display =
-                text.includes(search) ? "" : "none";
-        });
-    });
+        const selectedCount =
+            document.getElementById(
+                "selectedCount");
 
-    function clearSearch() {
-        searchInput.value = "";
+        function updateCount()
+        {
+            selectedCount.textContent =
+                document.querySelectorAll(
+                    ".position-check:checked"
+                ).length + " selected";
+        }
 
-        tableRows.forEach(row => {
-            row.style.display = "";
-        });
-    }
-</script>
+        function selectedPositions()
+        {
+            return Array.from(
+                document.querySelectorAll(
+                    ".position-check:checked"));
+        }
+
+        selectAll.addEventListener(
+            "change",
+            function ()
+            {
+                checks.forEach(
+                    check =>
+                    {
+                        check.checked =
+                            this.checked;
+                    });
+
+                updateCount();
+            });
+
+        checks.forEach(
+            check =>
+            {
+                check.addEventListener(
+                    "change",
+                    updateCount);
+            });
+
+        document
+            .getElementById("editSelected")
+            .addEventListener(
+                "click",
+                function ()
+                {
+                    const selected =
+                        selectedPositions();
+
+                    if (selected.length !== 1)
+                    {
+                        alert(
+                            "Select exactly one position to edit."
+                        );
+
+                        return;
+                    }
+
+                    window.location.href =
+                        "/Positions/Edit/" +
+                        selected[0].value;
+                });
+
+        document
+            .getElementById("duplicateSelected")
+            .addEventListener(
+                "click",
+                function ()
+                {
+                    const selected =
+                        selectedPositions();
+
+                    if (selected.length !== 1)
+                    {
+                        alert(
+                            "Select exactly one position to duplicate."
+                        );
+
+                        return;
+                    }
+
+                    window.location.href =
+                        "/Positions/Duplicate/" +
+                        selected[0].value;
+                });
+
+        function confirmDelete()
+        {
+            const count =
+                selectedPositions().length;
+
+            if (count === 0)
+            {
+                alert(
+                    "Select at least one position."
+                );
+
+                return false;
+            }
+
+            return confirm(
+                "Delete the selected position(s)?"
+            );
+        }
+
+        updateCount();
+
+    </script>
+}

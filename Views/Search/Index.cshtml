@@ -1,0 +1,259 @@
+@model CvManagementSystem.ViewModels.GlobalSearchViewModel
+
+@{
+    ViewData["Title"] = "Search";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">
+            Search
+        </h1>
+
+        <p class="text-muted mb-0">
+            Search positions and CV information available to your account.
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <form asp-action="Index"
+                  method="get"
+                  class="row g-3">
+
+                <div class="col-md-10">
+
+                    <label for="q"
+                           class="form-label">
+                        Search
+                    </label>
+
+                    <input id="q"
+                           name="q"
+                           value="@Model.Query"
+                           class="form-control form-control-lg"
+                           placeholder="Position, candidate, CV, skill, project..." />
+
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+
+                    <button type="submit"
+                            class="btn btn-primary btn-lg w-100">
+                        Search
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Query))
+    {
+        <div class="mb-4">
+            <span class="text-muted">
+                Search results for:
+            </span>
+
+            <strong>
+                @Model.Query
+            </strong>
+        </div>
+    }
+
+    <!-- Positions -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h2 class="h4 mb-0">
+            Positions
+        </h2>
+
+        <span class="text-muted">
+            @Model.Positions.Count result(s)
+        </span>
+
+    </div>
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Position</th>
+                        <th>Description</th>
+                        <th>Submitted CVs</th>
+                        <th>Updated</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Positions.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4"
+                                class="text-center text-muted py-4">
+
+                                No matching positions found.
+
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var position in Model.Positions)
+                        {
+                            <tr>
+
+                                <td>
+                                    <a asp-controller="Positions"
+                                       asp-action="Details"
+                                       asp-route-id="@position.Id"
+                                       class="fw-semibold text-decoration-none">
+                                        @(position.Title)
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(position.Description)
+                                        ? "No description"
+                                        : position.Description)
+                                </td>
+
+                                <td>
+                                    @position.SubmittedCvCount
+                                </td>
+
+                                <td>
+                                    @position.UpdatedAt
+                                        .ToLocalTime()
+                                        .ToString("dd MMM yyyy")
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- CVs -->
+
+    @if (Model.CanSeeCvs)
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h2 class="h4 mb-0">
+                CVs
+            </h2>
+
+            <span class="text-muted">
+                @Model.Cvs.Count result(s)
+            </span>
+
+        </div>
+
+        <div class="card shadow-sm">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>CV</th>
+                            <th>Position</th>
+                            <th>Candidate</th>
+                            <th>Status</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model.Cvs.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5"
+                                    class="text-center text-muted py-4">
+
+                                    No matching CVs found.
+
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var cv in Model.Cvs)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <a asp-controller="Cvs"
+                                           asp-action="Details"
+                                           asp-route-id="@cv.Id"
+                                           class="fw-semibold text-decoration-none">
+
+                                            @(cv.Title)
+
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        @(cv.PositionTitle)
+                                    </td>
+
+                                    <td>
+                                        @(cv.CandidateName)
+                                    </td>
+
+                                    <td>
+
+                                        @if (cv.IsPublished)
+                                        {
+                                            <span class="badge text-bg-success">
+                                                Published
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-secondary">
+                                                Draft
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+                                        @cv.UpdatedAt
+                                            .ToLocalTime()
+                                            .ToString("dd MMM yyyy")
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    }
+
+</div>

@@ -1,0 +1,480 @@
+@model CvManagementSystem.ViewModels.CvDetailsViewModel
+
+@{
+    ViewData["Title"] =
+        $"{Model.PositionTitle} CV";
+}
+
+<div class="container py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+
+        <div>
+
+            <h1 class="h3 mb-1">
+                @(Model.PositionTitle) CV
+            </h1>
+
+            <p class="text-muted mb-0">
+                Tailored CV generated from the candidate profile
+                and the position template.
+            </p>
+
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <a asp-controller="Positions"
+               asp-action="Details"
+               asp-route-id="@Model.PositionId"
+               class="btn btn-outline-secondary">
+                View Position
+            </a>
+
+            @if (!Model.IsReadOnly &&
+                 Model.CanPublish &&
+                 !Model.IsPublished)
+            {
+                <form asp-action="Publish"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="id"
+                           value="@Model.Id" />
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Publish CV
+                    </button>
+
+                </form>
+            }
+
+        </div>
+
+    </div>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">
+            @(success)
+        </div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-warning">
+            @(error)
+        </div>
+    }
+
+    @if (Model.MissingRequiredAttributes > 0)
+    {
+        <div class="alert alert-warning">
+            @(Model.MissingRequiredAttributes)
+            required attribute(s) are still missing.
+            They must be completed before the CV can be published.
+        </div>
+    }
+
+    @if (Model.IsPublished)
+    {
+        <div class="alert alert-success">
+            This CV is published.
+        </div>
+    }
+
+    <form asp-action="Save"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="Id"
+               type="hidden" />
+
+        <input asp-for="PositionId"
+               type="hidden" />
+
+        <input asp-for="ProfileVersion"
+               type="hidden" />
+
+        <!-- ================================================= -->
+        <!-- CANDIDATE -->
+        <!-- ================================================= -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label asp-for="CandidateFirstName"
+                               class="form-label">
+                            First Name
+                        </label>
+
+                        @if (Model.IsReadOnly)
+                        {
+                            <div class="form-control bg-light">
+                                @(Model.CandidateFirstName)
+                            </div>
+                        }
+                        else
+                        {
+                            <input asp-for="CandidateFirstName"
+                                   class="form-control" />
+                        }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="CandidateLastName"
+                               class="form-label">
+                            Last Name
+                        </label>
+
+                        @if (Model.IsReadOnly)
+                        {
+                            <div class="form-control bg-light">
+                                @(Model.CandidateLastName)
+                            </div>
+                        }
+                        else
+                        {
+                            <input asp-for="CandidateLastName"
+                                   class="form-control" />
+                        }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Location"
+                               class="form-label">
+                            Location
+                        </label>
+
+                        @if (Model.IsReadOnly)
+                        {
+                            <div class="form-control bg-light">
+                                @(Model.Location ?? "Not provided")
+                            </div>
+                        }
+                        else
+                        {
+                            <input asp-for="Location"
+                                   class="form-control" />
+                        }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted">
+                            Status
+                        </div>
+
+                        @if (Model.IsPublished)
+                        {
+                            <span class="badge text-bg-success">
+                                Published
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-secondary">
+                                Draft
+                            </span>
+                        }
+
+                        <div class="mt-3">
+
+                            <span class="small text-muted">
+                                Likes:
+                            </span>
+
+                            <strong>
+                                @(Model.LikeCount)
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- PROFILE ATTRIBUTES -->
+        <!-- ================================================= -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+                <strong>Relevant Information</strong>
+            </div>
+
+            <div class="card-body">
+
+                @for (var i = 0;
+                      i < Model.Attributes.Count;
+                      i++)
+                {
+                    var attribute =
+                        Model.Attributes[i];
+
+                    var missing =
+                        attribute.IsMissing;
+
+                    <div class="mb-4 p-3 rounded border
+                        @(missing && attribute.IsRequired
+                            ? "border-danger bg-danger-subtle"
+                            : "")">
+
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+
+                            <div>
+
+                                <strong>
+                                    @(attribute.Name)
+                                </strong>
+
+                                <div class="small text-muted">
+                                    @(attribute.Category)
+                                    ·
+                                    @(attribute.DataType)
+                                </div>
+
+                            </div>
+
+                            @if (attribute.IsRequired)
+                            {
+                                <span class="badge text-bg-danger">
+                                    Required
+                                </span>
+                            }
+
+                        </div>
+
+                        <input type="hidden"
+                               asp-for="Attributes[i].AttributeDefinitionId" />
+
+                        <input type="hidden"
+                               asp-for="Attributes[i].Version" />
+
+                        <input type="hidden"
+                               asp-for="Attributes[i].Name" />
+
+                        @if (Model.IsReadOnly)
+                        {
+                            <div class="form-control bg-light">
+
+                                @if (attribute.IsMissing)
+                                {
+                                    <span class="text-danger">
+                                        Information missing
+                                    </span>
+                                }
+                                else
+                                {
+                                    @(attribute.Value)
+                                }
+
+                            </div>
+                        }
+                        else
+                        {
+                            @switch (attribute.DataType)
+                            {
+                                case CvManagementSystem.Models.AttributeDataType.Text:
+
+                                    <textarea asp-for="Attributes[i].Value"
+                                              class="form-control"
+                                              rows="5"></textarea>
+
+                                    break;
+
+                                case CvManagementSystem.Models.AttributeDataType.Boolean:
+
+                                    <div class="form-check">
+
+                                        <input type="hidden"
+                                               name="Attributes[@i].Value"
+                                               value="false" />
+
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               name="Attributes[@i].Value"
+                                               value="true"
+                                               id="cv_boolean_@i"
+                                               @(string.Equals(
+                                                   attribute.Value,
+                                                   "true",
+                                                   StringComparison.OrdinalIgnoreCase)
+                                                   ? "checked"
+                                                   : "") />
+
+                                        <label class="form-check-label"
+                                               for="cv_boolean_@i">
+                                            Checked
+                                        </label>
+
+                                    </div>
+
+                                    break;
+
+                                case CvManagementSystem.Models.AttributeDataType.Date:
+
+                                    <input asp-for="Attributes[i].Value"
+                                           type="date"
+                                           class="form-control" />
+
+                                    break;
+
+                                case CvManagementSystem.Models.AttributeDataType.Numeric:
+
+                                    <input asp-for="Attributes[i].Value"
+                                           type="number"
+                                           step="any"
+                                           class="form-control" />
+
+                                    break;
+
+                                case CvManagementSystem.Models.AttributeDataType.Dropdown:
+
+                                    <select asp-for="Attributes[i].Value"
+                                            class="form-select">
+
+                                        <option value="">
+                                            Select...
+                                        </option>
+
+                                        @foreach (var option
+                                                 in attribute.Options)
+                                        {
+                                            if (attribute.Value == option)
+                                            {
+                                                <option value="@option"
+                                                        selected>
+                                                    @(option)
+                                                </option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@option">
+                                                    @(option)
+                                                </option>
+                                            }
+                                        }
+
+                                    </select>
+
+                                    break;
+
+                                default:
+
+                                    <input asp-for="Attributes[i].Value"
+                                           class="form-control" />
+
+                                    break;
+                            }
+
+                            @if (missing &&
+                                 attribute.IsRequired)
+                            {
+                                <div class="text-danger small mt-1">
+                                    This required field must be completed.
+                                </div>
+                            }
+                        }
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- PROJECTS -->
+        <!-- ================================================= -->
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+                <strong>Relevant Projects</strong>
+            </div>
+
+            <div class="card-body">
+
+                @if (Model.Projects.Count == 0)
+                {
+                    <div class="text-muted">
+                        No relevant projects were found for this position.
+                    </div>
+                }
+                else
+                {
+                    @foreach (var project in Model.Projects)
+                    {
+                        <article class="border rounded p-3 mb-3">
+
+                            <div class="d-flex flex-wrap justify-content-between gap-2">
+
+                                <h2 class="h6 mb-1">
+                                    @(project.Name)
+                                </h2>
+
+                                <span class="text-muted small">
+                                    @(project.Period)
+                                </span>
+
+                            </div>
+
+                            <p class="mb-2">
+                                @(project.DescriptionMarkdown)
+                            </p>
+
+                            <div class="d-flex flex-wrap gap-1">
+
+                                @foreach (var tag
+                                         in project.TechnologyTags)
+                                {
+                                    <span class="badge text-bg-light">
+                                        @(tag)
+                                    </span>
+                                }
+
+                            </div>
+
+                        </article>
+                    }
+                }
+
+            </div>
+
+        </div>
+
+        @if (!Model.IsReadOnly)
+        {
+            <div class="d-flex justify-content-end mb-5">
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Save CV
+                </button>
+
+            </div>
+        }
+
+    </form>
+
+</div>

@@ -2,23 +2,27 @@
 
 @{
     ViewData["Title"] = "Project Details";
+
+    bool isAdministratorView =
+        ViewBag.IsAdministratorView is bool value && value;
 }
 
 <div class="container py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
 
         <div>
             <h1 class="h3 mb-1">
-                @Model.Name
+                @(Model.Name)
             </h1>
 
             <p class="text-muted mb-0">
-                @Model.Period
+                @(Model.Period)
             </p>
         </div>
 
         <a asp-action="Index"
+           asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
            class="btn btn-outline-secondary">
             Back to Projects
         </a>
@@ -27,21 +31,85 @@
 
     <div class="card shadow-sm mb-4">
 
+        <div class="card-header">
+            <strong>Project Information</strong>
+        </div>
+
         <div class="card-body">
 
-            <h2 class="h5">
-                Description
-            </h2>
+            <dl class="row mb-0">
+
+                <dt class="col-sm-3">
+                    Project Name
+                </dt>
+
+                <dd class="col-sm-9">
+                    @(Model.Name)
+                </dd>
+
+                <dt class="col-sm-3">
+                    Period
+                </dt>
+
+                <dd class="col-sm-9">
+                    @(Model.Period)
+                </dd>
+
+                <dt class="col-sm-3">
+                    Start Date
+                </dt>
+
+                <dd class="col-sm-9">
+                    @(Model.StartDate.ToString("dd MMM yyyy"))
+                </dd>
+
+                <dt class="col-sm-3">
+                    End Date
+                </dt>
+
+                <dd class="col-sm-9">
+
+                    @if (Model.EndDate.HasValue)
+                    {
+                        @(Model.EndDate.Value.ToString("dd MMM yyyy"))
+                    }
+                    else
+                    {
+                        <span class="text-muted">
+                            Present
+                        </span>
+                    }
+
+                </dd>
+
+            </dl>
+
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+            <strong>Description</strong>
+        </div>
+
+        <div class="card-body">
 
             <div class="border rounded p-3">
-                @Model.DescriptionMarkdown
+                @(Model.DescriptionMarkdown)
+            </div>
+
+            <div class="form-text mt-2">
+                This content is stored as Markdown. Markdown rendering can
+                be added when we build the final CV renderer.
             </div>
 
         </div>
 
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
 
         <div class="card-header">
             <strong>Technology Tags</strong>
@@ -49,38 +117,25 @@
 
         <div class="card-body">
 
-            @{
-                var tagNames = new Dictionary<int, string>
-                {
-                    { 1, "Java" },
-                    { 2, ".NET" },
-                    { 3, "C#" },
-                    { 4, "JavaScript" },
-                    { 5, "Next.js" },
-                    { 6, "TypeScript" },
-                    { 7, "Spring Boot" },
-                    { 8, "NestJS" },
-                    { 9, "PostgreSQL" },
-                    { 10, "MySQL" },
-                    { 11, "MongoDB" },
-                    { 12, "Docker" },
-                    { 13, "React" }
-                };
+            @if (Model.TechnologyTags.Count == 0)
+            {
+                <span class="text-muted">
+                    No technology tags have been added.
+                </span>
             }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2">
 
-            <div class="d-flex flex-wrap gap-2">
-
-                @foreach (var tagId in Model.SelectedTechnologyTagIds)
-                {
-                    if (tagNames.TryGetValue(tagId, out var tagName))
+                    @foreach (var tag in Model.TechnologyTags)
                     {
-                        <span class="badge text-bg-light">
-                            @tagName
+                        <span class="badge text-bg-light p-2">
+                            @(tag)
                         </span>
                     }
-                }
 
-            </div>
+                </div>
+            }
 
         </div>
 

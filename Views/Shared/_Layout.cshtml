@@ -35,11 +35,141 @@
                                   Positions
                             </a>
                        </li>
+                       @if (User.Identity?.IsAuthenticated == true)
+                       {
+                         <li class="nav-item">
+                             <a class="nav-link"
+                                 asp-controller="Cvs"
+                                 asp-action="Index">
+                                  CVs
+                             </a>
+                           </li>
+                         }
+
+                         @if (User.Identity?.IsAuthenticated == true &&
+     User.IsInRole("Candidate"))
+    {
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Profile"
+               asp-action="Index">
+                My Profile
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Projects"
+               asp-action="Index">
+                My Projects
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Cvs"
+               asp-action="Index">
+                My CVs
+            </a>
+        </li>
+    }
+
+    @if (User.Identity?.IsAuthenticated == true &&
+     User.IsInRole("Recruiter"))
+    {
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Positions"
+               asp-action="Index">
+                Positions
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Attributes"
+               asp-action="Index">
+                Attribute Library
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Cvs"
+               asp-action="Index">
+                Candidate CVs
+            </a>
+        </li>
+    }
+
+    @if (User.Identity?.IsAuthenticated == true &&
+     User.IsInRole("Administrator"))
+    {
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Admin"
+               asp-action="Users">
+                Users
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Positions"
+               asp-action="Index">
+                Positions
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Attributes"
+               asp-action="Index">
+                Attribute Library
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Cvs"
+               asp-action="Index">
+                CVs
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               asp-controller="Profile"
+               asp-action="Index">
+                Profile
+            </a>
+        </li>
+    }
+}
                    </ul>
 
                   <partial name="_LoginPartial" />
                 </div>
             </div>
+
+            <form asp-controller="Search"
+      asp-action="Index"
+      method="get"
+      class="d-flex ms-lg-3 my-2 my-lg-0"
+      role="search">
+
+    <input class="form-control form-control-sm me-2"
+           type="search"
+           name="q"
+           placeholder="Search..."
+           aria-label="Search" />
+
+    <button class="btn btn-outline-primary btn-sm"
+            type="submit">
+        Search
+    </button>
+
+</form>
         </nav>
     </header>
     <div class="container">

@@ -1,37 +1,309 @@
-﻿@{
+﻿@model CvManagementSystem.ViewModels.HomeViewModel
+
+@{
     ViewData["Title"] = "Home";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center text-center">
-        <div class="col-lg-9">
+<div class="container py-4">
 
-            <span class="badge text-bg-primary mb-3">
-                CV Management Platform
-            </span>
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold mb-2">
+            CV Management System
+        </h1>
 
-            <h1 class="display-4 fw-bold">
-                Build better CVs.
-                <span class="text-primary">Find better candidates.</span>
-            </h1>
+        <p class="lead text-muted mb-0">
+            Build reusable professional profiles and generate
+            position-specific CVs.
+        </p>
+    </div>
 
-            <p class="lead text-secondary mt-3">
-                Create reusable professional profiles and generate
-                CVs tailored to specific positions.
-            </p>
+    <!-- Statistics -->
 
-            <div class="d-flex justify-content-center gap-2 mt-4">
-                <a href="/Positions"
-                   class="btn btn-primary btn-lg">
-                    Browse Positions
-                </a>
+    <div class="row g-3 mb-5">
 
-                <a href="/Identity/Account/Register"
-                   class="btn btn-outline-secondary btn-lg">
-                    Create Account
-                </a>
+        <div class="col-6 col-lg">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        New CVs · 24 hours
+                    </div>
+                    <div class="fs-3 fw-bold">
+                        @Model.Statistics.NewCvsLast24Hours
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="col-6 col-lg">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Positions
+                    </div>
+                    <div class="fs-3 fw-bold">
+                        @Model.Statistics.TotalPositions
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Candidates
+                    </div>
+                    <div class="fs-3 fw-bold">
+                        @Model.Statistics.TotalCandidates
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Recruiters
+                    </div>
+                    <div class="fs-3 fw-bold">
+                        @Model.Statistics.TotalRecruiters
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small">
+                        Submitted CVs
+                    </div>
+                    <div class="fs-3 fw-bold">
+                        @Model.Statistics.TotalSubmittedCvs
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Latest Positions -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+            <h2 class="h4 mb-1">
+                Latest Positions
+            </h2>
+
+            <p class="text-muted mb-0">
+                Recently created or updated positions.
+            </p>
+        </div>
+
+        <a asp-controller="Positions"
+           asp-action="Index"
+           class="btn btn-outline-primary">
+            View All
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Position</th>
+                        <th>Description</th>
+                        <th>Submitted CVs</th>
+                        <th>Updated</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.LatestPositions.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="4"
+                                class="text-center text-muted py-4">
+                                No positions are currently available.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var position in Model.LatestPositions)
+                        {
+                            <tr>
+
+                                <td>
+                                    <a asp-controller="Positions"
+                                       asp-action="Details"
+                                       asp-route-id="@position.Id"
+                                       class="fw-semibold text-decoration-none">
+
+                                        @(position.Title)
+
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted">
+                                        @(string.IsNullOrWhiteSpace(position.Description)
+                                            ? "No description"
+                                            : position.Description)
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @position.SubmittedCvCount
+                                </td>
+
+                                <td>
+                                    @position.UpdatedAt
+                                        .ToLocalTime()
+                                        .ToString("dd MMM yyyy, HH:mm")
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
 
         </div>
+
     </div>
+
+    <!-- Most Popular -->
+
+    <div class="mb-3">
+        <h2 class="h4 mb-1">
+            Most Popular Positions
+        </h2>
+
+        <p class="text-muted mb-0">
+            Positions with the highest number of submitted CVs.
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Position</th>
+                        <th>Submitted CVs</th>
+                        <th>Updated</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.PopularPositions.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="3"
+                                class="text-center text-muted py-4">
+                                No submitted CVs yet.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var position in Model.PopularPositions)
+                        {
+                            <tr>
+
+                                <td>
+                                    <a asp-controller="Positions"
+                                       asp-action="Details"
+                                       asp-route-id="@position.Id"
+                                       class="fw-semibold text-decoration-none">
+
+                                        @(position.Title)
+
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @position.SubmittedCvCount
+                                </td>
+
+                                <td>
+                                    @position.UpdatedAt
+                                        .ToLocalTime()
+                                        .ToString("dd MMM yyyy")
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- Technology Tags -->
+
+    <div class="mb-3">
+        <h2 class="h4 mb-1">
+            Technology Tags
+        </h2>
+
+        <p class="text-muted mb-0">
+            Explore positions and CVs by technology.
+        </p>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+
+        <div class="card-body">
+
+            @if (Model.TechnologyTags.Count == 0)
+            {
+                <p class="text-muted mb-0">
+                    No technology tags are available yet.
+                </p>
+            }
+            else
+            {
+                <div class="d-flex flex-wrap gap-2">
+
+                    @foreach (var tag in Model.TechnologyTags)
+                    {
+                        <a href="@tag.Url"
+                           class="badge rounded-pill text-bg-light border text-decoration-none px-3 py-2">
+
+                            @tag.Name
+
+                            <span class="text-muted ms-1">
+                                @tag.Count
+                            </span>
+
+                        </a>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
 </div>
