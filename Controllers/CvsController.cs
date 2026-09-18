@@ -58,10 +58,15 @@ public class CvsController : Controller
             .OrderByDescending(x => x.UpdatedAt)
             .AsQueryable();
 
-        if (!isAdmin && !isRecruiter)
+        if (isRecruiter)
         {
-            query = query.Where(x =>
-                x.CandidateProfile.UserId == currentUser.Id);
+             query = query.Where(x =>
+                 x.IsPublished);
+        }
+        else if (!isAdmin)
+       {
+             query = query.Where(x =>
+                 x.CandidateProfile.UserId == currentUser.Id);
         }
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -712,4 +717,73 @@ public async Task<IActionResult> ToggleLike(int id)
         likeCount
     });
   }
+
+  [Authorize(Roles = "Candidate,Administrator")]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> DeleteSelected(
+    int[] selectedIds)
+{
+    var currentUser =
+        await _userManager.GetUserAsync(User);
+
+    if (currentUser == null)
+    {
+        return Challenge();
+    }
+
+    var ids = selectedIds?
+        .Where(x => x > 0)
+        .Distinct()
+        .ToList()
+        ?? new List<int>();
+
+    if (ids.Count == 0)
+    {
+        TempData["ErrorMessage"] =
+            "Select at least one CV.";
+
+        return RedirectToAction(
+            "Index",
+            "Profile");
+    }
+
+    var isAdministrator =
+        await _userManager.IsInRoleAsync(
+            currentUser,
+            "Administrator");
+
+    var query = _context.Cvs
+        .Where(x => ids.Contains(x.Id));
+
+    if (!isAdministrator)
+    {
+        query = query.Where(x =>
+            x.CandidateProfile.UserId ==
+            currentUser.Id);
+    }
+
+    var cvs = await query.ToListAsync();
+
+    if (cvs.Count == 0)
+    {
+        TempData["ErrorMessage"] =
+            "No matching CVs were found.";
+
+        return RedirectToAction(
+            "Index",
+            "Profile");
+    }
+
+    _context.Cvs.RemoveRange(cvs);
+
+    await _context.SaveChangesAsync();
+
+    TempData["SuccessMessage"] =
+        $"{cvs.Count} CV(s) deleted successfully.";
+
+    return RedirectToAction(
+        "Index",
+        "Profile");
+}
 }

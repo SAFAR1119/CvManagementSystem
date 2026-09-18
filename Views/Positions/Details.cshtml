@@ -1,190 +1,402 @@
+@using CvManagementSystem.ViewModels
 @model dynamic
 
 @{
-    ViewData["Title"] = "Position Details";
+    ViewData["Title"] = Model.Title;
+
+    var isRecruiter =
+        ViewBag.IsRecruiter ?? false;
+
+    var isAdministrator =
+        ViewBag.IsAdministrator ?? false;
+
+    var canGenerateCv =
+        ViewBag.CanGenerateCv ?? false;
+
+    var existingCvId =
+        ViewBag.ExistingCvId as int?;
+
+    var discussions =
+        ViewBag.Discussions
+        as IReadOnlyList<PositionDiscussionViewModel>
+        ?? new List<PositionDiscussionViewModel>();
+
+    var canPostDiscussion =
+        ViewBag.CanPostDiscussion ?? false;
+
+    var showDiscussionProfileLinks =
+        ViewBag.ShowDiscussionProfileLinks ?? false;
 }
+
 
 <div class="container py-4">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <!-- ===================================================== -->
+    <!-- Header -->
+    <!-- ===================================================== -->
+
+    <div class="d-flex flex-column flex-md-row
+                justify-content-between
+                align-items-md-start
+                gap-3 mb-4">
 
         <div>
-            <h1 class="h3 mb-1">
-                @(Model.Title)
-            </h1>
+
+            <div class="d-flex
+                        flex-wrap
+                        align-items-center
+                        gap-2 mb-2">
+
+                <h1 class="h3 mb-0">
+                    @(Model.Title)
+                </h1>
+
+                @if (Model.IsPublic)
+                {
+                    <span class="badge text-bg-success">
+                        @L["Public"]
+                    </span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning">
+                        @L["Restricted"]
+                    </span>
+                }
+
+            </div>
 
             <p class="text-muted mb-0">
-                Position template and requirements.
+                @L["PositionDetails"]
             </p>
+
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Back to Positions
-        </a>
+
+        @if (isRecruiter || isAdministrator)
+        {
+            <div class="d-flex gap-2">
+
+                <a asp-action="Edit"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-outline-primary">
+
+                    @L["EditPosition"]
+
+                </a>
+
+                <form asp-action="Duplicate"
+                      asp-route-id="@Model.Id"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn btn-outline-secondary">
+
+                        @L["DuplicatePosition"]
+
+                    </button>
+
+                </form>
+
+            </div>
+        }
 
     </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Messages -->
+    <!-- ===================================================== -->
+
+    @if (TempData["SuccessMessage"] is string success)
+    {
+        <div class="alert alert-success">
+            @success
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- Candidate CV action -->
+    <!-- ===================================================== -->
+
+    @if (User.IsInRole("Candidate"))
+    {
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body">
+
+                @if (existingCvId.HasValue)
+                {
+                    <div class="d-flex flex-column
+                                flex-md-row
+                                justify-content-between
+                                align-items-md-center
+                                gap-3">
+
+                        <div>
+
+                            <h2 class="h5 mb-1">
+                                @L["YourCV"]
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                @L["AlreadyHaveCV"]
+                            </p>
+
+                        </div>
+
+                        <a asp-controller="Cvs"
+                           asp-action="Details"
+                           asp-route-id="@existingCvId.Value"
+                           class="btn btn-primary">
+
+                            @L["OpenMyCV"]
+
+                        </a>
+
+                    </div>
+                }
+                else if (canGenerateCv)
+                {
+                    <div class="d-flex flex-column
+                                flex-md-row
+                                justify-content-between
+                                align-items-md-center
+                                gap-3">
+
+                        <div>
+
+                            <h2 class="h5 mb-1">
+                                @L["CreateCVForPosition"]
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                @L["GenerateCVDescription"]
+                            </p>
+
+                        </div>
+
+                        <form asp-controller="Cvs"
+                              asp-action="Generate"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="positionId"
+                                   value="@Model.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+
+                                @L["GenerateCV"]
+
+                            </button>
+
+                        </form>
+
+                    </div>
+                }
+                else
+                {
+                    <div>
+
+                        <h2 class="h5 mb-1 text-danger">
+                            @L["CVUnavailable"]
+                        </h2>
+
+                        <p class="text-muted mb-0">
+                            @L["AccessRequirementMessage"]
+                        </p>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- Basic information -->
+    <!-- ===================================================== -->
 
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <strong>Basic Information</strong>
+
+            <h2 class="h5 mb-0">
+                @L["BasicInformation"]
+            </h2>
+
         </div>
 
         <div class="card-body">
 
-            @if (!string.IsNullOrWhiteSpace(Model.Description))
-            {
-                <p>
-                    @(Model.Description)
-                </p>
-            }
+            <dl class="row mb-0">
 
-            <div class="row g-3">
+                <dt class="col-sm-3">
+                    @L["PositionTitle"]
+                </dt>
 
-                <div class="col-md-4">
+                <dd class="col-sm-9">
+                    @(Model.Title)
+                </dd>
 
-                    <div class="small text-muted">
-                        Access
-                    </div>
+
+                <dt class="col-sm-3">
+                    @L["ShortDescription"]
+                </dt>
+
+                <dd class="col-sm-9">
+
+                    @if (string.IsNullOrWhiteSpace(
+                        Model.Description))
+                    {
+                        <span class="text-muted">
+                            —
+                        </span>
+                    }
+                    else
+                    {
+                        @(Model.Description)
+                    }
+
+                </dd>
+
+
+                <dt class="col-sm-3">
+                    @L["Access"]
+                </dt>
+
+                <dd class="col-sm-9">
 
                     @if (Model.IsPublic)
                     {
                         <span class="badge text-bg-success">
-                            Public
+                            @L["Public"]
                         </span>
                     }
                     else
                     {
                         <span class="badge text-bg-warning">
-                            Restricted
+                            @L["Restricted"]
                         </span>
                     }
 
-                </div>
+                </dd>
 
-                <div class="col-md-4">
 
-                    <div class="small text-muted">
-                        Maximum Projects
-                    </div>
+                <dt class="col-sm-3">
+                    @L["MaximumProjects"]
+                </dt>
 
-                    <strong>
-                        @(Model.MaxProjects)
-                    </strong>
+                <dd class="col-sm-9">
+                    @Model.MaxProjects
+                </dd>
 
-                </div>
 
-                <div class="col-md-4">
+                <dt class="col-sm-3">
+                    @L["Updated"]
+                </dt>
 
-                    <div class="small text-muted">
-                        Selected Attributes
-                    </div>
+                <dd class="col-sm-9">
 
-                    <strong>
-                        @(Model.Attributes.Count)
-                    </strong>
+                    @Model.UpdatedAt
+                        .ToLocalTime()
+                        .ToString("dd MMM yyyy, HH:mm")
 
-                </div>
+                </dd>
 
-            </div>
+            </dl>
 
         </div>
 
     </div>
+
+
+    <!-- ===================================================== -->
+    <!-- Selected Attributes -->
+    <!-- ===================================================== -->
 
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <strong>CV Attributes</strong>
+
+            <h2 class="h5 mb-0">
+                @L["SelectedAttributes"]
+            </h2>
+
         </div>
 
-        @if (User.IsInRole("Candidate"))
-{
-    <div class="card shadow-sm mb-4">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-1">Create your CV</h5>
-                <p class="text-muted mb-0">
-                    Generate a CV for this position using your profile information.
-                </p>
-            </div>
-
-            <form asp-controller="Cvs"
-                  asp-action="Generate"
-                  method="post"
-                  class="mb-0">
-                @Html.AntiForgeryToken()
-
-                <input type="hidden"
-                       name="positionId"
-                       value="@Model.Id" />
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    Generate CV
-                </button>
-            </form>
-        </div>
-    </div>
-}
-
-        <div class="card-body">
+        <div class="card-body p-0">
 
             @if (Model.Attributes.Count == 0)
             {
-                <p class="text-muted mb-0">
-                    No attributes have been selected for this position.
-                </p>
+                <div class="p-4 text-muted">
+                    @L["NoSelectedAttributes"]
+                </div>
             }
             else
             {
                 <div class="table-responsive">
 
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover
+                                  align-middle
+                                  mb-0">
 
-                        <thead>
+                        <thead class="table-light">
 
                             <tr>
+
                                 <th>
-                                    Attribute
+                                    @L["Category"]
                                 </th>
 
                                 <th>
-                                    Category
+                                    @L["Position"]
                                 </th>
 
                                 <th>
-                                    Type
+                                    @L["DataType"]
                                 </th>
 
                                 <th>
-                                    Required
+                                    @L["Required"]
                                 </th>
+
                             </tr>
 
                         </thead>
 
                         <tbody>
 
-                            @foreach (var attribute in Model.Attributes)
+                            @foreach (var attribute
+                                in Model.Attributes)
                             {
                                 <tr>
-
-                                    <td>
-                                        <strong>
-                                            @(attribute.Name)
-                                        </strong>
-                                    </td>
 
                                     <td>
                                         @(attribute.Category)
                                     </td>
 
                                     <td>
-                                        <span class="badge text-bg-light">
-                                            @(attribute.DataType)
-                                        </span>
+                                        @(attribute.Name)
+                                    </td>
+
+                                    <td>
+                                        @(attribute.DataType)
                                     </td>
 
                                     <td>
@@ -192,13 +404,13 @@
                                         @if (attribute.IsRequired)
                                         {
                                             <span class="badge text-bg-danger">
-                                                Required
+                                                @L["Required"]
                                             </span>
                                         }
                                         else
                                         {
                                             <span class="text-muted">
-                                                Optional
+                                                —
                                             </span>
                                         }
 
@@ -218,28 +430,41 @@
 
     </div>
 
-    <div class="card shadow-sm">
+
+    <!-- ===================================================== -->
+    <!-- Project Tags -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <strong>Project Technology Tags</strong>
+
+            <h2 class="h5 mb-0">
+                @L["ProjectTags"]
+            </h2>
+
         </div>
 
         <div class="card-body">
 
-            @if (Model.TechnologyTags.Count == 0)
+            @if (Model.ProjectTags.Count == 0)
             {
-                <p class="text-muted mb-0">
-                    No project technology tags have been configured.
-                </p>
+                <span class="text-muted">
+                    @L["NoProjectTags"]
+                </span>
             }
             else
             {
                 <div class="d-flex flex-wrap gap-2">
 
-                    @foreach (var tag in Model.TechnologyTags)
+                    @foreach (var tag in Model.ProjectTags)
                     {
-                        <span class="badge text-bg-light p-2">
-                            @(tag)
+                        <span class="badge
+                                     text-bg-light
+                                     border">
+
+                            @tag
+
                         </span>
                     }
 
@@ -247,280 +472,564 @@
             }
 
         </div>
-        @{
-    var discussions =
-        ViewBag.Discussions
-        as IReadOnlyList<CvManagementSystem.ViewModels.PositionDiscussionViewModel>
-        ?? new List<CvManagementSystem.ViewModels.PositionDiscussionViewModel>();
 
-    var canPostDiscussion =
-        ViewBag.CanPostDiscussion ?? false;
-
-    var showDiscussionProfileLinks =
-        ViewBag.ShowDiscussionProfileLinks ?? false;
-}
-
-<div class="card shadow-sm mt-4">
-    <div class="card-header">
-        <h2 class="h5 mb-0">
-            Discussion
-        </h2>
     </div>
 
-    <div class="card-body">
 
-        <div id="discussion-list">
+    <!-- ===================================================== -->
+    <!-- Access Rules -->
+    <!-- ===================================================== -->
 
-            @if (discussions.Count == 0)
-            {
-                <div id="discussion-empty"
-                     class="text-muted">
-                    No discussion posts yet.
-                </div>
-            }
-            else
-            {
-                @foreach (var post in discussions)
+    @if (!Model.IsPublic)
+    {
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <h2 class="h5 mb-0">
+                    @L["AccessRules"]
+                </h2>
+
+            </div>
+
+            <div class="card-body p-0">
+
+                @if (Model.AccessRules.Count == 0)
                 {
-                    <article class="border-bottom pb-3 mb-3 discussion-post"
-                             data-discussion-id="@post.Id">
+                    <div class="p-4 text-muted">
+                        @L["NoAccessRules"]
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
 
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                        <table class="table table-hover
+                                      align-middle
+                                      mb-0">
 
-                            <div>
-                                @if (showDiscussionProfileLinks)
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>
+                                        @L["Position"]
+                                    </th>
+
+                                    <th>
+                                        @L["DataType"]
+                                    </th>
+
+                                    <th>
+                                        @L["Operator"]
+                                    </th>
+
+                                    <th>
+                                        @L["Value"]
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var rule
+                                    in Model.AccessRules)
                                 {
-                                    <a asp-controller="Profile"
-                                       asp-action="Public"
-                                       asp-route-userId="@post.AuthorId"
-                                       class="fw-semibold text-decoration-none">
-                                        @post.AuthorName
-                                    </a>
+                                    <tr>
+
+                                        <td>
+                                            @(rule.AttributeName)
+                                        </td>
+
+                                        <td>
+                                            @rule.DataType
+                                        </td>
+
+                                        <td>
+                                            @rule.Operator
+                                        </td>
+
+                                        <td>
+                                            @(rule.Value)
+                                        </td>
+
+                                    </tr>
                                 }
-                                else
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- Candidate CVs -->
+    <!-- ===================================================== -->
+
+    @if (isRecruiter || isAdministrator)
+    {
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-header">
+
+                <h2 class="h5 mb-0">
+                    @L["CandidateCVs"]
+                </h2>
+
+            </div>
+
+            <div class="card-body p-0">
+
+                @if (Model.Cvs.Count == 0)
+                {
+                    <div class="p-4 text-muted">
+                        @L["NoCandidateCVs"]
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+
+                        <table class="table table-hover
+                                      align-middle
+                                      mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>
+                                        @L["CVs"]
+                                    </th>
+
+                                    <th>
+                                        @L["Candidates"]
+                                    </th>
+
+                                    <th>
+                                        @L["Likes"]
+                                    </th>
+
+                                    <th>
+                                        @L["Updated"]
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var cv in Model.Cvs)
                                 {
-                                    <strong>
-                                        @post.AuthorName
-                                    </strong>
+                                    <tr>
+
+                                        <td>
+
+                                            <a asp-controller="Cvs"
+                                               asp-action="Details"
+                                               asp-route-id="@cv.Id"
+                                               class="fw-semibold
+                                                      text-decoration-none">
+
+                                                @(cv.Title)
+
+                                            </a>
+
+                                        </td>
+
+                                        <td>
+                                            @(cv.CandidateName)
+                                        </td>
+
+                                        <td>
+                                            @cv.LikeCount
+                                        </td>
+
+                                        <td>
+
+                                            @cv.UpdatedAt
+                                                .ToLocalTime()
+                                                .ToString("dd MMM yyyy")
+
+                                        </td>
+
+                                    </tr>
                                 }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- ===================================================== -->
+    <!-- Discussion -->
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm mt-4"
+         id="discussion-section">
+
+        <div class="card-header">
+
+            <h2 class="h5 mb-0">
+                @L["Discussion"]
+            </h2>
+
+        </div>
+
+        <div class="card-body">
+
+            <div id="discussion-list">
+
+                @if (discussions.Count == 0)
+                {
+                    <div id="discussion-empty"
+                         class="text-muted">
+
+                        No discussion posts yet.
+
+                    </div>
+                }
+                else
+                {
+                    @foreach (var post in discussions)
+                    {
+                        <article class="border-bottom
+                                        pb-3
+                                        mb-3
+                                        discussion-post"
+                                 data-discussion-id="@post.Id">
+
+                            <div class="d-flex
+                                        justify-content-between
+                                        align-items-start
+                                        gap-3
+                                        mb-2">
+
+                                <div>
+
+                                    @if (showDiscussionProfileLinks)
+                                    {
+                                        <a asp-controller="Profile"
+                                           asp-action="Public"
+                                           asp-route-userId="@post.AuthorId"
+                                           class="fw-semibold text-decoration-none">
+
+                                            @(post.AuthorName)
+
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <strong>
+                                            @(post.AuthorName)
+                                        </strong>
+                                    }
+
+                                </div>
+
+                                <small class="text-muted text-nowrap">
+
+                                    @post.CreatedAt
+                                        .ToLocalTime()
+                                        .ToString(
+                                            "dd MMM yyyy, HH:mm")
+
+                                </small>
+
                             </div>
 
-                            <small class="text-muted">
-                                @post.CreatedAt
-                                    .ToLocalTime()
-                                    .ToString("dd MMM yyyy, HH:mm")
-                            </small>
+                            <div class="discussion-message">
 
-                        </div>
+                                @Html.Raw(post.RenderedHtml)
 
-                        <div class="discussion-message">
-                            @Html.Raw(post.RenderedHtml)
-                        </div>
+                            </div>
 
-                    </article>
+                        </article>
+                    }
                 }
+
+            </div>
+
+
+            @if (canPostDiscussion)
+            {
+                <hr />
+
+                <form asp-controller="Positions"
+                      asp-action="AddDiscussion"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="positionId"
+                           value="@Model.Id" />
+
+                    <div class="mb-3">
+
+                        <label for="discussion-message"
+                               class="form-label">
+
+                            @L["Discussion"]
+
+                        </label>
+
+                        <textarea id="discussion-message"
+                                  name="message"
+                                  class="form-control"
+                                  rows="5"
+                                  maxlength="10000"
+                                  placeholder="Write your message using Markdown..."></textarea>
+
+                        <div class="form-text">
+                            Markdown formatting is supported.
+                        </div>
+
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        Post Discussion
+
+                    </button>
+
+                </form>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <hr />
+
+                <p class="text-muted mb-0">
+                    Sign in to participate in the discussion.
+                </p>
             }
 
         </div>
 
-        @if (canPostDiscussion)
-        {
-            <hr />
-
-            <form asp-controller="Positions"
-                  asp-action="AddDiscussion"
-                  method="post">
-
-                @Html.AntiForgeryToken()
-
-                <input type="hidden"
-                       name="positionId"
-                       value="@Model.Id" />
-
-                <div class="mb-3">
-                    <label for="discussion-message"
-                           class="form-label">
-                        Add a discussion post
-                    </label>
-
-                    <textarea id="discussion-message"
-                              name="message"
-                              class="form-control"
-                              rows="5"
-                              maxlength="10000"
-                              placeholder="Write your message using Markdown..."></textarea>
-
-                    <div class="form-text">
-                        Markdown formatting is supported.
-                    </div>
-                </div>
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    Post Discussion
-                </button>
-
-            </form>
-        }
-        else if (User.Identity?.IsAuthenticated != true)
-        {
-            <hr />
-
-            <p class="text-muted mb-0">
-                Sign in to participate in the discussion.
-            </p>
-        }
-
-    </div>
-</div>
-
     </div>
 
 </div>
+
+
+<!-- ========================================================= -->
+<!-- Discussion polling -->
+<!-- ========================================================= -->
 
 <script>
+
     (() => {
-        const positionId = @Model.Id;
-        const discussionList = document.getElementById("discussion-list");
+
+        const positionId =
+            @Model.Id;
+
+        const discussionList =
+            document.getElementById(
+                "discussion-list"
+            );
 
         if (!discussionList) {
             return;
         }
 
-        let lastKnownId = 0;
 
-        document.querySelectorAll(".discussion-post")
-            .forEach(post => {
-                const id = Number(
-                    post.dataset.discussionId || "0"
+        function appendPost(post) {
+
+            const article =
+                document.createElement(
+                    "article"
                 );
 
-                if (id > lastKnownId) {
-                    lastKnownId = id;
-                }
-            });
+            article.className =
+                "border-bottom pb-3 mb-3 discussion-post";
+
+            article.dataset.discussionId =
+                post.id;
+
+
+            const header =
+                document.createElement(
+                    "div"
+                );
+
+            header.className =
+                "d-flex justify-content-between align-items-start gap-3 mb-2";
+
+
+            const author =
+                document.createElement(
+                    "div"
+                );
+
+            const authorElement =
+                document.createElement(
+                    "strong"
+                );
+
+            authorElement.textContent =
+                post.authorName || "User";
+
+            author.appendChild(
+                authorElement
+            );
+
+
+            const timestamp =
+                document.createElement(
+                    "small"
+                );
+
+            timestamp.className =
+                "text-muted text-nowrap";
+
+            timestamp.textContent =
+                post.createdAt;
+
+
+            header.appendChild(
+                author
+            );
+
+            header.appendChild(
+                timestamp
+            );
+
+
+            const message =
+                document.createElement(
+                    "div"
+                );
+
+            message.className =
+                "discussion-message";
+
+            message.innerHTML =
+                post.renderedHtml || "";
+
+
+            article.appendChild(
+                header
+            );
+
+            article.appendChild(
+                message
+            );
+
+
+            discussionList.appendChild(
+                article
+            );
+
+        }
+
 
         async function refreshDiscussions() {
+
             try {
-                const response = await fetch(
-                    `/Positions/DiscussionFeed/${positionId}`,
-                    {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        },
-                        cache: "no-store"
-                    }
-                );
+
+                const response =
+                    await fetch(
+                        `/Positions/DiscussionFeed/${positionId}`,
+                        {
+                            headers: {
+                                "X-Requested-With":
+                                    "XMLHttpRequest"
+                            },
+
+                            cache:
+                                "no-store"
+                        }
+                    );
 
                 if (!response.ok) {
                     return;
                 }
 
-                const posts = await response.json();
+
+                const posts =
+                    await response.json();
 
                 if (!Array.isArray(posts)) {
                     return;
                 }
 
-                const currentIds = new Set(
-                    Array.from(
-                        discussionList.querySelectorAll(
-                            ".discussion-post"
+
+                const currentIds =
+                    new Set(
+                        Array.from(
+                            discussionList.querySelectorAll(
+                                ".discussion-post"
+                            )
+                        ).map(
+                            x =>
+                                Number(
+                                    x.dataset.discussionId ||
+                                    "0"
+                                )
                         )
-                    ).map(x =>
-                        Number(
-                            x.dataset.discussionId || "0"
-                        )
-                    )
-                );
+                    );
+
 
                 const emptyMessage =
                     document.getElementById(
                         "discussion-empty"
                     );
 
-                if (emptyMessage && posts.length > 0) {
+                if (
+                    emptyMessage &&
+                    posts.length > 0
+                ) {
                     emptyMessage.remove();
                 }
 
-                for (const post of posts) {
-                    const id = Number(post.id);
 
-                    if (currentIds.has(id)) {
-                        continue;
+                posts.forEach(post => {
+
+                    const id =
+                        Number(post.id);
+
+                    if (!currentIds.has(id)) {
+                        appendPost(post);
                     }
 
-                    const article =
-                        document.createElement("article");
+                });
 
-                    article.className =
-                        "border-bottom pb-3 mb-3 discussion-post";
+            }
+            catch (error) {
 
-                    article.dataset.discussionId = id;
-
-                    const header =
-                        document.createElement("div");
-
-                    header.className =
-                        "d-flex justify-content-between align-items-start mb-2";
-
-                    const author =
-                        document.createElement("div");
-
-                    const authorElement =
-                        document.createElement("strong");
-
-                    authorElement.textContent =
-                        post.authorName || "User";
-
-                    author.appendChild(authorElement);
-
-                    const timestamp =
-                        document.createElement("small");
-
-                    timestamp.className =
-                        "text-muted";
-
-                    timestamp.textContent =
-                        post.createdAt;
-
-                    header.appendChild(author);
-                    header.appendChild(timestamp);
-
-                    const message =
-                        document.createElement("div");
-
-                    message.className =
-                        "discussion-message";
-
-                    /*
-                     * RenderedHtml was produced server-side
-                     * by Markdig with HTML input disabled.
-                     */
-                    message.innerHTML =
-                        post.renderedHtml || "";
-
-                    article.appendChild(header);
-                    article.appendChild(message);
-
-                    discussionList.appendChild(article);
-
-                    if (id > lastKnownId) {
-                        lastKnownId = id;
-                    }
-                }
-
-            } catch (error) {
                 console.debug(
                     "Discussion refresh failed.",
                     error
                 );
+
             }
+
         }
+
 
         setInterval(
             refreshDiscussions,
             3000
         );
+
     })();
+
 </script>

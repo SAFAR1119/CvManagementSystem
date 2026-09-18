@@ -193,4 +193,245 @@
 <data name="CVManagementDescription" xml:space="preserve">
   <value>Build reusable professional profiles and generate position-specific CVs.</value>
 </data>
+
+<data name="PositionManagement" xml:space="preserve">
+  <value>Position Management</value>
+</data>
+
+<data name="SearchPositions" xml:space="preserve">
+  <value>Search positions...</value>
+</data>
+
+<data name="AllTags" xml:space="preserve">
+  <value>All technology tags</value>
+</data>
+
+<data name="Public" xml:space="preserve">
+  <value>Public</value>
+</data>
+
+<data name="Restricted" xml:space="preserve">
+  <value>Restricted</value>
+</data>
+
+<data name="MaxProjects" xml:space="preserve">
+  <value>Max Projects</value>
+</data>
+
+<data name="Access" xml:space="preserve">
+  <value>Access</value>
+</data>
+
+<data name="Actions" xml:space="preserve">
+  <value>Actions</value>
+</data>
+
+<data name="CreatePosition" xml:space="preserve">
+  <value>Create Position</value>
+</data>
+
+<data name="EditSelected" xml:space="preserve">
+  <value>Edit Selected</value>
+</data>
+
+<data name="DeleteSelected" xml:space="preserve">
+  <value>Delete Selected</value>
+</data>
+
+<data name="Duplicate" xml:space="preserve">
+  <value>Duplicate</value>
+</data>
+
+<data name="Clear" xml:space="preserve">
+  <value>Clear</value>
+</data>
+
+<data name="NoPositionsFound" xml:space="preserve">
+  <value>No positions found.</value>
+</data>
+
+<data name="PositionDetails" xml:space="preserve">
+  <value>Position Details</value>
+</data>
+
+<data name="ShortDescription" xml:space="preserve">
+  <value>Short Description</value>
+</data>
+
+<data name="AccessRules" xml:space="preserve">
+  <value>Access Rules</value>
+</data>
+
+<data name="SelectedAttributes" xml:space="preserve">
+  <value>Selected Attributes</value>
+</data>
+
+<data name="Required" xml:space="preserve">
+  <value>Required</value>
+</data>
+
+<data name="ProjectTags" xml:space="preserve">
+  <value>Project Tags</value>
+</data>
+
+<data name="MaximumProjects" xml:space="preserve">
+  <value>Maximum Projects</value>
+</data>
+
+
+<data name="NoCandidateCVs" xml:space="preserve">
+  <value>No published candidate CVs yet.</value>
+</data>
+
+<data name="CreateCVForPosition" xml:space="preserve">
+  <value>Create a CV for this position</value>
+</data>
+
+<data name="GenerateCVDescription" xml:space="preserve">
+  <value>Your profile information will be used to generate a CV tailored to this position.</value>
+</data>
+
+<data name="CVUnavailable" xml:space="preserve">
+  <value>CV unavailable</value>
+</data>
+
+<data name="AccessRequirementMessage" xml:space="preserve">
+  <value>Your current profile information does not satisfy this position's access requirements.</value>
+</data>
+
+<data name="AlreadyHaveCV" xml:space="preserve">
+  <value>You already have a CV for this position.</value>
+</data>
+
+<data name="YourCV" xml:space="preserve">
+  <value>Your CV</value>
+</data>
+
+<data name="Created" xml:space="preserve">
+  <value>Created</value>
+</data>
+
+<data name="Category" xml:space="preserve">
+  <value>Category</value>
+</data>
+
+<data name="DataType" xml:space="preserve">
+  <value>Data Type</value>
+</data>
+
+<data name="Operator" xml:space="preserve">
+  <value>Operator</value>
+</data>
+
+<data name="Value" xml:space="preserve">
+  <value>Value</value>
+</data>
+
+<data name="NoAccessRules" xml:space="preserve">
+  <value>No access rules configured.</value>
+</data>
+
+<data name="NoSelectedAttributes" xml:space="preserve">
+  <value>No attributes selected.</value>
+</data>
+
+<data name="NoProjectTags" xml:space="preserve">
+  <value>No project tags configured.</value>
+</data>
+
+<data name="EditPosition" xml:space="preserve">
+  <value>Edit Position</value>
+</data>
+
+<data name="BasicInformation" xml:space="preserve">
+  <value>Basic Information</value>
+</data>
+
+<data name="PositionTitle" xml:space="preserve">
+  <value>Position Title</value>
+</data>
+
+<data name="PublicPosition" xml:space="preserve">
+  <value>Public Position</value>
+</data>
+
+<data name="RestrictedPosition" xml:space="preserve">
+  <value>Restricted Position</value>
+</data>
+
+<data name="PositionAccessibleToEveryone" xml:space="preserve">
+  <value>This position is accessible to all authenticated candidates.</value>
+</data>
+
+<data name="ConfigureAccessRules" xml:space="preserve">
+  <value>Configure access rules to control which candidates can access this position.</value>
+</data>
+
+<data name="AttributesFromLibrary" xml:space="preserve">
+  <value>Attributes from Attribute Library</value>
+</data>
+
+<data name="SelectAttributes" xml:space="preserve">
+  <value>Select Attributes</value>
+</data>
+
+<data name="Selected" xml:space="preserve">
+  <value>Selected</value>
+</data>
+
+<data name="AccessRule" xml:space="preserve">
+  <value>Access Rule</value>
+</data>
+
+<data name="AddAccessRule" xml:space="preserve">
+  <value>Add Access Rule</value>
+</data>
+
+<data name="Remove" xml:space="preserve">
+  <value>Remove</value>
+</data>
+
+<data name="SelectProjectTags" xml:space="preserve">
+  <value>Select project technology tags used to choose relevant candidate projects.</value>
+</data>
+
+<data name="SavePosition" xml:space="preserve">
+  <value>Save Position</value>
+</data>
+
+<data name="Cancel" xml:space="preserve">
+  <value>Cancel</value>
+</data>
+
+<data name="DeletePosition" xml:space="preserve">
+  <value>Delete Position</value>
+</data>
+
+<data name="DuplicatePosition" xml:space="preserve">
+  <value>Duplicate Position</value>
+</data>
+
+<data name="PositionCreated" xml:space="preserve">
+  <value>Position created successfully.</value>
+</data>
+
+<data name="PositionUpdated" xml:space="preserve">
+  <value>Position updated successfully.</value>
+</data>
+
+<data name="PositionChangedElsewhere" xml:space="preserve">
+  <value>This position was changed by another user. Reload the page and try again.</value>
+</data>
+
+<data name="NoCVs" xml:space="preserve">
+  <value>No CVs created yet.</value>
+</data>
+
+<data name="CreateCVFromPosition" xml:space="preserve">
+  <value>Open a position and generate a CV for it.</value>
+</data>
+
+<data name="Status" xml:space="preserve">
+  <value>Status</value>
+</data>
 </root>

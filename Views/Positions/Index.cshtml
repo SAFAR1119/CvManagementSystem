@@ -1,279 +1,234 @@
-@using Microsoft.AspNetCore.Razor.Language
-@model IReadOnlyList<dynamic>
+@model dynamic
 
 @{
-    ViewData["Title"] = "Positions";
+    ViewData["Title"] = L["Positions"];
+
+    var isRecruiter =
+        ViewBag.IsRecruiter ?? false;
+
+    var isAdministrator =
+        ViewBag.IsAdministrator ?? false;
+
+    var search =
+        ViewBag.Search as string;
+
+    var tag =
+        ViewBag.Tag as string;
 }
 
 <div class="container py-4">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <!-- Header -->
+
+    <div class="d-flex flex-column flex-md-row
+                justify-content-between
+                align-items-md-center
+                gap-3 mb-4">
 
         <div>
             <h1 class="h3 mb-1">
-                Positions
+                @L["Positions"]
             </h1>
 
             <p class="text-muted mb-0">
-                Browse available recruitment positions.
+                @L["PositionManagement"]
             </p>
         </div>
 
-        @if (User.IsInRole("Recruiter") ||
-             User.IsInRole("Administrator"))
+        @if (isRecruiter || isAdministrator)
         {
             <a asp-action="Create"
                class="btn btn-primary">
-                Create Position
+                @L["CreatePosition"]
             </a>
         }
 
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(ViewBag.Tag as string))
-    {
-         <div class="alert alert-info">
-             Showing positions for technology tag:
-             <strong>@ViewBag.Tag</strong>
-         </div>
-    }
 
-    @if (TempData["Success"] is string success)
+    <!-- Messages -->
+
+    @if (TempData["SuccessMessage"] is string success)
     {
         <div class="alert alert-success">
-            @(success)
+            @success
         </div>
     }
 
-    @if (TempData["Error"] is string error)
+    @if (TempData["ErrorMessage"] is string error)
     {
-        <div class="alert alert-warning">
-            @(error)
+        <div class="alert alert-danger">
+            @error
         </div>
     }
 
-    @if (User.IsInRole("Recruiter") ||
-         User.IsInRole("Administrator"))
+
+    <!-- Search -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form asp-action="Index"
+                  method="get"
+                  class="row g-3">
+
+                <div class="col-lg-6">
+
+                    <label for="search"
+                           class="form-label">
+                        @L["Search"]
+                    </label>
+
+                    <input id="search"
+                           name="search"
+                           value="@search"
+                           class="form-control"
+                           placeholder="@L["SearchPositions"]" />
+
+                </div>
+
+                <div class="col-lg-4">
+
+                    <label for="tag"
+                           class="form-label">
+                        @L["TechnologyTags"]
+                    </label>
+
+                    <input id="tag"
+                           name="tag"
+                           value="@tag"
+                           class="form-control"
+                           placeholder="@L["AllTags"]" />
+
+                </div>
+
+                <div class="col-lg-2 d-flex align-items-end">
+
+                    <div class="d-flex gap-2 w-100">
+
+                        <button type="submit"
+                                class="btn btn-primary flex-grow-1">
+                            @L["Search"]
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            @L["Clear"]
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    @if (!string.IsNullOrWhiteSpace(tag))
     {
-        <form asp-action="Delete"
-              method="post">
+        <div class="alert alert-info">
+            @L["TechnologyTags"]:
+            <strong>@tag</strong>
+        </div>
+    }
+
+
+    <!-- Toolbar -->
+
+    @if (isRecruiter || isAdministrator)
+    {
+        <form asp-action="DeleteSelected"
+              method="post"
+              id="position-selection-form">
 
             @Html.AntiForgeryToken()
 
             <div class="card shadow-sm mb-3">
 
-                <div class="card-body">
+                <div class="card-body py-2">
 
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-
-                        <button type="button"
-                                id="editSelected"
-                                class="btn btn-outline-primary">
-                            Edit Selected
-                        </button>
+                    <div class="d-flex flex-wrap gap-2">
 
                         <button type="button"
-                                id="duplicateSelected"
-                                class="btn btn-outline-secondary">
-                            Duplicate Selected
+                                id="edit-selected"
+                                class="btn btn-outline-primary btn-sm"
+                                disabled>
+
+                            @L["EditSelected"]
+
                         </button>
 
                         <button type="submit"
-                                class="btn btn-outline-danger"
-                                onclick="return confirmDelete()">
-                            Delete Selected
+                                class="btn btn-outline-danger btn-sm"
+                                disabled
+                                id="delete-selected">
+
+                            @L["DeleteSelected"]
+
                         </button>
 
-                        <span id="selectedCount"
-                              class="text-muted small">
-                            0 selected
-                        </span>
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm"
+                                id="clear-selection">
+
+                            @L["Clear"]
+
+                        </button>
 
                     </div>
 
                 </div>
 
             </div>
+
+
+            <!-- Position table -->
 
             <div class="card shadow-sm">
 
-                <div class="card-body">
-
-                    <div class="table-responsive">
-
-                        <table class="table table-hover align-middle mb-0">
-
-                            <thead>
-
-                                <tr>
-
-                                    <th style="width:45px;">
-
-                                        <input type="checkbox"
-                                               id="selectAll"
-                                               class="form-check-input" />
-
-                                        <input type="hidden"
-                                           name="tag"
-                                           value="@ViewBag.Tag" />
-
-                                    </th>
-
-                                    <th>
-                                        Position
-                                    </th>
-
-                                    <th>
-                                        Access
-                                    </th>
-
-                                    <th>
-                                        Attributes
-                                    </th>
-
-                                    <th>
-                                        Project Tags
-                                    </th>
-
-                                    <th>
-                                        Max Projects
-                                    </th>
-
-                                    <th>
-                                        Updated
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                @if (Model.Count == 0)
-                                {
-                                    <tr>
-
-                                        <td colspan="7"
-                                            class="text-center text-muted py-5">
-
-                                            No positions have been created yet.
-
-                                        </td>
-
-                                    </tr>
-                                }
-                                else
-                                {
-                                    foreach (var position in Model)
-                                    {
-                                        <tr>
-
-                                            <td>
-
-                                                @if (User.IsInRole("Recruiter") ||
-                                                     User.IsInRole("Administrator"))
-                                                {
-                                                    <input type="checkbox"
-                                                           class="position-check form-check-input"
-                                                           name="selectedIds"
-                                                           value="@position.Id" />
-                                                }
-
-                                            </td>
-
-                                            <td>
-
-                                                <a asp-action="Details"
-                                                   asp-route-id="@position.Id"
-                                                   class="text-decoration-none">
-
-
-                                                    <strong>
-                                                        @(position.Title)
-                                                    </strong>
-
-                                                </a>
-
-                                                @if (!string.IsNullOrWhiteSpace(
-                                                    position.Description))
-                                                {
-                                                    <div class="small text-muted">
-                                                        @(position.Description)
-                                                    </div>
-                                                }
-
-                                            </td>
-
-                                            <td>
-
-                                                @if (position.IsPublic)
-                                                {
-                                                    <span class="badge text-bg-success">
-                                                        Public
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge text-bg-warning">
-                                                        Restricted
-                                                    </span>
-                                                }
-
-                                            </td>
-
-                                            <td>
-                                                @(position.AttributeCount)
-                                            </td>
-
-                                            <td>
-                                                @(position.ProjectTagCount)
-                                            </td>
-
-                                            <td>
-                                                @(position.MaxProjects)
-                                            </td>
-
-                                            <td>
-                                                @position.UpdatedAt
-                                                    .ToLocalTime()
-                                                    .ToString("dd MMM yyyy HH:mm")
-                                            </td>
-
-                                        </tr>
-                                    }
-                                }
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </form>
-    }
-    else
-    {
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
                 <div class="table-responsive">
 
-                    <table class="table table-hover align-middle">
+                    <table class="table table-hover align-middle mb-0">
 
-                        <thead>
+                        <thead class="table-light">
 
                             <tr>
-                                <th>Position</th>
-                                <th>Access</th>
-                                <th>Attributes</th>
-                                <th>Project Tags</th>
-                                <th>Max Projects</th>
-                                <th>Updated</th>
+
+                                <th style="width: 45px;">
+                                    <input type="checkbox"
+                                           class="form-check-input"
+                                           id="select-all"
+                                           aria-label="Select all" />
+                                </th>
+
+                                <th>
+                                    @L["Position"]
+                                </th>
+
+                                <th>
+                                    @L["Access"]
+                                </th>
+
+                                <th>
+                                    @L["MaxProjects"]
+                                </th>
+
+                                <th>
+                                    @L["ProjectTags"]
+                                </th>
+
+                                <th>
+                                    @L["SubmittedCVs"]
+                                </th>
+
+                                <th>
+                                    @L["Updated"]
+                                </th>
+
                             </tr>
 
                         </thead>
@@ -284,10 +239,10 @@
                             {
                                 <tr>
 
-                                    <td colspan="6"
+                                    <td colspan="7"
                                         class="text-center text-muted py-5">
 
-                                        No positions available.
+                                        @L["NoPositionsFound"]
 
                                     </td>
 
@@ -295,21 +250,37 @@
                             }
                             else
                             {
-                                foreach (var position in Model)
+                                @foreach (var position in Model)
                                 {
                                     <tr>
 
                                         <td>
 
+                                            <input type="checkbox"
+                                                   name="selectedIds"
+                                                   value="@position.Id"
+                                                   class="form-check-input position-checkbox"
+                                                   aria-label="Select position" />
+
+                                        </td>
+
+                                        <td>
+
                                             <a asp-action="Details"
                                                asp-route-id="@position.Id"
-                                               class="text-decoration-none">
+                                               class="fw-semibold text-decoration-none">
 
-                                                <strong>
-                                                    @(position.Title)
-                                                </strong>
+                                                @(position.Title)
 
                                             </a>
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                position.Description))
+                                            {
+                                                <div class="small text-muted mt-1">
+                                                    @(position.Description)
+                                                </div>
+                                            }
 
                                         </td>
 
@@ -318,34 +289,59 @@
                                             @if (position.IsPublic)
                                             {
                                                 <span class="badge text-bg-success">
-                                                    Public
+                                                    @L["Public"]
                                                 </span>
                                             }
                                             else
                                             {
                                                 <span class="badge text-bg-warning">
-                                                    Restricted
+                                                    @L["Restricted"]
                                                 </span>
                                             }
 
                                         </td>
 
                                         <td>
-                                            @(position.AttributeCount)
+                                            @position.MaxProjects
                                         </td>
 
                                         <td>
-                                            @(position.ProjectTagCount)
+
+                                            @if (position.TechnologyTags.Count == 0)
+                                            {
+                                                <span class="text-muted">
+                                                    —
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <div class="d-flex flex-wrap gap-1">
+
+                                                    @foreach (var positionTag
+                                                        in position.TechnologyTags)
+                                                    {
+                                                        <span class="badge
+                                                                     text-bg-light
+                                                                     border">
+
+                                                            @positionTag
+
+                                                        </span>
+                                                    }
+
+                                                </div>
+                                            }
+
                                         </td>
 
                                         <td>
-                                            @(position.MaxProjects)
+                                            @position.SubmittedCvCount
                                         </td>
 
                                         <td>
                                             @position.UpdatedAt
                                                 .ToLocalTime()
-                                                .ToString("dd MMM yyyy HH:mm")
+                                                .ToString("dd MMM yyyy")
                                         </td>
 
                                     </tr>
@@ -360,130 +356,292 @@
 
             </div>
 
+        </form>
+    }
+    else
+    {
+        <!-- Candidate / Anonymous table -->
+
+        <div class="card shadow-sm">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                @L["Position"]
+                            </th>
+
+                            <th>
+                                @L["Access"]
+                            </th>
+
+                            <th>
+                                @L["MaxProjects"]
+                            </th>
+
+                            <th>
+                                @L["ProjectTags"]
+                            </th>
+
+                            <th>
+                                @L["Updated"]
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+
+                                <td colspan="5"
+                                    class="text-center text-muted py-5">
+
+                                    @L["NoPositionsFound"]
+
+                                </td>
+
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var position in Model)
+                            {
+                                <tr>
+
+                                    <td>
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@position.Id"
+                                           class="fw-semibold text-decoration-none">
+
+                                            @(position.Title)
+
+                                        </a>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            position.Description))
+                                        {
+                                            <div class="small text-muted mt-1">
+                                                @(position.Description)
+                                            </div>
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        @if (position.IsPublic)
+                                        {
+                                            <span class="badge text-bg-success">
+                                                @L["Public"]
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-warning">
+                                                @L["Restricted"]
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+                                        @position.MaxProjects
+                                    </td>
+
+                                    <td>
+
+                                        @if (position.TechnologyTags.Count == 0)
+                                        {
+                                            <span class="text-muted">
+                                                —
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex flex-wrap gap-1">
+
+                                                @foreach (var positionTag
+                                                    in position.TechnologyTags)
+                                                {
+                                                    <span class="badge
+                                                                 text-bg-light
+                                                                 border">
+
+                                                        @positionTag
+
+                                                    </span>
+                                                }
+
+                                            </div>
+                                        }
+
+                                    </td>
+
+                                    <td>
+                                        @position.UpdatedAt
+                                            .ToLocalTime()
+                                            .ToString("dd MMM yyyy")
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
     }
 
+
 </div>
 
-@if (User.IsInRole("Recruiter") ||
-     User.IsInRole("Administrator"))
+
+@if (isRecruiter || isAdministrator)
 {
     <script>
 
-        const selectAll =
-            document.getElementById("selectAll");
+        (() => {
 
-        const checks =
-            document.querySelectorAll(
-                ".position-check");
+            const selectAll =
+                document.getElementById("select-all");
 
-        const selectedCount =
-            document.getElementById(
-                "selectedCount");
-
-        function updateCount()
-        {
-            selectedCount.textContent =
-                document.querySelectorAll(
-                    ".position-check:checked"
-                ).length + " selected";
-        }
-
-        function selectedPositions()
-        {
-            return Array.from(
-                document.querySelectorAll(
-                    ".position-check:checked"));
-        }
-
-        selectAll.addEventListener(
-            "change",
-            function ()
-            {
-                checks.forEach(
-                    check =>
-                    {
-                        check.checked =
-                            this.checked;
-                    });
-
-                updateCount();
-            });
-
-        checks.forEach(
-            check =>
-            {
-                check.addEventListener(
-                    "change",
-                    updateCount);
-            });
-
-        document
-            .getElementById("editSelected")
-            .addEventListener(
-                "click",
-                function ()
-                {
-                    const selected =
-                        selectedPositions();
-
-                    if (selected.length !== 1)
-                    {
-                        alert(
-                            "Select exactly one position to edit."
-                        );
-
-                        return;
-                    }
-
-                    window.location.href =
-                        "/Positions/Edit/" +
-                        selected[0].value;
-                });
-
-        document
-            .getElementById("duplicateSelected")
-            .addEventListener(
-                "click",
-                function ()
-                {
-                    const selected =
-                        selectedPositions();
-
-                    if (selected.length !== 1)
-                    {
-                        alert(
-                            "Select exactly one position to duplicate."
-                        );
-
-                        return;
-                    }
-
-                    window.location.href =
-                        "/Positions/Duplicate/" +
-                        selected[0].value;
-                });
-
-        function confirmDelete()
-        {
-            const count =
-                selectedPositions().length;
-
-            if (count === 0)
-            {
-                alert(
-                    "Select at least one position."
+            const checkboxes =
+                Array.from(
+                    document.querySelectorAll(
+                        ".position-checkbox"
+                    )
                 );
 
-                return false;
+            const editButton =
+                document.getElementById("edit-selected");
+
+            const deleteButton =
+                document.getElementById("delete-selected");
+
+            const clearButton =
+                document.getElementById("clear-selection");
+
+            function getSelected() {
+
+                return checkboxes.filter(
+                    checkbox => checkbox.checked
+                );
+
             }
 
-            return confirm(
-                "Delete the selected position(s)?"
-            );
-        }
+            function updateToolbar() {
 
-        updateCount();
+                const selected =
+                    getSelected();
+
+                const hasOne =
+                    selected.length === 1;
+
+                const hasAny =
+                    selected.length > 0;
+
+                editButton.disabled =
+                    !hasOne;
+
+                deleteButton.disabled =
+                    !hasAny;
+
+                if (selectAll) {
+
+                    selectAll.checked =
+                        checkboxes.length > 0 &&
+                        selected.length ===
+                        checkboxes.length;
+
+                    selectAll.indeterminate =
+                        selected.length > 0 &&
+                        selected.length <
+                        checkboxes.length;
+                }
+            }
+
+            checkboxes.forEach(
+                checkbox => {
+                    checkbox.addEventListener(
+                        "change",
+                        updateToolbar
+                    );
+                }
+            );
+
+            if (selectAll) {
+
+                selectAll.addEventListener(
+                    "change",
+                    () => {
+
+                        checkboxes.forEach(
+                            checkbox => {
+                                checkbox.checked =
+                                    selectAll.checked;
+                            }
+                        );
+
+                        updateToolbar();
+                    }
+                );
+            }
+
+            clearButton.addEventListener(
+                "click",
+                () => {
+
+                    checkboxes.forEach(
+                        checkbox => {
+                            checkbox.checked = false;
+                        }
+                    );
+
+                    if (selectAll) {
+                        selectAll.checked = false;
+                        selectAll.indeterminate = false;
+                    }
+
+                    updateToolbar();
+                }
+            );
+
+            editButton.addEventListener(
+                "click",
+                () => {
+
+                    const selected =
+                        getSelected();
+
+                    if (selected.length !== 1) {
+                        return;
+                    }
+
+                    const id =
+                        selected[0].value;
+
+                    window.location =
+                        `/Positions/Edit/${id}`;
+                }
+            );
+
+            updateToolbar();
+
+        })();
 
     </script>
 }

@@ -1,18 +1,16 @@
 @model CvManagementSystem.ViewModels.PositionViewModel
 
 @{
-    ViewData["Title"] = "Edit Position";
+    ViewData["Title"] = L["EditPosition"];
 }
 
 <div class="container py-4">
 
     <div class="mb-4">
-        <h1 class="h3 mb-1">
-            Edit Position
-        </h1>
+        <h1>@L["EditPosition"]</h1>
 
         <p class="text-muted mb-0">
-            Update the shared CV template and its access requirements.
+            @L["UpdatePositionDescription"]
         </p>
     </div>
 

@@ -1,16 +1,16 @@
 @model CvManagementSystem.ViewModels.PositionViewModel
 
 @{
-    ViewData["Title"] = "Create Position";
+    ViewData["Title"] = L["CreatePosition"];
 }
 
 <div class="container py-4">
 
     <div class="mb-4">
-        <h1 class="h3 mb-1">Create Position</h1>
+        <h1>@L["CreatePosition"]</h1>
 
         <p class="text-muted mb-0">
-            Create a reusable CV template for candidates.
+            @L["CreatePositionDescription"]
         </p>
     </div>
 
@@ -31,7 +31,7 @@
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Basic Information</strong>
+                <strong>@L["BasicInformation"]</strong>
             </div>
 
             <div class="card-body">
@@ -61,7 +61,7 @@
                     <textarea asp-for="Description"
                               class="form-control"
                               rows="4"
-                              placeholder="Short description of the position..."></textarea>
+                              placeholder="@L["ShortDescription"] @L["OfThePosition"]..."></textarea>
 
                     <span asp-validation-for="Description"
                           class="text-danger">

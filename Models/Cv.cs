@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using NpgsqlTypes;
 
 namespace CvManagementSystem.Models;
 
@@ -25,6 +26,8 @@ public class Cv
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public Guid Version { get; set; } = Guid.NewGuid();
+
+    public NpgsqlTsVector SearchVector { get; set; } = null!;
 
     public ICollection<CvAttributeValue> AttributeValues { get; set; }
         = new List<CvAttributeValue>();

@@ -193,4 +193,244 @@
 <data name="CVManagementDescription" xml:space="preserve">
   <value>পুনঃব্যবহারযোগ্য পেশাদার প্রোফাইল তৈরি করুন এবং পজিশনভিত্তিক সিভি তৈরি করুন।</value>
 </data>
+
+<data name="PositionManagement" xml:space="preserve">
+  <value>পজিশন ব্যবস্থাপনা</value>
+</data>
+
+<data name="SearchPositions" xml:space="preserve">
+  <value>পজিশন অনুসন্ধান করুন...</value>
+</data>
+
+<data name="AllTags" xml:space="preserve">
+  <value>সব প্রযুক্তি ট্যাগ</value>
+</data>
+
+<data name="Public" xml:space="preserve">
+  <value>পাবলিক</value>
+</data>
+
+<data name="Restricted" xml:space="preserve">
+  <value>সীমাবদ্ধ</value>
+</data>
+
+<data name="MaxProjects" xml:space="preserve">
+  <value>সর্বোচ্চ প্রজেক্ট</value>
+</data>
+
+<data name="Access" xml:space="preserve">
+  <value>অ্যাক্সেস</value>
+</data>
+
+<data name="Actions" xml:space="preserve">
+  <value>অ্যাকশন</value>
+</data>
+
+<data name="CreatePosition" xml:space="preserve">
+  <value>পজিশন তৈরি করুন</value>
+</data>
+
+<data name="EditSelected" xml:space="preserve">
+  <value>নির্বাচিতটি সম্পাদনা</value>
+</data>
+
+<data name="DeleteSelected" xml:space="preserve">
+  <value>নির্বাচিতটি মুছুন</value>
+</data>
+
+<data name="Duplicate" xml:space="preserve">
+  <value>ডুপ্লিকেট</value>
+</data>
+
+<data name="Clear" xml:space="preserve">
+  <value>পরিষ্কার</value>
+</data>
+
+<data name="NoPositionsFound" xml:space="preserve">
+  <value>কোনো পজিশন পাওয়া যায়নি।</value>
+</data>
+
+<data name="PositionDetails" xml:space="preserve">
+  <value>পজিশনের বিস্তারিত</value>
+</data>
+
+<data name="ShortDescription" xml:space="preserve">
+  <value>সংক্ষিপ্ত বিবরণ</value>
+</data>
+
+<data name="AccessRules" xml:space="preserve">
+  <value>অ্যাক্সেস নিয়ম</value>
+</data>
+
+<data name="SelectedAttributes" xml:space="preserve">
+  <value>নির্বাচিত অ্যাট্রিবিউট</value>
+</data>
+
+<data name="Required" xml:space="preserve">
+  <value>প্রয়োজনীয়</value>
+</data>
+
+<data name="ProjectTags" xml:space="preserve">
+  <value>প্রজেক্ট ট্যাগ</value>
+</data>
+
+<data name="MaximumProjects" xml:space="preserve">
+  <value>সর্বোচ্চ প্রজেক্ট</value>
+</data>
+
+<data name="NoCandidateCVs" xml:space="preserve">
+  <value>এখনও কোনো প্রকাশিত প্রার্থী সিভি নেই।</value>
+</data>
+
+<data name="CreateCVForPosition" xml:space="preserve">
+  <value>এই পজিশনের জন্য সিভি তৈরি করুন</value>
+</data>
+
+<data name="GenerateCVDescription" xml:space="preserve">
+  <value>এই পজিশন অনুযায়ী সিভি তৈরি করতে আপনার প্রোফাইলের তথ্য ব্যবহার করা হবে।</value>
+</data>
+
+<data name="CVUnavailable" xml:space="preserve">
+  <value>সিভি পাওয়া যাচ্ছে না</value>
+</data>
+
+<data name="AccessRequirementMessage" xml:space="preserve">
+  <value>আপনার বর্তমান প্রোফাইলের তথ্য এই পজিশনের অ্যাক্সেস শর্ত পূরণ করে না।</value>
+</data>
+
+<data name="AlreadyHaveCV" xml:space="preserve">
+  <value>এই পজিশনের জন্য আপনার ইতিমধ্যে একটি সিভি আছে।</value>
+</data>
+
+<data name="YourCV" xml:space="preserve">
+  <value>আপনার সিভি</value>
+</data>
+
+<data name="Created" xml:space="preserve">
+  <value>তৈরি হয়েছে</value>
+</data>
+
+<data name="Category" xml:space="preserve">
+  <value>ক্যাটাগরি</value>
+</data>
+
+<data name="DataType" xml:space="preserve">
+  <value>ডেটা টাইপ</value>
+</data>
+
+<data name="Operator" xml:space="preserve">
+  <value>অপারেটর</value>
+</data>
+
+<data name="Value" xml:space="preserve">
+  <value>মান</value>
+</data>
+
+<data name="NoAccessRules" xml:space="preserve">
+  <value>কোনো অ্যাক্সেস নিয়ম কনফিগার করা হয়নি।</value>
+</data>
+
+<data name="NoSelectedAttributes" xml:space="preserve">
+  <value>কোনো অ্যাট্রিবিউট নির্বাচিত হয়নি।</value>
+</data>
+
+<data name="NoProjectTags" xml:space="preserve">
+  <value>কোনো প্রজেক্ট ট্যাগ কনফিগার করা হয়নি।</value>
+</data>
+
+<data name="EditPosition" xml:space="preserve">
+  <value>পজিশন সম্পাদনা</value>
+</data>
+
+<data name="BasicInformation" xml:space="preserve">
+  <value>মৌলিক তথ্য</value>
+</data>
+
+<data name="PositionTitle" xml:space="preserve">
+  <value>পজিশনের শিরোনাম</value>
+</data>
+
+<data name="PublicPosition" xml:space="preserve">
+  <value>পাবলিক পজিশন</value>
+</data>
+
+<data name="RestrictedPosition" xml:space="preserve">
+  <value>সীমাবদ্ধ পজিশন</value>
+</data>
+
+<data name="PositionAccessibleToEveryone" xml:space="preserve">
+  <value>এই পজিশনটি সব প্রমাণীকৃত প্রার্থীর জন্য উন্মুক্ত।</value>
+</data>
+
+<data name="ConfigureAccessRules" xml:space="preserve">
+  <value>কোন প্রার্থীরা এই পজিশনে অ্যাক্সেস পাবে তা নিয়ন্ত্রণ করতে অ্যাক্সেস নিয়ম কনফিগার করুন।</value>
+</data>
+
+<data name="AttributesFromLibrary" xml:space="preserve">
+  <value>অ্যাট্রিবিউট লাইব্রেরির অ্যাট্রিবিউট</value>
+</data>
+
+<data name="SelectAttributes" xml:space="preserve">
+  <value>অ্যাট্রিবিউট নির্বাচন করুন</value>
+</data>
+
+<data name="Selected" xml:space="preserve">
+  <value>নির্বাচিত</value>
+</data>
+
+<data name="AccessRule" xml:space="preserve">
+  <value>অ্যাক্সেস নিয়ম</value>
+</data>
+
+<data name="AddAccessRule" xml:space="preserve">
+  <value>অ্যাক্সেস নিয়ম যোগ করুন</value>
+</data>
+
+<data name="Remove" xml:space="preserve">
+  <value>সরান</value>
+</data>
+
+<data name="SelectProjectTags" xml:space="preserve">
+  <value>প্রাসঙ্গিক প্রার্থী প্রজেক্ট নির্বাচন করতে ব্যবহৃত প্রযুক্তি ট্যাগ নির্বাচন করুন।</value>
+</data>
+
+<data name="SavePosition" xml:space="preserve">
+  <value>পজিশন সংরক্ষণ করুন</value>
+</data>
+
+<data name="Cancel" xml:space="preserve">
+  <value>বাতিল</value>
+</data>
+
+<data name="DeletePosition" xml:space="preserve">
+  <value>পজিশন মুছুন</value>
+</data>
+
+<data name="DuplicatePosition" xml:space="preserve">
+  <value>পজিশন ডুপ্লিকেট করুন</value>
+</data>
+
+<data name="PositionCreated" xml:space="preserve">
+  <value>পজিশন সফলভাবে তৈরি হয়েছে।</value>
+</data>
+
+<data name="PositionUpdated" xml:space="preserve">
+  <value>পজিশন সফলভাবে আপডেট হয়েছে।</value>
+</data>
+
+<data name="PositionChangedElsewhere" xml:space="preserve">
+  <value>এই পজিশনটি অন্য একজন ব্যবহারকারী পরিবর্তন করেছেন। পেজটি পুনরায় লোড করুন।</value>
+</data>
+
+<data name="NoCVs" xml:space="preserve">
+  <value>এখনও কোনো সিভি তৈরি হয়নি।</value>
+</data>
+
+<data name="CreateCVFromPosition" xml:space="preserve">
+  <value>একটি পজিশন খুলে তার জন্য সিভি তৈরি করুন।</value>
+</data>
+
+<data name="Status" xml:space="preserve">
+  <value>স্ট্যাটাস</value>
+</data>
 </root>

@@ -1,11 +1,11 @@
 using CvManagementSystem.Data;
 using CvManagementSystem.Models;
+using CvManagementSystem.Services;
 using CvManagementSystem.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CvManagementSystem.Services;
 
 namespace CvManagementSystem.Controllers;
 
@@ -23,197 +23,254 @@ public class ProfileController : Controller
         _userManager = userManager;
     }
 
+
+    // =========================================================
+    // INDEX
+    // =========================================================
+
     [HttpGet]
     public async Task<IActionResult> Index(
         string? userId,
         string? attributeSearch,
         int? attributeCategoryId)
     {
-        var targetUserId =
-            await GetTargetUserIdAsync(userId);
+        var currentUser =
+            await _userManager.GetUserAsync(User);
 
-        if (targetUserId == null)
+        if (currentUser == null)
         {
-            return Forbid();
+            return Challenge();
         }
 
+
+        var isAdministrator =
+            await _userManager.IsInRoleAsync(
+                currentUser,
+                "Administrator");
+
+
+        var targetUserId =
+            isAdministrator &&
+            !string.IsNullOrWhiteSpace(userId)
+                ? userId
+                : currentUser.Id;
+
+
         var profile =
-            await LoadProfileAsync(targetUserId);
+            await LoadProfileAsync(
+                targetUserId);
+
 
         if (profile == null)
         {
-            profile = new CandidateProfile
-            {
-                UserId = targetUserId,
-                FirstName = "New",
-                LastName = "Candidate",
-                Location = null,
-                PhotoUrl = null,
-                UpdatedAt = DateTime.UtcNow,
-                Version = Guid.NewGuid()
-            };
+            profile =
+                new CandidateProfile
+                {
+                    UserId =
+                        targetUserId,
 
-            _context.CandidateProfiles.Add(profile);
+                    FirstName =
+                        string.Empty,
+
+                    LastName =
+                        string.Empty,
+
+                    Location =
+                        null,
+
+                    PhotoUrl =
+                        null,
+
+                    UpdatedAt =
+                        DateTime.UtcNow,
+
+                    Version =
+                        Guid.NewGuid()
+                };
+
+            _context.CandidateProfiles.Add(
+                profile);
 
             await _context.SaveChangesAsync();
 
             profile =
-                await LoadProfileAsync(targetUserId);
-
-            if (profile == null)
-            {
-                return Problem(
-                    "The candidate profile could not be created.");
-            }
+                await LoadProfileAsync(
+                    targetUserId);
         }
 
-        var model =
-            await BuildViewModelAsync(
-                profile,
-                attributeSearch,
-                attributeCategoryId);
-
-                
-
-        model.IsAdministratorView =
-            User.IsInRole("Administrator") &&
-            !string.Equals(
-                targetUserId,
-                _userManager.GetUserId(User),
-                StringComparison.Ordinal);
-                
-                var accessiblePositions =
-    await _context.Positions
-        .AsNoTracking()
-        .Include(x => x.AccessRules)
-            .ThenInclude(x => x.AttributeDefinition)
-        .ToListAsync();
-
-var accessiblePositionIds =
-    accessiblePositions
-        .Where(position =>
-            PositionAccessService.IsAuthorized(
-                position,
-                profile))
-        .Select(position => position.Id)
-        .ToHashSet();
-
-        var visibleCvs = profile.Cvs
-    .Where(x => accessiblePositionIds.Contains(x.PositionId))
-    .ToList();
-
-            
-
-        return View(model);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Save(
-        CandidateProfileViewModel model,
-        string? userId)
-    {
-        var targetUserId =
-            await GetTargetUserIdAsync(userId);
-
-        if (targetUserId == null)
-        {
-            return Forbid();
-        }
-
-        if (!ModelState.IsValid)
-        {
-            var existingProfile =
-                await LoadProfileAsync(targetUserId);
-
-            if (existingProfile != null)
-            {
-                await RebuildListsAsync(
-                    model,
-                    existingProfile);
-            }
-
-            return View("Index", model);
-        }
-
-        var profile =
-            await _context.CandidateProfiles
-                .Include(x => x.AttributeValues)
-                .FirstOrDefaultAsync(
-                    x => x.UserId == targetUserId);
 
         if (profile == null)
         {
             return NotFound();
         }
 
+
+        var model =
+            await BuildViewModelAsync(
+                profile,
+                attributeSearch,
+                attributeCategoryId,
+                isAdministrator &&
+                profile.UserId != currentUser.Id);
+
+
+        return View(model);
+    }
+
+
+    // =========================================================
+    // SAVE
+    // =========================================================
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Save(
+        CandidateProfileViewModel model)
+    {
+        var currentUser =
+            await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            return Challenge();
+        }
+
+
+        var isAdministrator =
+            await _userManager.IsInRoleAsync(
+                currentUser,
+                "Administrator");
+
+
+        var targetUserId =
+            isAdministrator &&
+            !string.IsNullOrWhiteSpace(model.UserId)
+                ? model.UserId
+                : currentUser.Id;
+
+
+        var profile =
+            await _context.CandidateProfiles
+                .Include(x => x.AttributeValues)
+                .FirstOrDefaultAsync(
+                    x =>
+                        x.UserId ==
+                        targetUserId);
+
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+
+        // ------------------------------------------------------
+        // Profile optimistic locking
+        // ------------------------------------------------------
+
         if (profile.Version != model.Version)
         {
-            ModelState.AddModelError(
-                string.Empty,
-                "This profile was changed by another user. " +
-                "Reload the page before saving again.");
+            TempData["ErrorMessage"] =
+                "The profile was changed by another user. Reload the page and try again.";
 
-            await RebuildListsAsync(
-                model,
-                profile);
-
-            return View("Index", model);
+            return RedirectToAction(
+                nameof(Index),
+                new
+                {
+                    userId = targetUserId
+                });
         }
 
-        var submittedAttributeIds =
-            model.Attributes
-                .Select(x => x.AttributeDefinitionId)
-                .ToHashSet();
 
-        foreach (var attributeValue in profile.AttributeValues)
-        {
-            if (!submittedAttributeIds.Contains(
-                    attributeValue.AttributeDefinitionId))
-            {
-                continue;
-            }
-
-            var submitted =
-                model.Attributes.FirstOrDefault(
-                    x => x.AttributeDefinitionId ==
-                         attributeValue.AttributeDefinitionId);
-
-            if (submitted == null)
-            {
-                continue;
-            }
-
-            if (attributeValue.Version != submitted.Version)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    $"The attribute '{submitted.Name}' was changed " +
-                    "by another user. Reload the page and try again.");
-
-                await RebuildListsAsync(
-                    model,
-                    profile);
-
-                return View("Index", model);
-            }
-        }
+        // ------------------------------------------------------
+        // Built-in fields
+        // ------------------------------------------------------
 
         profile.FirstName =
-            model.FirstName.Trim();
+            (model.FirstName ?? string.Empty)
+                .Trim();
 
         profile.LastName =
-            model.LastName.Trim();
+            (model.LastName ?? string.Empty)
+                .Trim();
 
         profile.Location =
-            string.IsNullOrWhiteSpace(model.Location)
+            string.IsNullOrWhiteSpace(
+                model.Location)
                 ? null
                 : model.Location.Trim();
 
         profile.PhotoUrl =
-            string.IsNullOrWhiteSpace(model.PhotoUrl)
+            string.IsNullOrWhiteSpace(
+                model.PhotoUrl)
                 ? null
                 : model.PhotoUrl.Trim();
+
+
+        // ------------------------------------------------------
+        // Attribute optimistic locking
+        // ------------------------------------------------------
+
+        foreach (var attribute
+                 in model.Attributes)
+        {
+            var existing =
+                profile.AttributeValues
+                    .FirstOrDefault(
+                        x =>
+                            x.AttributeDefinitionId ==
+                            attribute.AttributeDefinitionId);
+
+
+            if (existing == null)
+            {
+                profile.AttributeValues.Add(
+                    new CandidateAttributeValue
+                    {
+                        AttributeDefinitionId =
+                            attribute.AttributeDefinitionId,
+
+                        Value =
+                            attribute.Value,
+
+                        UpdatedAt =
+                            DateTime.UtcNow,
+
+                        Version =
+                            Guid.NewGuid()
+                    });
+
+                continue;
+            }
+
+
+            if (attribute.Version != Guid.Empty &&
+                existing.Version !=
+                attribute.Version)
+            {
+                TempData["ErrorMessage"] =
+                    $"The attribute '{attribute.Name}' was changed elsewhere. Reload the page and try again.";
+
+                return RedirectToAction(
+                    nameof(Index),
+                    new
+                    {
+                        userId =
+                            targetUserId
+                    });
+            }
+
+
+            existing.Value =
+                attribute.Value;
+
+            existing.UpdatedAt =
+                DateTime.UtcNow;
+
+            existing.Version =
+                Guid.NewGuid();
+        }
+
 
         profile.UpdatedAt =
             DateTime.UtcNow;
@@ -221,29 +278,6 @@ var accessiblePositionIds =
         profile.Version =
             Guid.NewGuid();
 
-        foreach (var attributeValue in profile.AttributeValues)
-        {
-            var submitted =
-                model.Attributes.FirstOrDefault(
-                    x => x.AttributeDefinitionId ==
-                         attributeValue.AttributeDefinitionId);
-
-            if (submitted == null)
-            {
-                continue;
-            }
-
-            attributeValue.Value =
-                string.IsNullOrWhiteSpace(submitted.Value)
-                    ? null
-                    : submitted.Value.Trim();
-
-            attributeValue.UpdatedAt =
-                DateTime.UtcNow;
-
-            attributeValue.Version =
-                Guid.NewGuid();
-        }
 
         try
         {
@@ -251,37 +285,293 @@ var accessiblePositionIds =
         }
         catch (DbUpdateConcurrencyException)
         {
-            ModelState.AddModelError(
-                string.Empty,
-                "The profile was changed by another user. " +
-                "Reload the page and try again.");
+            TempData["ErrorMessage"] =
+                "The profile was changed by another user. Reload the page and try again.";
 
-            var latest =
-                await LoadProfileAsync(targetUserId);
-
-            if (latest != null)
-            {
-                await RebuildListsAsync(
-                    model,
-                    latest);
-            }
-
-            return View("Index", model);
+            return RedirectToAction(
+                nameof(Index),
+                new
+                {
+                    userId =
+                        targetUserId
+                });
         }
 
-        TempData["Success"] =
+
+        TempData["SuccessMessage"] =
             "Profile saved successfully.";
+
 
         return RedirectToAction(
             nameof(Index),
             new
             {
                 userId =
-                    User.IsInRole("Administrator")
+                    isAdministrator &&
+                    targetUserId != currentUser.Id
                         ? targetUserId
                         : null
             });
     }
+
+
+    // =========================================================
+    // AUTO SAVE
+    // =========================================================
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AutoSave(
+        ProfileAutoSaveViewModel model)
+    {
+        var currentUser =
+            await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+
+        var isAdministrator =
+            await _userManager.IsInRoleAsync(
+                currentUser,
+                "Administrator");
+
+
+        var targetUserId =
+            isAdministrator &&
+            !string.IsNullOrWhiteSpace(
+                model.UserId)
+                ? model.UserId
+                : currentUser.Id;
+
+
+        var profile =
+            await _context.CandidateProfiles
+                .Include(x => x.AttributeValues)
+                .FirstOrDefaultAsync(
+                    x =>
+                        x.UserId ==
+                        targetUserId);
+
+
+        if (profile == null)
+        {
+            return NotFound(
+                new
+                {
+                    success = false,
+                    message =
+                        "Candidate profile was not found."
+                });
+        }
+
+
+        // ------------------------------------------------------
+        // Profile version
+        // ------------------------------------------------------
+
+        if (profile.Version !=
+            model.Version)
+        {
+            return Conflict(
+                new
+                {
+                    success = false,
+                    conflict = true,
+                    message =
+                        "This profile was changed somewhere else. Reload the page before continuing."
+                });
+        }
+
+
+        profile.FirstName =
+            (model.FirstName ?? string.Empty)
+                .Trim();
+
+        profile.LastName =
+            (model.LastName ?? string.Empty)
+                .Trim();
+
+        profile.Location =
+            string.IsNullOrWhiteSpace(
+                model.Location)
+                ? null
+                : model.Location.Trim();
+
+        profile.PhotoUrl =
+            string.IsNullOrWhiteSpace(
+                model.PhotoUrl)
+                ? null
+                : model.PhotoUrl.Trim();
+
+
+        var submittedAttributeIds =
+            model.Attributes
+                .Where(
+                    x =>
+                        x.AttributeDefinitionId > 0)
+                .Select(
+                    x =>
+                        x.AttributeDefinitionId)
+                .Distinct()
+                .ToList();
+
+
+        var validAttributeIds =
+            submittedAttributeIds.Count == 0
+                ? new HashSet<int>()
+                : (
+                    await _context.AttributeDefinitions
+                        .AsNoTracking()
+                        .Where(
+                            x =>
+                                submittedAttributeIds
+                                    .Contains(x.Id))
+                        .Select(x => x.Id)
+                        .ToListAsync()
+                  )
+                  .ToHashSet();
+
+
+        if (validAttributeIds.Count !=
+            submittedAttributeIds.Count)
+        {
+            return BadRequest(
+                new
+                {
+                    success = false,
+                    message =
+                        "One or more selected attributes no longer exist."
+                });
+        }
+
+
+        foreach (var attribute
+                 in model.Attributes)
+        {
+            if (!validAttributeIds.Contains(
+                    attribute.AttributeDefinitionId))
+            {
+                continue;
+            }
+
+
+            var existing =
+                profile.AttributeValues
+                    .FirstOrDefault(
+                        x =>
+                            x.AttributeDefinitionId ==
+                            attribute.AttributeDefinitionId);
+
+
+            if (existing == null)
+            {
+                profile.AttributeValues.Add(
+                    new CandidateAttributeValue
+                    {
+                        AttributeDefinitionId =
+                            attribute.AttributeDefinitionId,
+
+                        Value =
+                            attribute.Value,
+
+                        UpdatedAt =
+                            DateTime.UtcNow,
+
+                        Version =
+                            Guid.NewGuid()
+                    });
+
+                continue;
+            }
+
+
+            if (attribute.Version !=
+                    Guid.Empty &&
+                existing.Version !=
+                    attribute.Version)
+            {
+                return Conflict(
+                    new
+                    {
+                        success = false,
+                        conflict = true,
+
+                        attributeDefinitionId =
+                            attribute.AttributeDefinitionId,
+
+                        message =
+                            "One of the profile attributes was changed elsewhere. Reload the page before continuing."
+                    });
+            }
+
+
+            existing.Value =
+                attribute.Value;
+
+            existing.UpdatedAt =
+                DateTime.UtcNow;
+
+            existing.Version =
+                Guid.NewGuid();
+        }
+
+
+        profile.UpdatedAt =
+            DateTime.UtcNow;
+
+        profile.Version =
+            Guid.NewGuid();
+
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Conflict(
+                new
+                {
+                    success = false,
+                    conflict = true,
+                    message =
+                        "The profile was changed by another user. Reload the page before continuing."
+                });
+        }
+
+
+        var attributeVersions =
+            profile.AttributeValues
+                .Where(
+                    x =>
+                        validAttributeIds.Contains(
+                            x.AttributeDefinitionId))
+                .ToDictionary(
+                    x =>
+                        x.AttributeDefinitionId,
+                    x =>
+                        x.Version);
+
+
+        return Json(
+            new
+            {
+                success = true,
+
+                profileVersion =
+                    profile.Version,
+
+                attributeVersions
+            });
+    }
+
+
+    // =========================================================
+    // ADD ATTRIBUTE
+    // =========================================================
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -289,187 +579,329 @@ var accessiblePositionIds =
         int attributeDefinitionId,
         string? userId)
     {
-        var targetUserId =
-            await GetTargetUserIdAsync(userId);
+        var currentUser =
+            await _userManager.GetUserAsync(User);
 
-        if (targetUserId == null)
+        if (currentUser == null)
         {
-            return Forbid();
+            return Challenge();
         }
+
+
+        var isAdministrator =
+            await _userManager.IsInRoleAsync(
+                currentUser,
+                "Administrator");
+
+
+        var targetUserId =
+            isAdministrator &&
+            !string.IsNullOrWhiteSpace(userId)
+                ? userId
+                : currentUser.Id;
+
 
         var profile =
             await _context.CandidateProfiles
                 .FirstOrDefaultAsync(
-                    x => x.UserId == targetUserId);
+                    x =>
+                        x.UserId ==
+                        targetUserId);
+
 
         if (profile == null)
         {
             return NotFound();
         }
 
-        var alreadySelected =
-            await _context.CandidateAttributeValues
-                .AnyAsync(
-                    x =>
-                        x.CandidateProfileId == profile.Id &&
-                        x.AttributeDefinitionId ==
-                        attributeDefinitionId);
-
-        if (alreadySelected)
-        {
-            TempData["Error"] =
-                "This attribute is already in the profile.";
-
-            return RedirectToProfile(targetUserId);
-        }
 
         var definition =
             await _context.AttributeDefinitions
                 .FirstOrDefaultAsync(
-                    x => x.Id == attributeDefinitionId);
+                    x =>
+                        x.Id ==
+                        attributeDefinitionId);
+
 
         if (definition == null)
         {
             return NotFound();
         }
 
-        var value =
-            new CandidateAttributeValue
+
+        var exists =
+            await _context.CandidateAttributeValues
+                .AnyAsync(
+                    x =>
+                        x.CandidateProfileId ==
+                        profile.Id &&
+                        x.AttributeDefinitionId ==
+                        attributeDefinitionId);
+
+
+        if (!exists)
+        {
+            _context.CandidateAttributeValues.Add(
+                new CandidateAttributeValue
+                {
+                    CandidateProfileId =
+                        profile.Id,
+
+                    AttributeDefinitionId =
+                        attributeDefinitionId,
+
+                    Value =
+                        null,
+
+                    UpdatedAt =
+                        DateTime.UtcNow,
+
+                    Version =
+                        Guid.NewGuid()
+                });
+
+            definition.LastUsedAt =
+                DateTime.UtcNow;
+
+            definition.UsageCount++;
+
+            await _context.SaveChangesAsync();
+        }
+
+
+        return RedirectToAction(
+            nameof(Index),
+            new
             {
-                CandidateProfileId = profile.Id,
-                AttributeDefinitionId =
-                    definition.Id,
-                Value = null,
-                UpdatedAt = DateTime.UtcNow,
-                Version = Guid.NewGuid()
-            };
-
-        _context.CandidateAttributeValues.Add(value);
-
-        definition.LastUsedAt =
-            DateTime.UtcNow;
-
-        definition.UsageCount++;
-
-        await _context.SaveChangesAsync();
-
-        return RedirectToProfile(targetUserId);
+                userId =
+                    isAdministrator &&
+                    targetUserId != currentUser.Id
+                        ? targetUserId
+                        : null
+            });
     }
+
+
+    // =========================================================
+    // REMOVE ATTRIBUTE
+    // =========================================================
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveAttribute(
-        int attributeId,
+        int[] attributeIds,
         string? userId)
     {
-        var targetUserId =
-            await GetTargetUserIdAsync(userId);
+        var currentUser =
+            await _userManager.GetUserAsync(User);
 
-        if (targetUserId == null)
+        if (currentUser == null)
         {
-            return Forbid();
+            return Unauthorized();
         }
+
+
+        var isAdministrator =
+            await _userManager.IsInRoleAsync(
+                currentUser,
+                "Administrator");
+
+
+        var targetUserId =
+            isAdministrator &&
+            !string.IsNullOrWhiteSpace(userId)
+                ? userId
+                : currentUser.Id;
+
+
+        var ids =
+            attributeIds?
+                .Where(x => x > 0)
+                .Distinct()
+                .ToList()
+            ?? new List<int>();
+
+
+        if (ids.Count > 0)
+        {
+            var profile =
+                await _context.CandidateProfiles
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.UserId ==
+                            targetUserId);
+
+
+            if (profile != null)
+            {
+                var values =
+                    await _context.CandidateAttributeValues
+                        .Where(
+                            x =>
+                                x.CandidateProfileId ==
+                                profile.Id &&
+                                ids.Contains(
+                                    x.AttributeDefinitionId))
+                        .ToListAsync();
+
+
+                if (values.Count > 0)
+                {
+                    _context.CandidateAttributeValues
+                        .RemoveRange(values);
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+
+
+        return RedirectToAction(
+            nameof(Index),
+            new
+            {
+                userId =
+                    isAdministrator &&
+                    targetUserId != currentUser.Id
+                        ? targetUserId
+                        : null
+            });
+    }
+
+
+    // =========================================================
+    // PUBLIC PROFILE
+    // =========================================================
+
+    [Authorize(Roles = "Recruiter,Administrator")]
+    [HttpGet]
+    public async Task<IActionResult> Public(
+        string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return BadRequest();
+        }
+
 
         var profile =
             await _context.CandidateProfiles
+                .AsNoTracking()
+                .Include(x => x.Projects)
+                    .ThenInclude(x =>
+                        x.TechnologyTags)
+                        .ThenInclude(x =>
+                            x.TechnologyTag)
                 .FirstOrDefaultAsync(
-                    x => x.UserId == targetUserId);
+                    x =>
+                        x.UserId ==
+                        userId);
+
 
         if (profile == null)
         {
-            return NotFound();
+            var user =
+                await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.Id ==
+                            userId);
+
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+
+            ViewBag.DisplayName =
+                user.UserName ??
+                user.Email ??
+                "User";
+
+
+            return View(
+                "Public",
+                null);
         }
 
-        var value =
-            await _context.CandidateAttributeValues
-                .FirstOrDefaultAsync(
-                    x =>
-                        x.CandidateProfileId == profile.Id &&
-                        x.AttributeDefinitionId ==
-                        attributeId);
 
-        if (value == null)
-        {
-            return RedirectToProfile(targetUserId);
-        }
-
-        _context.CandidateAttributeValues.Remove(
-            value);
-
-        await _context.SaveChangesAsync();
-
-        return RedirectToProfile(targetUserId);
+        return View(
+            "Public",
+            profile);
     }
 
-    private async Task<string?> GetTargetUserIdAsync(
-        string? requestedUserId)
-    {
-        var currentUserId =
-            _userManager.GetUserId(User);
 
-        if (string.IsNullOrWhiteSpace(currentUserId))
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(requestedUserId))
-        {
-            return currentUserId;
-        }
-
-        if (!User.IsInRole("Administrator"))
-        {
-            return null;
-        }
-
-        var exists =
-            await _userManager.Users
-                .AsNoTracking()
-                .AnyAsync(
-                    x => x.Id == requestedUserId);
-
-        return exists
-            ? requestedUserId
-            : null;
-    }
+    // =========================================================
+    // PRIVATE: LOAD PROFILE
+    // =========================================================
 
     private async Task<CandidateProfile?> LoadProfileAsync(
         string userId)
     {
         return await _context.CandidateProfiles
+            .AsNoTracking()
             .AsSplitQuery()
-            .Include(x => x.AttributeValues)
-                .ThenInclude(x => x.AttributeDefinition)
-                    .ThenInclude(x => x.Category)
-            .Include(x => x.AttributeValues)
-                .ThenInclude(x => x.AttributeDefinition)
-                    .ThenInclude(x => x.Options)
-            .Include(x => x.Projects)
-                .ThenInclude(x => x.TechnologyTags)
-                    .ThenInclude(x => x.TechnologyTag)
-            .Include(x => x.Cvs)
-                .ThenInclude(x => x.Position)
+            .Include(x =>
+                x.AttributeValues)
+                .ThenInclude(x =>
+                    x.AttributeDefinition)
+                    .ThenInclude(x =>
+                        x.Category)
+            .Include(x =>
+                x.AttributeValues)
+                .ThenInclude(x =>
+                    x.AttributeDefinition)
+                    .ThenInclude(x =>
+                        x.Options)
+            .Include(x =>
+                x.Projects)
+                .ThenInclude(x =>
+                    x.TechnologyTags)
+                    .ThenInclude(x =>
+                        x.TechnologyTag)
+            .Include(x =>
+                x.Cvs)
+                .ThenInclude(x =>
+                    x.Position)
             .FirstOrDefaultAsync(
-                x => x.UserId == userId);
+                x =>
+                    x.UserId ==
+                    userId);
     }
+
+
+    // =========================================================
+    // PRIVATE: BUILD VIEW MODEL
+    // =========================================================
 
     private async Task<CandidateProfileViewModel>
         BuildViewModelAsync(
             CandidateProfile profile,
             string? attributeSearch,
-            int? attributeCategoryId)
+            int? attributeCategoryId,
+            bool isAdministratorView)
     {
-        var selectedAttributeIds =
+        var candidateAttributeDefinitionIds =
             profile.AttributeValues
-                .Select(x => x.AttributeDefinitionId)
-                .ToList();
+                .Select(
+                    x =>
+                        x.AttributeDefinitionId)
+                .ToHashSet();
+
 
         var availableQuery =
             _context.AttributeDefinitions
                 .AsNoTracking()
-                .Include(x => x.Category)
+                .Include(x =>
+                    x.Category)
                 .Where(
-                    x => !selectedAttributeIds.Contains(x.Id));
+                    x =>
+                        !candidateAttributeDefinitionIds
+                            .Contains(x.Id));
+
 
         if (!string.IsNullOrWhiteSpace(
                 attributeSearch))
@@ -485,6 +917,7 @@ var accessiblePositionIds =
                             prefix + "%"));
         }
 
+
         if (attributeCategoryId.HasValue)
         {
             availableQuery =
@@ -494,250 +927,243 @@ var accessiblePositionIds =
                         attributeCategoryId.Value);
         }
 
+
         var availableAttributes =
             await availableQuery
                 .OrderByDescending(
-                    x => x.LastUsedAt)
-                .ThenBy(x => x.Name)
+                    x =>
+                        x.LastUsedAt)
+                .ThenBy(
+                    x =>
+                        x.Name)
                 .Take(50)
                 .Select(
                     x =>
                         new AvailableProfileAttributeViewModel
                         {
-                            Id = x.Id,
-                            Name = x.Name,
+                            Id =
+                                x.Id,
+
+                            Name =
+                                x.Name,
+
                             Category =
                                 x.Category.Name,
+
                             DataType =
                                 x.DataType,
+
                             LastUsedAt =
                                 x.LastUsedAt
                         })
                 .ToListAsync();
 
-        var categories =
+
+        var attributeCategories =
             await _context.AttributeCategories
                 .AsNoTracking()
-                .OrderBy(x => x.Name)
+                .OrderBy(
+                    x =>
+                        x.Name)
                 .Select(
                     x =>
-                        new CandidateAttributeCategoryViewModel
+                        new
                         {
-                            Id = x.Id,
-                            Name = x.Name
+                            x.Id,
+                            x.Name
                         })
                 .ToListAsync();
 
-        return new CandidateProfileViewModel
-        {
-            Id = profile.Id,
-            UserId = profile.UserId,
-            FirstName = profile.FirstName,
-            LastName = profile.LastName,
-            Location = profile.Location,
-            PhotoUrl = profile.PhotoUrl,
-            Version = profile.Version,
 
-            AttributeSearch =
-                attributeSearch,
+        ViewBag.AttributeCategories =
+            attributeCategories;
 
-            AttributeCategoryId =
-                attributeCategoryId,
 
-            Attributes =
-                profile.AttributeValues
-                    .OrderBy(
-                        x => x.AttributeDefinition.Name)
-                    .Select(
-                        x =>
-                            new CandidateAttributeViewModel
-                            {
-                                Id = x.Id,
+        // ------------------------------------------------------
+        // Accessible positions
+        // ------------------------------------------------------
 
-                                AttributeDefinitionId =
-                                    x.AttributeDefinitionId,
+        var positions =
+            await _context.Positions
+                .AsNoTracking()
+                .Include(x =>
+                    x.AccessRules)
+                    .ThenInclude(x =>
+                        x.AttributeDefinition)
+                .ToListAsync();
 
-                                Name =
-                                    x.AttributeDefinition.Name,
 
-                                Category =
-                                    x.AttributeDefinition
-                                        .Category.Name,
+        var accessiblePositionIds =
+            positions
+                .Where(
+                    x =>
+                        PositionAccessService
+                            .IsAuthorized(
+                                x,
+                                profile))
+                .Select(
+                    x =>
+                        x.Id)
+                .ToHashSet();
 
-                                DataType =
-                                    x.AttributeDefinition
-                                        .DataType,
 
-                                Value =
-                                    x.Value,
+        // ------------------------------------------------------
+        // Visible CVs
+        //
+        // Existing CVs are retained in DB when access is lost,
+        // but hidden from the Candidate UI.
+        // ------------------------------------------------------
 
-                                Version =
-                                    x.Version,
+        var visibleCvs =
+            profile.Cvs
+                .Where(
+                    x =>
+                        accessiblePositionIds.Contains(
+                            x.PositionId))
+                .OrderByDescending(
+                    x =>
+                        x.UpdatedAt)
+                .ToList();
 
-                                Options =
-                                    x.AttributeDefinition
-                                        .Options
-                                        .OrderBy(
-                                            o => o.SortOrder)
-                                        .Select(
-                                            o =>
+
+        var model =
+            new CandidateProfileViewModel
+            {
+                Id =
+                    profile.Id,
+
+                UserId =
+                    profile.UserId,
+
+                FirstName =
+                    profile.FirstName,
+
+                LastName =
+                    profile.LastName,
+
+                Location =
+                    profile.Location,
+
+                PhotoUrl =
+                    profile.PhotoUrl,
+
+                Version =
+                    profile.Version,
+
+                AttributeSearch =
+                    attributeSearch,
+
+                AttributeCategoryId =
+                    attributeCategoryId,
+
+                IsAdministratorView =
+                    isAdministratorView,
+
+                AvailableAttributes =
+                    availableAttributes,
+
+                Attributes =
+                    profile.AttributeValues
+                        .OrderBy(
+                            x =>
+                                x.AttributeDefinition.Category.Name)
+                        .ThenBy(
+                            x =>
+                                x.AttributeDefinition.Name)
+                        .Select(
+                            x =>
+                                new CandidateAttributeViewModel
+                                {
+                                    AttributeDefinitionId =
+                                        x.AttributeDefinitionId,
+
+                                    Name =
+                                        x.AttributeDefinition.Name,
+
+                                    Category =
+                                        x.AttributeDefinition
+                                            .Category.Name,
+
+                                    DataType =
+                                        x.AttributeDefinition
+                                            .DataType,
+
+                                    Value =
+                                        x.Value,
+
+                                    Version =
+                                        x.Version,
+
+                                    Options =
+                                        x.AttributeDefinition.Options
+                                            .OrderBy(o => o.SortOrder)
+                                            .Select(o =>
                                                 new CandidateAttributeOptionViewModel
                                                 {
                                                     Id = o.Id,
                                                     Value = o.Value
                                                 })
-                                        .ToList()
-                            })
-                    .ToList(),
+                                            .ToList(),
+                                })
+                        .ToList(),
 
-            AvailableAttributes =
-                availableAttributes,
+                Projects =
+                    profile.Projects
+                        .OrderByDescending(
+                            x =>
+                                x.StartDate)
+                        .Select(
+                            x =>
+                                new CandidateProjectViewModel
+                                {
+                                    Id =
+                                        x.Id,
 
-            Categories =
-                categories,
+                                    Name =
+                                        x.Name,
 
-            Projects =
-                profile.Projects
-                    .OrderByDescending(
-                        x => x.StartDate)
-                    .Select(
-                        x =>
-                            new CandidateProjectViewModel
-                            {
-                                Id = x.Id,
+                                    Period =
+                                        x.EndDate.HasValue
+                                            ? $"{x.StartDate:MMM yyyy} - {x.EndDate.Value:MMM yyyy}"
+                                            : $"{x.StartDate:MMM yyyy} - Present",
 
-                                Name = x.Name,
+                                    TechnologyTags =
+                                        x.TechnologyTags
+                                            .OrderBy(
+                                                t =>
+                                                    t.TechnologyTag.Name)
+                                            .Select(
+                                                t =>
+                                                    t.TechnologyTag.Name)
+                                            .ToList()
+                                })
+                        .ToList(),
 
-                                Period =
-                                    x.EndDate.HasValue
-                                        ? $"{x.StartDate:MMM yyyy} - {x.EndDate.Value:MMM yyyy}"
-                                        : $"{x.StartDate:MMM yyyy} - Present",
+                Cvs =
+                    visibleCvs
+                        .Select(
+                            x =>
+                                new CandidateCvSummaryViewModel
+                                {
+                                    Id =
+                                        x.Id,
 
-                                DescriptionMarkdown =
-                                    x.DescriptionMarkdown,
+                                    Title =
+                                        x.Title,
 
-                                TechnologyTags =
-                                    x.TechnologyTags
-                                        .OrderBy(
-                                            t => t.TechnologyTag.Name)
-                                        .Select(
-                                            t => t.TechnologyTag.Name)
-                                        .ToList()
-                            })
-                    .ToList(),
+                                    PositionTitle =
+                                        x.Position.Title,
 
-            Cvs =
-                profile.Cvs
-                    .OrderByDescending(
-                        x => x.UpdatedAt)
-                    .Select(
-                        x =>
-                            new CandidateCvSummaryViewModel
-                            {
-                                Id = x.Id,
-                                PositionTitle =
-                                    x.Position.Title,
-                                Title =
-                                    x.Title,
-                                IsPublished =
-                                    x.IsPublished,
-                                UpdatedAt =
-                                    x.UpdatedAt
-                            })
-                    .ToList()
-        };
+                                    IsPublished =
+                                        x.IsPublished,
+
+                                    UpdatedAt =
+                                        x.UpdatedAt
+                                })
+                        .ToList()
+            };
+
+
+        return model;
     }
-
-    private async Task RebuildListsAsync(
-        CandidateProfileViewModel model,
-        CandidateProfile profile)
-    {
-        var rebuilt =
-            await BuildViewModelAsync(
-                profile,
-                model.AttributeSearch,
-                model.AttributeCategoryId);
-
-        model.Id = rebuilt.Id;
-        model.UserId = rebuilt.UserId;
-        model.Version = rebuilt.Version;
-
-        model.Attributes =
-            rebuilt.Attributes;
-
-        model.AvailableAttributes =
-            rebuilt.AvailableAttributes;
-
-        model.Categories =
-            rebuilt.Categories;
-
-        model.Projects =
-            rebuilt.Projects;
-
-        model.Cvs =
-            rebuilt.Cvs;
-
-        model.IsAdministratorView =
-            model.IsAdministratorView;
-    }
-
-    private IActionResult RedirectToProfile(
-        string userId)
-    {
-        var currentUserId =
-            _userManager.GetUserId(User);
-
-        return RedirectToAction(
-            nameof(Index),
-            new
-            {
-                userId =
-                    User.IsInRole("Administrator") &&
-                    !string.Equals(
-                        currentUserId,
-                        userId,
-                        StringComparison.Ordinal)
-                        ? userId
-                        : null
-            });
-    }
-
-    [Authorize(Roles = "Recruiter,Administrator")]
-[HttpGet]
-public async Task<IActionResult> Public(string userId)
-{
-    if (string.IsNullOrWhiteSpace(userId))
-    {
-        return BadRequest();
-    }
-
-    var profile = await _context.CandidateProfiles
-        .AsNoTracking()
-        .Include(x => x.Projects)
-            .ThenInclude(x => x.TechnologyTags)
-                .ThenInclude(x => x.TechnologyTag)
-        .Include(x => x.User)
-        .FirstOrDefaultAsync(x => x.UserId == userId);
-
-    if (profile == null)
-    {
-        var user = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == userId);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        ViewBag.DisplayName =
-            user.UserName ??
-            user.Email ??
-            "User";
-
-        return View("Public", null);
-    }
-
-    return View("Public", profile);
-}
 }

@@ -1,206 +1,305 @@
 @model CvManagementSystem.ViewModels.CandidateProfileViewModel
 
 @{
-    ViewData["Title"] =
-        Model.IsAdministratorView
-            ? "Candidate Profile"
-            : "My Profile";
+
+    ViewData["Title"] = L["Profile"];
+
+    var categories =
+
+        ViewBag.AttributeCategories
+
+        as IEnumerable<dynamic>
+
+        ?? Enumerable.Empty<dynamic>();
+
+    var attributeSearch =
+
+        Model.AttributeSearch ?? string.Empty;
+
+    var selectedCategoryId =
+
+        Model.AttributeCategoryId;
+
+    var isAdministratorView =
+
+        Model.IsAdministratorView;
+
 }
 
 <div class="container py-4">
 
     <!-- ===================================================== -->
-    <!-- PAGE HEADER -->
+
+    <!-- Header -->
+
     <!-- ===================================================== -->
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row
+
+                justify-content-between
+
+                align-items-md-center
+
+                gap-3 mb-4">
 
         <div>
+
             <h1 class="h3 mb-1">
-                @(Model.IsAdministratorView ? "Candidate Profile" : "My Profile")
+
+                @L["Profile"]
+
             </h1>
 
             <p class="text-muted mb-0">
-                Manage reusable profile information, attributes, projects and CVs.
+
+                @L["PersonalProfile"]
+
             </p>
+
         </div>
 
-        <a asp-controller="Positions"
-           asp-action="Index"
-           class="btn btn-outline-primary">
-            Browse Positions
-        </a>
+        @if (!isAdministratorView)
+
+        {
+
+            <a asp-controller="Projects"
+
+               asp-action="Index"
+
+               class="btn btn-outline-primary">
+
+                @L["MyProjects"]
+
+            </a>
+
+        }
 
     </div>
 
-    <!-- ===================================================== -->
-    <!-- MESSAGES -->
+
     <!-- ===================================================== -->
 
-    @if (TempData["Success"] is string success)
+    <!-- Messages -->
+
+    <!-- ===================================================== -->
+
+    @if (TempData["SuccessMessage"] is string success)
+
     {
+
         <div class="alert alert-success">
+
             @success
+
         </div>
+
     }
 
-    @if (TempData["Error"] is string error)
+    @if (TempData["ErrorMessage"] is string error)
+
     {
-        <div class="alert alert-warning">
+
+        <div class="alert alert-danger">
+
             @error
+
         </div>
+
     }
 
-    <div asp-validation-summary="ModelOnly"
-         class="alert alert-danger">
-    </div>
 
     <!-- ===================================================== -->
-    <!-- ADD ATTRIBUTE FROM LIBRARY -->
+
+    <!-- Add Attribute -->
+
     <!-- ===================================================== -->
 
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
 
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h2 class="h5 mb-0">
 
-                <strong>
-                    Add Attribute from Library
-                </strong>
+                @L["AddProfileAttribute"]
 
-                <span class="badge text-bg-secondary">
-                    @(Model.Attributes.Count) selected
-                </span>
-
-            </div>
+            </h2>
 
         </div>
 
         <div class="card-body">
 
-            <form asp-action="Index"
+            <form asp-controller="Profile"
+
+                  asp-action="Index"
+
                   method="get"
-                  class="row g-2 mb-3">
 
-                <div class="col-md-5">
+                  class="row g-3">
 
-                    <input type="text"
+                <input type="hidden"
+
+                       name="userId"
+
+                       value="@Model.UserId" />
+
+                <div class="col-md-6">
+
+                    <label for="attributeSearch"
+
+                           class="form-label">
+
+                        @L["SearchAttributes"]
+
+                    </label>
+
+                    <input id="attributeSearch"
+
                            name="attributeSearch"
-                           value="@Model.AttributeSearch"
+
+                           value="@attributeSearch"
+
                            class="form-control"
-                           placeholder="Search by attribute prefix..." />
+
+                           placeholder="@L["SearchAttributes"]" />
 
                 </div>
 
                 <div class="col-md-4">
 
-                    <select name="attributeCategoryId"
+                    <label for="attributeCategoryId"
+
+                           class="form-label">
+
+                        @L["AllCategories"]
+
+                    </label>
+
+                    <select id="attributeCategoryId"
+
+                            name="attributeCategoryId"
+
                             class="form-select">
 
                         <option value="">
-                            All categories
+
+                            @L["AllCategories"]
+
                         </option>
 
-                        @foreach (var category in Model.Categories)
+                        @foreach (var category in categories)
+
                         {
-                            if (Model.AttributeCategoryId == category.Id)
-                            {
-                                <option value="@category.Id"
-                                        selected>
-                                    @(category.Name)
-                                </option>
-                            }
-                            else
-                            {
-                                <option value="@category.Id">
-                                    @(category.Name)
-                                </option>
-                            }
+
+                            <option value="@category.Id"
+
+                                    selected="@(selectedCategoryId == (int?)category.Id)">
+
+                                @category.Name
+
+                            </option>
+
                         }
 
                     </select>
 
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2 d-flex align-items-end">
 
                     <button type="submit"
+
                             class="btn btn-outline-primary w-100">
-                        Find Attributes
+
+                        @L["Search"]
+
                     </button>
 
                 </div>
 
             </form>
 
-            @if (Model.AvailableAttributes.Count == 0)
+
+            @if (Model.AvailableAttributes.Count > 0)
             {
-                <div class="text-muted">
-                    No available attributes match your search.
+                <div class="table-responsive mt-4">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">
+                                    @L["Select"]
+                                </th>
+                                <th>
+                                    @L["Position"]
+                                </th>
+                                <th>
+                                    @L["Category"]
+                                </th>
+                                <th>
+                                    @L["DataType"]
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attribute in Model.AvailableAttributes)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="radio"
+                                               name="availableAttributeSelection"
+                                               class="form-check-input available-attribute-radio"
+                                               value="@(attribute.Id)"
+                                               aria-label="@(attribute.Name)" />
+                                    </td>
+                                    <td>
+                                        @(attribute.Name)
+                                    </td>
+                                    <td>
+                                        @(attribute.Category)
+                                    </td>
+                                    <td>
+                                        @(attribute.DataType)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="border-top pt-3 mt-3">
+                    <form asp-action="AddAttribute"
+                          method="post"
+                          id="add-attribute-form"
+                          class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="attributeDefinitionId"
+                               id="selected-attribute-definition-id"
+                               value="" />
+
+                        <input type="hidden"
+                               name="userId"
+                               value="@Model.UserId" />
+
+                        <button type="submit"
+                                id="add-selected-attribute"
+                                class="btn btn-primary"
+                                disabled>
+                            @L["AddAttribute"]
+                        </button>
+
+                        <span id="attribute-selection-status"
+                              class="small text-muted">
+                            @L["SelectAttribute"]
+                        </span>
+                    </form>
                 </div>
             }
             else
             {
-                <form asp-action="AddAttribute"
-                      method="post">
-
-                    @Html.AntiForgeryToken()
-
-                    @if (Model.IsAdministratorView)
-                    {
-                        <input type="hidden"
-                               name="userId"
-                               value="@Model.UserId" />
-                    }
-
-                    <div class="row g-2">
-
-                        <div class="col-md-9">
-
-                            <select name="attributeDefinitionId"
-                                    class="form-select"
-                                    required>
-
-                                <option value="">
-                                    Select an attribute...
-                                </option>
-
-                                @foreach (var item in Model.AvailableAttributes)
-                                {
-                                    <option value="@item.Id">
-                                        @(item.Name)
-                                        — @(item.Category)
-                                        — @(item.DataType)
-
-                                        @if (item.LastUsedAt.HasValue)
-                                        {
-                                            @: (recently used)
-                                        }
-                                    </option>
-                                }
-
-                            </select>
-
-                        </div>
-
-                        <div class="col-md-3">
-
-                            <button type="submit"
-                                    class="btn btn-success w-100">
-                                Add Attribute
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                    <div class="form-text mt-2">
-                        Search supports attribute prefix lookup and category
-                        filtering. Recently used attributes are shown first.
-                    </div>
-
-                </form>
+                <div class="text-muted mt-3">
+                    @L["NoAttributesSelected"]
+                </div>
             }
 
         </div>
@@ -209,39 +308,47 @@
 
 
     <!-- ===================================================== -->
-    <!-- PROFILE SAVE FORM -->
+
+    <!-- Main Profile Form -->
+
     <!-- ===================================================== -->
 
     <form asp-action="Save"
+
           method="post"
-          id="profileForm">
+
+          id="profile-form">
 
         @Html.AntiForgeryToken()
 
-        <input asp-for="Id"
-               type="hidden" />
+        <input type="hidden"
 
-        <input asp-for="UserId"
-               type="hidden" />
+               asp-for="Id" />
 
-        <input asp-for="Version"
-               type="hidden" />
+        <input type="hidden"
 
-        @if (Model.IsAdministratorView)
-        {
-            <input type="hidden"
-                   name="userId"
-                   value="@Model.UserId" />
-        }
+               asp-for="UserId" />
 
-        <!-- ================================================= -->
-        <!-- ME -->
+        <input type="hidden"
+
+               asp-for="Version" />
+
+               <!-- ================================================= -->
+
+        <!-- Me -->
+
         <!-- ================================================= -->
 
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Me</strong>
+
+                <h2 class="h5 mb-0">
+
+                    @L["Me"]
+
+                </h2>
+
             </div>
 
             <div class="card-body">
@@ -251,59 +358,123 @@
                     <div class="col-md-6">
 
                         <label asp-for="FirstName"
+
                                class="form-label">
+
+                            @L["FirstName"]
+
                         </label>
 
                         <input asp-for="FirstName"
-                               class="form-control" />
+
+                               class="form-control @(string.IsNullOrWhiteSpace(Model.FirstName)
+
+                                   ? "border-danger"
+
+                                   : "")" />
+
+                        @if (string.IsNullOrWhiteSpace(Model.FirstName))
+
+                        {
+
+                            <div class="text-danger small mt-1">
+
+                                @L["Required"]
+
+                            </div>
+
+                        }
 
                         <span asp-validation-for="FirstName"
-                              class="text-danger">
-                        </span>
+
+                              class="text-danger"></span>
 
                     </div>
+
 
                     <div class="col-md-6">
 
                         <label asp-for="LastName"
+
                                class="form-label">
+
+                            @L["LastName"]
+
                         </label>
 
                         <input asp-for="LastName"
-                               class="form-control" />
+
+                               class="form-control @(string.IsNullOrWhiteSpace(Model.LastName)
+
+                                   ? "border-danger"
+
+                                   : "")" />
+
+                        @if (string.IsNullOrWhiteSpace(Model.LastName))
+
+                        {
+
+                            <div class="text-danger small mt-1">
+
+                                @L["Required"]
+
+                            </div>
+
+                        }
 
                         <span asp-validation-for="LastName"
-                              class="text-danger">
-                        </span>
+
+                              class="text-danger"></span>
 
                     </div>
+
 
                     <div class="col-md-6">
 
                         <label asp-for="Location"
+
                                class="form-label">
+
+                            @L["Location"]
+
                         </label>
 
                         <input asp-for="Location"
-                               class="form-control"
-                               placeholder="Dhaka, Bangladesh" />
+
+                               class="form-control" />
+
+                        <span asp-validation-for="Location"
+
+                              class="text-danger"></span>
 
                     </div>
+
 
                     <div class="col-md-6">
 
                         <label asp-for="PhotoUrl"
+
                                class="form-label">
+
+                            @L["PersonalPhoto"]
+
                         </label>
 
                         <input asp-for="PhotoUrl"
+
                                class="form-control"
-                               placeholder="https://example.com/photo.jpg" />
+
+                               placeholder="https://..." />
 
                         <div class="form-text">
-                            Use an external image URL. Images are not uploaded
-                            to the application server or database.
+
+                            Use an external image URL. The application does not store image files on the web server.
+
                         </div>
+
+                        <span asp-validation-for="PhotoUrl"
+
+                              class="text-danger"></span>
 
                     </div>
 
@@ -315,94 +486,81 @@
 
 
         <!-- ================================================= -->
-        <!-- INFO -->
+
+        <!-- Info -->
+
         <!-- ================================================= -->
 
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
 
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h2 class="h5 mb-0">
 
-                    <strong>
-                        Info
-                    </strong>
+                    @L["Info"]
 
-                    <span id="selectedAttributeCount"
-                          class="badge text-bg-secondary">
-                        0 selected
-                    </span>
-
-                </div>
+                </h2>
 
             </div>
 
-            <div class="card-body">
+            <div class="card-body p-0">
 
                 @if (Model.Attributes.Count == 0)
+
                 {
-                    <div class="text-muted text-center py-4">
-                        No reusable attributes have been added to this profile yet.
+
+                    <div class="p-4 text-muted">
+
+                        @L["NoAttributesSelected"]
+
                     </div>
+
                 }
+
                 else
+
                 {
-                    <!-- Toolbar -->
-
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-
-                        <button type="submit"
-                                formaction="@Url.Action("RemoveAttribute", "Profile")"
-                                formmethod="post"
-                                class="btn btn-outline-danger"
-                                id="removeSelectedButton">
-                            Remove Selected
-                        </button>
-
-                        <button type="button"
-                                class="btn btn-outline-secondary"
-                                id="selectAllAttributesButton">
-                            Select All
-                        </button>
-
-                        <button type="button"
-                                class="btn btn-outline-secondary"
-                                id="clearAttributeSelectionButton">
-                            Clear Selection
-                        </button>
-
-                        <span class="text-muted small">
-                            Select attributes to remove them together.
-                        </span>
-
-                    </div>
 
                     <div class="table-responsive">
 
                         <table class="table table-hover align-middle mb-0">
 
-                            <thead>
+                            <thead class="table-light">
 
                                 <tr>
 
                                     <th style="width: 45px;">
 
                                         <input type="checkbox"
-                                               id="selectAllAttributes"
+
+                                               id="select-all-attributes"
+
                                                class="form-check-input" />
 
                                     </th>
 
                                     <th>
-                                        Attribute
+
+                                        @L["Position"]
+
                                     </th>
 
                                     <th>
-                                        Category
+
+                                        @L["Category"]
+
                                     </th>
 
                                     <th>
-                                        Value
+
+                                        @L["DataType"]
+
+                                    </th>
+
+                                    <th>
+
+                                        @L["Value"]
+
                                     </th>
 
                                 </tr>
@@ -412,10 +570,15 @@
                             <tbody>
 
                                 @for (var i = 0;
-                                      i < Model.Attributes.Count;
-                                      i++)
+
+                                     i < Model.Attributes.Count;
+
+                                     i++)
+
                                 {
+
                                     var item =
+
                                         Model.Attributes[i];
 
                                     <tr>
@@ -423,422 +586,199 @@
                                         <td>
 
                                             <input type="checkbox"
-                                                   class="form-check-input attribute-select"
-                                                   name="attributeIds"
+
+                                                   class="form-check-input attribute-checkbox"
+
                                                    value="@item.AttributeDefinitionId" />
 
                                         </td>
 
                                         <td>
 
-                                            <strong>
-                                                @(item.Name)
-                                            </strong>
-
-                                            <div class="small text-muted">
-                                                @(item.DataType)
-                                            </div>
+                                            @(item.Name)
 
                                             <input type="hidden"
-                                                   asp-for="Attributes[i].AttributeDefinitionId" />
+
+                                                   name="Attributes[@i].AttributeDefinitionId"
+
+                                                   value="@item.AttributeDefinitionId" />
 
                                             <input type="hidden"
-                                                   asp-for="Attributes[i].Version" />
+
+                                                   name="Attributes[@i].Version"
+
+                                                   value="@item.Version" />
 
                                         </td>
 
                                         <td>
+
                                             @(item.Category)
+
+                                        </td>
+
+                                        <td>
+
+                                            @item.DataType
+
                                         </td>
 
                                         <td>
 
                                             @switch (item.DataType)
+
                                             {
-                                                case CvManagementSystem.Models.AttributeDataType.String:
-
-                                                    <input asp-for="Attributes[i].Value"
-                                                           class="form-control"
-                                                           placeholder="Enter value..." />
-
-                                                    break;
-
-
-                                                case CvManagementSystem.Models.AttributeDataType.Text:
-
-                                                    <textarea asp-for="Attributes[i].Value"
-                                                              class="form-control"
-                                                              rows="4"
-                                                              placeholder="Enter Markdown text..."></textarea>
-
-                                                    break;
-
-
-                                                case CvManagementSystem.Models.AttributeDataType.Image:
-
-                                                    <input asp-for="Attributes[i].Value"
-                                                           type="url"
-                                                           class="form-control"
-                                                           placeholder="https://..." />
-
-                                                    <div class="form-text">
-                                                        External cloud image URL.
-                                                    </div>
-
-                                                    break;
-
-
-                                                case CvManagementSystem.Models.AttributeDataType.Numeric:
-
-                                                    <input asp-for="Attributes[i].Value"
-                                                           type="number"
-                                                           step="any"
-                                                           class="form-control"
-                                                           placeholder="Enter number..." />
-
-                                                    break;
-
-
-                                                case CvManagementSystem.Models.AttributeDataType.Date:
-
-                                                    <input asp-for="Attributes[i].Value"
-                                                           type="date"
-                                                           class="form-control" />
-
-                                                    break;
-
 
                                                 case CvManagementSystem.Models.AttributeDataType.Boolean:
 
                                                     <div class="form-check">
 
                                                         <input type="hidden"
+
                                                                name="Attributes[@i].Value"
+
                                                                value="false" />
 
                                                         <input type="checkbox"
-                                                               class="form-check-input"
-                                                               name="Attributes[@i].Value"
-                                                               value="true"
-                                                               id="boolean_@item.AttributeDefinitionId"
-                                                               @(string.Equals(
-                                                                   item.Value,
-                                                                   "true",
-                                                                   StringComparison.OrdinalIgnoreCase)
-                                                                   ? "checked"
-                                                                   : "") />
 
-                                                        <label class="form-check-label"
-                                                               for="boolean_@item.AttributeDefinitionId">
-                                                            Checked
-                                                        </label>
+                                                               class="form-check-input"
+
+                                                               name="Attributes[@i].Value"
+
+                                                               value="true"
+
+                                                               checked="@(item.Value == "true")" />
 
                                                     </div>
 
                                                     break;
 
-
                                                 case CvManagementSystem.Models.AttributeDataType.Dropdown:
 
-                                                    <select asp-for="Attributes[i].Value"
+                                                    <select name="Attributes[@i].Value"
+
                                                             class="form-select">
 
                                                         <option value="">
-                                                            Select...
+
+                                                            —
+
                                                         </option>
 
-                                                        @foreach (var option in item.Options)
+                                                        @foreach (var option
+
+                                                            in item.Options)
+
                                                         {
-                                                            if (item.Value == option.Value)
-                                                            {
-                                                                <option value="@option.Value"
-                                                                        selected>
-                                                                    @(option.Value)
-                                                                </option>
-                                                            }
-                                                            else
-                                                            {
-                                                                <option value="@option.Value">
-                                                                    @(option.Value)
-                                                                </option>
-                                                            }
+
+                                                            <option value="@option.Value"
+
+                                                                    selected="@(item.Value == option.Value)">
+
+                                                                @option.Value
+
+                                                            </option>
+
                                                         }
 
                                                     </select>
 
                                                     break;
 
+                                                case CvManagementSystem.Models.AttributeDataType.Text:
+
+                                                    <textarea name="Attributes[@i].Value"
+
+                                                              class="form-control"
+
+                                                              rows="4">@item.Value</textarea>
+
+                                                    break;
+
+                                                case CvManagementSystem.Models.AttributeDataType.Numeric:
+
+                                                    <input type="number"
+
+                                                           step="any"
+
+                                                           name="Attributes[@i].Value"
+
+                                                           value="@item.Value"
+
+                                                           class="form-control" />
+
+                                                    break;
+
+                                                case CvManagementSystem.Models.AttributeDataType.Date:
+
+                                                    <input type="date"
+
+                                                           name="Attributes[@i].Value"
+
+                                                           value="@item.Value"
+
+                                                           class="form-control" />
+
+                                                    break;
 
                                                 case CvManagementSystem.Models.AttributeDataType.Period:
 
-                                                    <div class="row g-2">
+                                                    <input type="text"
 
-                                                        <div class="col-md-6">
+                                                           name="Attributes[@i].Value"
 
-                                                            <label class="form-label small">
-                                                                Start
-                                                            </label>
+                                                           value="@item.Value"
 
-                                                            <input type="date"
-                                                                   class="form-control period-start"
-                                                                   data-target="period_@item.AttributeDefinitionId" />
+                                                           class="form-control"
 
-                                                        </div>
-
-                                                        <div class="col-md-6">
-
-                                                            <label class="form-label small">
-                                                                End
-                                                            </label>
-
-                                                            <input type="date"
-                                                                   class="form-control period-end"
-                                                                   data-target="period_@item.AttributeDefinitionId" />
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <input asp-for="Attributes[i].Value"
-                                                           id="period_@item.AttributeDefinitionId"
-                                                           type="hidden"
-                                                           class="period-value" />
+                                                           placeholder="YYYY-MM-DD - YYYY-MM-DD" />
 
                                                     break;
 
+                                                case CvManagementSystem.Models.AttributeDataType.Image:
+
+                                                    <input type="url"
+
+                                                           name="Attributes[@i].Value"
+
+                                                           value="@item.Value"
+
+                                                           class="form-control"
+
+                                                           placeholder="https://..." />
+
+                                                    break;
 
                                                 default:
 
-                                                    <input asp-for="Attributes[i].Value"
-                                                           class="form-control"
-                                                           placeholder="Enter value..." />
+                                                    <input type="text"
+
+                                                           name="Attributes[@i].Value"
+
+                                                           value="@item.Value"
+
+                                                           class="form-control" />
 
                                                     break;
+
                                             }
 
-                                        </td>
+                                            @if (string.IsNullOrWhiteSpace(item.Value))
 
-                                    </tr>
-                                }
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-                }
-
-            </div>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- PROJECTS -->
-        <!-- ================================================= -->
-
-        <div class="card shadow-sm mb-4">
-
-            <div class="card-header d-flex justify-content-between align-items-center">
-
-                <strong>
-                    Projects
-                </strong>
-
-                <a asp-controller="Projects"
-                   asp-action="Create"
-                   class="btn btn-sm btn-outline-primary">
-                    Add Project
-                </a>
-
-            </div>
-
-            <div class="card-body">
-
-                @if (Model.Projects.Count == 0)
-                {
-                    <div class="text-muted text-center py-4">
-                        No projects have been added yet.
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-
-                        <table class="table table-hover align-middle mb-0">
-
-                            <thead>
-
-                                <tr>
-                                    <th>
-                                        Project
-                                    </th>
-
-                                    <th>
-                                        Period
-                                    </th>
-
-                                    <th>
-                                        Technology Tags
-                                    </th>
-
-                                    <th>
-                                        Description
-                                    </th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                @foreach (var project in Model.Projects)
-                                {
-                                    <tr>
-
-                                        <td>
-                                            <strong>
-                                                @(project.Name)
-                                            </strong>
-                                        </td>
-
-                                        <td>
-                                            @(project.Period)
-                                        </td>
-
-                                        <td>
-
-                                            <div class="d-flex flex-wrap gap-1">
-
-                                                @foreach (var tag in project.TechnologyTags)
-                                                {
-                                                    <span class="badge text-bg-light">
-                                                        @(tag)
-                                                    </span>
-                                                }
-
-                                            </div>
-
-                                        </td>
-
-                                        <td>
-                                            @(project.DescriptionMarkdown)
-                                        </td>
-
-                                    </tr>
-                                }
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-                }
-
-            </div>
-
-        </div>
-
-
-        <!-- ================================================= -->
-        <!-- CVS -->
-        <!-- ================================================= -->
-
-        <div class="card shadow-sm mb-4">
-
-            <div class="card-header">
-
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-
-                    <strong>
-                        CVs
-                    </strong>
-
-                    <span class="badge text-bg-secondary">
-                        @(Model.Cvs.Count)
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div class="card-body">
-
-                @if (Model.Cvs.Count == 0)
-                {
-                    <div class="text-muted text-center py-4">
-                        No CVs have been created yet.
-                    </div>
-                }
-                else
-                {
-                    <div class="table-responsive">
-
-                        <table class="table table-hover align-middle mb-0">
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        CV
-                                    </th>
-
-                                    <th>
-                                        Position
-                                    </th>
-
-                                    <th>
-                                        Status
-                                    </th>
-
-                                    <th>
-                                        Updated
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                @foreach (var cv in Model.Cvs)
-                                {
-                                    <tr>
-
-                                        <td>
-                                            <strong>
-                                                @(cv.Title)
-                                            </strong>
-                                        </td>
-
-                                        <td>
-                                            @(cv.PositionTitle)
-                                        </td>
-
-                                        <td>
-
-                                            @if (cv.IsPublished)
                                             {
-                                                <span class="badge text-bg-success">
-                                                    Published
-                                                </span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge text-bg-secondary">
-                                                    Draft
-                                                </span>
+
+                                                <div class="text-danger small mt-1">
+
+                                                    @L["Required"]
+
+                                                </div>
+
                                             }
 
-                                        </td>
-
-                                        <td>
-                                            @cv.UpdatedAt
-                                                .ToLocalTime()
-                                                .ToString("dd MMM yyyy HH:mm")
                                         </td>
 
                                     </tr>
+
                                 }
 
                             </tbody>
@@ -847,10 +787,21 @@
 
                     </div>
 
-                    <div class="form-text mt-2">
-                        CV navigation will be connected to the CV detail page
-                        when CV creation and editing are implemented.
+
+                    <div class="border-top p-3">
+
+                        <button type="button"
+
+                                id="remove-selected-attributes"
+
+                                class="btn btn-outline-danger btn-sm">
+
+                            @L["RemoveSelected"]
+
+                        </button>
+
                     </div>
+
                 }
 
             </div>
@@ -859,244 +810,943 @@
 
 
         <!-- ================================================= -->
-        <!-- SAVE -->
+
+        <!-- Save -->
+
         <!-- ================================================= -->
 
-        <div class="d-flex justify-content-end mb-5">
+        <div class="d-flex flex-column flex-sm-row
+
+                    align-items-sm-center
+
+                    gap-3 mb-4">
 
             <button type="submit"
+
                     class="btn btn-primary">
-                Save Profile
+
+                @L["SaveProfile"]
+
             </button>
+
+            <span id="autosave-status"
+
+                  class="small text-muted">
+
+                @L["Saved"]
+
+            </span>
 
         </div>
 
     </form>
 
+
+    <!-- ===================================================== -->
+
+    <!-- Projects -->
+
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header d-flex
+
+                    justify-content-between
+
+                    align-items-center">
+
+            <div>
+
+                <h2 class="h5 mb-0">
+
+                    @L["Projects"]
+
+                </h2>
+
+                <p class="text-muted small mb-0 mt-1">
+
+                    @L["ManageProjects"]
+
+                </p>
+
+            </div>
+
+            <a asp-controller="Projects"
+
+               asp-action="Index"
+
+               class="btn btn-outline-primary btn-sm">
+
+                @L["MyProjects"]
+
+            </a>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.Projects.Count == 0)
+
+            {
+
+                <div class="p-4 text-muted">
+
+                    @L["NoProjects"]
+
+                </div>
+
+            }
+
+            else
+
+            {
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover
+
+                                  align-middle
+
+                                  mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+
+                                    @L["Project"]
+
+                                </th>
+
+                                <th>
+
+                                    @L["Period"]
+
+                                </th>
+
+                                <th>
+
+                                    @L["TechnologyTags"]
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var project in Model.Projects)
+
+                            {
+
+                                <tr>
+
+                                    <td>
+
+                                        <a asp-controller="Projects"
+
+                                           asp-action="Details"
+
+                                           asp-route-id="@project.Id"
+
+                                           class="fw-semibold text-decoration-none">
+
+                                            @(project.Name)
+
+                                        </a>
+
+                                    </td>
+
+                                    <td>
+
+                                        @(project.Period)
+
+                                    </td>
+
+                                    <td>
+
+                                        @if (project.TechnologyTags.Count == 0)
+
+                                        {
+
+                                            <span class="text-muted">
+
+                                                —
+
+                                            </span>
+
+                                        }
+
+                                        else
+
+                                        {
+
+                                            <div class="d-flex flex-wrap gap-1">
+
+                                                @foreach (var projectTag
+
+                                                    in project.TechnologyTags)
+
+                                                {
+
+                                                    <span class="badge
+
+                                                                 text-bg-light
+
+                                                                 border">
+
+                                                        @projectTag
+
+                                                    </span>
+
+                                                }
+
+                                            </div>
+
+                                        }
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+
+    <!-- CVs -->
+
+    <!-- ===================================================== -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header d-flex
+
+                    justify-content-between
+
+                    align-items-center">
+
+            <div>
+
+                <h2 class="h5 mb-0">
+
+                    @L["MyCVs"]
+
+                </h2>
+
+                <p class="text-muted small mb-0 mt-1">
+
+                    @L["CreateCVFromPosition"]
+
+                </p>
+
+            </div>
+
+            <a asp-controller="Positions"
+
+               asp-action="Index"
+
+               class="btn btn-outline-primary btn-sm">
+
+                @L["BrowsePositions"]
+
+            </a>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            @if (Model.Cvs.Count == 0)
+
+            {
+
+                <div class="p-4 text-center">
+
+                    <h3 class="h6">
+
+                        @L["NoCVs"]
+
+                    </h3>
+
+                    <p class="text-muted mb-0">
+
+                        @L["CreateCVFromPosition"]
+
+                    </p>
+
+                </div>
+
+            }
+
+            else
+
+            {
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover
+
+                                  align-middle
+
+                                  mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+
+                                    @L["CVs"]
+
+                                </th>
+
+                                <th>
+
+                                    @L["Position"]
+
+                                </th>
+
+                                <th>
+
+                                    @L["Status"]
+
+                                </th>
+
+                                <th>
+
+                                    @L["Updated"]
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var cv in Model.Cvs)
+
+                            {
+
+                                <tr>
+
+                                    <td>
+
+                                        <a asp-controller="Cvs"
+
+                                           asp-action="Details"
+
+                                           asp-route-id="@cv.Id"
+
+                                           class="fw-semibold text-decoration-none">
+
+                                            @(cv.Title)
+
+                                        </a>
+
+                                    </td>
+
+                                    <td>
+
+                                        @(cv.PositionTitle)
+
+                                    </td>
+
+                                    <td>
+
+                                        @if (cv.IsPublished)
+
+                                        {
+
+                                            <span class="badge text-bg-success">
+
+                                                @L["Published"]
+
+                                            </span>
+
+                                        }
+
+                                        else
+
+                                        {
+
+                                            <span class="badge text-bg-secondary">
+
+                                                @L["Draft"]
+
+                                            </span>
+
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        @cv.UpdatedAt
+
+                                            .ToLocalTime()
+
+                                            .ToString("dd MMM yyyy, HH\:mm")
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+
 </div>
 
 
-@section Scripts {
+<!-- ========================================================= -->
 
-    <partial name="_ValidationScriptsPartial" />
+<!-- Profile JavaScript -->
 
-    <script>
+<!-- ========================================================= -->
 
-        // =====================================================
-        // ATTRIBUTE SELECTION
-        // =====================================================
+<script>
 
+    (() => {
+
+        // -----------------------------------------------------
+        // Available attribute selection
+        // -----------------------------------------------------
+        const availableAttributeRadios =
+            Array.from(
+                document.querySelectorAll(".available-attribute-radio")
+            );
+
+        const selectedAttributeDefinitionInput =
+            document.getElementById("selected-attribute-definition-id");
+
+        const addSelectedAttributeButton =
+            document.getElementById("add-selected-attribute");
+
+        const attributeSelectionStatus =
+            document.getElementById("attribute-selection-status");
+
+        availableAttributeRadios.forEach(radio => {
+            radio.addEventListener("change", () => {
+                if (selectedAttributeDefinitionInput) {
+                    selectedAttributeDefinitionInput.value = radio.value;
+                }
+
+                if (addSelectedAttributeButton) {
+                    addSelectedAttributeButton.disabled = false;
+                }
+
+                if (attributeSelectionStatus) {
+                    attributeSelectionStatus.textContent =
+                        radio.getAttribute("aria-label") || "";
+                }
+            });
+        });
+
+        // -----------------------------------------------------
+        // Selected profile attributes
+        // -----------------------------------------------------
         const selectAllAttributes =
+
             document.getElementById(
-                "selectAllAttributes");
 
-        const selectAllAttributesButton =
-            document.getElementById(
-                "selectAllAttributesButton");
+                "select-all-attributes"
 
-        const clearAttributeSelectionButton =
-            document.getElementById(
-                "clearAttributeSelectionButton");
+            );
 
-        const removeSelectedButton =
-            document.getElementById(
-                "removeSelectedButton");
+        const attributeCheckboxes =
 
-        const attributeChecks =
-            document.querySelectorAll(
-                ".attribute-select");
+            Array.from(
 
-        const selectedAttributeCount =
-            document.getElementById(
-                "selectedAttributeCount");
-
-
-        function updateAttributeCount()
-        {
-            const count =
                 document.querySelectorAll(
-                    ".attribute-select:checked"
-                ).length;
 
-            if (selectedAttributeCount)
-            {
-                selectedAttributeCount.textContent =
-                    count + " selected";
-            }
+                    ".attribute-checkbox"
+
+                )
+
+            );
+
+        const removeAttributesButton =
+
+            document.getElementById(
+
+                "remove-selected-attributes"
+
+            );
+
+
+        function selectedAttributeIds() {
+
+            return attributeCheckboxes
+
+                .filter(x => x.checked)
+
+                .map(x => Number(x.value));
+
         }
 
 
-        function setAllAttributes(value)
-        {
-            attributeChecks.forEach(
-                check =>
-                {
-                    check.checked = value;
-                });
+        if (selectAllAttributes) {
 
-            if (selectAllAttributes)
-            {
-                selectAllAttributes.checked =
-                    value;
-            }
-
-            updateAttributeCount();
-        }
-
-
-        if (selectAllAttributes)
-        {
             selectAllAttributes.addEventListener(
+
                 "change",
-                function ()
-                {
-                    setAllAttributes(
-                        this.checked);
-                });
-        }
 
+                () => {
 
-        if (selectAllAttributesButton)
-        {
-            selectAllAttributesButton.addEventListener(
-                "click",
-                function ()
-                {
-                    setAllAttributes(true);
-                });
-        }
+                    attributeCheckboxes.forEach(
 
+                        checkbox => {
 
-        if (clearAttributeSelectionButton)
-        {
-            clearAttributeSelectionButton.addEventListener(
-                "click",
-                function ()
-                {
-                    setAllAttributes(false);
-                });
-        }
+                            checkbox.checked =
 
+                                selectAllAttributes.checked;
 
-        attributeChecks.forEach(
-            check =>
-            {
-                check.addEventListener(
-                    "change",
-                    function ()
-                    {
-                        const allSelected =
-                            Array.from(
-                                attributeChecks
-                            ).every(
-                                x => x.checked);
-
-                        const noneSelected =
-                            Array.from(
-                                attributeChecks
-                            ).every(
-                                x => !x.checked);
-
-                        if (selectAllAttributes)
-                        {
-                            selectAllAttributes.checked =
-                                allSelected;
-
-                            selectAllAttributes.indeterminate =
-                                !allSelected &&
-                                !noneSelected;
                         }
 
-                        updateAttributeCount();
-                    });
-            });
+                    );
+
+                }
+
+            );
+
+        }
 
 
-        if (removeSelectedButton)
-        {
-            removeSelectedButton.addEventListener(
+        if (removeAttributesButton) {
+
+            removeAttributesButton.addEventListener(
+
                 "click",
-                function (event)
-                {
-                    const selected =
-                        document.querySelectorAll(
-                            ".attribute-select:checked"
-                        ).length;
 
-                    if (selected === 0)
-                    {
-                        event.preventDefault();
+                async () => {
 
-                        alert(
-                            "Select at least one attribute."
-                        );
+                    const ids =
+
+                        selectedAttributeIds();
+
+                    if (ids.length === 0) {
 
                         return;
+
                     }
 
-                    if (!confirm(
-                        "Remove the selected attribute(s) from this profile?"
-                    ))
-                    {
-                        event.preventDefault();
+                    const formData =
+
+                        new FormData();
+
+                    formData.append(
+
+                        "__RequestVerificationToken",
+
+                        document.querySelector(
+
+                            '#profile-form input[name="__RequestVerificationToken"]'
+
+                        )?.value || ""
+
+                    );
+
+                    formData.append(
+
+                        "userId",
+
+                        "@Model.UserId"
+
+                    );
+
+                    ids.forEach(
+
+                        id => {
+
+                            formData.append(
+
+                                "attributeIds",
+
+                                id
+
+                            );
+
+                        }
+
+                    );
+
+
+                    const response =
+
+                        await fetch(
+
+                            "@Url.Action("RemoveAttribute", "Profile")",
+
+                            {
+
+                                method: "POST",
+
+                                body: formData
+
+                            }
+
+                        );
+
+
+                    if (response.ok) {
+
+                        window.location.reload();
+
                     }
-                });
+
+                }
+
+            );
+
         }
 
 
-        updateAttributeCount();
+        // -----------------------------------------------------
+
+        // Autosave
+
+        // -----------------------------------------------------
+
+        const profileForm =
+
+            document.getElementById(
+
+                "profile-form"
+
+            );
+
+        const autosaveStatus =
+
+            document.getElementById(
+
+                "autosave-status"
+
+            );
+
+        if (!profileForm || !autosaveStatus) {
+
+            return;
+
+        }
 
 
-        // =====================================================
-        // PERIOD FIELD
-        // =====================================================
+        let dirty = false;
 
-        document
-            .querySelectorAll(".period-start")
-            .forEach(
-                startInput =>
-                {
-                    const targetId =
-                        startInput.dataset.target;
+        let saving = false;
 
-                    const endInput =
-                        document.querySelector(
-                            `.period-end[data-target="${targetId}"]`
-                        );
 
-                    const hiddenInput =
-                        document.getElementById(
-                            targetId);
+        function setStatus(text) {
 
-                    function updatePeriod()
-                    {
-                        if (!hiddenInput)
+            autosaveStatus.textContent =
+
+                text;
+
+        }
+
+
+        function markDirty() {
+
+            dirty = true;
+
+            setStatus(
+
+                "@Html.Raw(L["UnsavedChanges"].Value)"
+
+            );
+
+        }
+
+
+        profileForm.addEventListener(
+
+            "input",
+
+            markDirty
+
+        );
+
+        profileForm.addEventListener(
+
+            "change",
+
+            markDirty
+
+        );
+
+
+        async function autoSave() {
+
+            if (!dirty || saving) {
+
+                return;
+
+            }
+
+            saving = true;
+
+            setStatus(
+
+                "@Html.Raw(L["Saving"].Value)"
+
+            );
+
+
+            try {
+
+                const formData =
+
+                    new FormData(profileForm);
+
+
+                const response =
+
+                    await fetch(
+
+                        "@Url.Action("AutoSave", "Profile")",
+
                         {
-                            return;
+
+                            method: "POST",
+
+                            body: formData
+
                         }
 
-                        const start =
-                            startInput.value || "";
+                    );
 
-                        const end =
-                            endInput
-                                ? endInput.value || ""
-                                : "";
 
-                        hiddenInput.value =
-                            `${start}|${end}`;
-                    }
+                if (response.status === 409) {
 
-                    startInput.addEventListener(
-                        "change",
-                        updatePeriod);
+                    const result =
 
-                    if (endInput)
-                    {
-                        endInput.addEventListener(
-                            "change",
-                            updatePeriod);
-                    }
-                });
-    </script>
-}
+                        await response.json();
+
+                    setStatus(
+
+                        result.message ||
+
+                        "@Html.Raw(L["SaveConflict"].Value)"
+
+                    );
+
+                    return;
+
+                }
+
+
+                if (!response.ok) {
+
+                    setStatus(
+
+                        "Auto-save failed."
+
+                    );
+
+                    return;
+
+                }
+
+
+                const result =
+
+                    await response.json();
+
+
+                if (!result.success) {
+
+                    setStatus(
+
+                        result.message ||
+
+                        "Auto-save failed."
+
+                    );
+
+                    return;
+
+                }
+
+
+                const profileVersionInput =
+
+                    profileForm.querySelector(
+
+                        'input[name="Version"]'
+
+                    );
+
+                if (
+
+                    profileVersionInput &&
+
+                    result.profileVersion
+
+                ) {
+
+                    profileVersionInput.value =
+
+                        result.profileVersion;
+
+                }
+
+
+                if (result.attributeVersions) {
+
+                    const attributeIdInputs =
+
+                        profileForm.querySelectorAll(
+
+                            'input[name$=".AttributeDefinitionId"]'
+
+                        );
+
+
+                    attributeIdInputs.forEach(
+
+                        attributeIdInput => {
+
+                            const match =
+
+                                attributeIdInput.name.match(
+
+                                    /Attributes\[(\d+)\]\.AttributeDefinitionId/
+
+                                );
+
+                            if (!match) {
+
+                                return;
+
+                            }
+
+
+                            const index =
+
+                                match[1];
+
+                            const attributeId =
+
+                                Number(
+
+                                    attributeIdInput.value
+
+                                );
+
+
+                            const newVersion =
+
+                                result.attributeVersions[
+
+                                    attributeId
+
+                                ];
+
+
+                            if (!newVersion) {
+
+                                return;
+
+                            }
+
+
+                            const versionInput =
+
+                                profileForm.querySelector(
+
+                                    \`input[name="Attributes[${index}].Version"]\`
+
+                                );
+
+
+                            if (versionInput) {
+
+                                versionInput.value =
+
+                                    newVersion;
+
+                            }
+
+                        }
+
+                    );
+
+                }
+
+
+                dirty = false;
+
+                setStatus(
+
+                    "@Html.Raw(L["AutoSaved"].Value)"
+
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+
+                    "Profile auto-save failed:",
+
+                    error
+
+                );
+
+                setStatus(
+
+                    "Auto-save failed."
+
+                );
+
+            }
+
+            finally {
+
+                saving = false;
+
+            }
+
+        }
+
+
+        // Seven seconds is within the required 5-10 second interval.
+
+        setInterval(
+
+            autoSave,
+
+            7000
+
+        );
+
+    })();
+
+</script>

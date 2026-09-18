@@ -29,162 +29,87 @@ public class SearchController : Controller
     {
         var query = q?.Trim() ?? string.Empty;
 
-        var user = await _userManager.GetUserAsync(User);
+        var user =
+            await _userManager.GetUserAsync(User);
 
-        var isAuthenticated = user != null;
+        var isCandidate =
+            user != null &&
+            await _userManager.IsInRoleAsync(
+                user,
+                "Candidate");
 
         var isRecruiter =
-            isAuthenticated &&
+            user != null &&
             await _userManager.IsInRoleAsync(
-                user!,
+                user,
                 "Recruiter");
 
         var isAdministrator =
-            isAuthenticated &&
+            user != null &&
             await _userManager.IsInRoleAsync(
-                user!,
+                user,
                 "Administrator");
 
-        var isCandidate =
-            isAuthenticated &&
-            await _userManager.IsInRoleAsync(
-                user!,
-                "Candidate");
-
         var visiblePositions =
-            await _positionAccessService.GetVisiblePositionsAsync(
-                user?.Id,
-                isRecruiter || isAdministrator);
+            await _positionAccessService
+                .GetVisiblePositionsAsync(
+                    user?.Id,
+                    isRecruiter || isAdministrator);
 
         var visiblePositionIds =
             visiblePositions
                 .Select(x => x.Id)
                 .ToHashSet();
 
-        var model = new GlobalSearchViewModel
-        {
-            Query = query,
-            CanSeeCvs = isRecruiter || isAdministrator || isCandidate
-        };
+        var model =
+            new GlobalSearchViewModel
+            {
+                Query = query,
+
+                CanSeeCvs =
+                    isCandidate ||
+                    isRecruiter ||
+                    isAdministrator
+            };
 
         if (string.IsNullOrWhiteSpace(query))
         {
             return View(model);
         }
 
-        /*
-         * Position search.
-         *
-         * Search title and description only. Access filtering has
-         * already been handled through PositionAccessService.
-         */
-        model.Positions = visiblePositions
-            .Where(x =>
-                x.Title.Contains(
-                    query,
-                    StringComparison.OrdinalIgnoreCase) ||
-                (x.Description?.Contains(
-                    query,
-                    StringComparison.OrdinalIgnoreCase) ?? false))
-            .Take(50)
-            .Select(x => new GlobalSearchPositionViewModel
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Description = x.Description,
-                IsPublic = x.IsPublic,
-                UpdatedAt = x.UpdatedAt
-            })
-            .ToList();
+        // =====================================================
+        // Position full-text search
+        // =====================================================
 
-        /*
-         * Only authenticated users may search CVs.
-         *
-         * Recruiters:
-         *   published CVs only
-         *
-         * Candidates:
-         *   their own CVs, subject to current position access
-         *
-         * Administrators:
-         *   all CVs
-         */
-        if (isRecruiter || isAdministrator || isCandidate)
+        var positionSearchQuery =
+            EF.Functions.WebSearchToTsQuery(
+                "simple",
+                query);
+
+        model.Positions =
+    await _context.Positions
+        .AsNoTracking()
+       .Where(x => visiblePositionIds.Contains(x.Id))
+        .Where(x =>
+            x.SearchVector.Matches(
+                EF.Functions.WebSearchToTsQuery("simple", query)))
+        .OrderByDescending(x => x.UpdatedAt)
+        .Take(50)
+        .Select(x => new GlobalSearchPositionViewModel
         {
-            var cvQuery = _context.Cvs
-                .AsNoTracking()
-                .Include(x => x.Position)
-                .Include(x => x.CandidateProfile)
-                .AsQueryable();
+            Id = x.Id,
+            Title = x.Title,
+            Description = x.Description,
+            IsPublic = x.IsPublic,
+            UpdatedAt = x.UpdatedAt
+        })
+        .ToListAsync();
 
-            if (isRecruiter)
-            {
-                cvQuery = cvQuery.Where(x =>
-                    x.IsPublished &&
-                    visiblePositionIds.Contains(x.PositionId));
-            }
-            else if (isCandidate)
-            {
-                cvQuery = cvQuery.Where(x =>
-                    x.CandidateProfile.UserId == user!.Id &&
-                    visiblePositionIds.Contains(x.PositionId));
-            }
 
-            
+        // =====================================================
+        // Submitted CV counts
+        // =====================================================
 
-            cvQuery = cvQuery.Where(x =>
-                EF.Functions.ILike(
-                    x.Title,
-                    $"%{query}%") ||
-
-                EF.Functions.ILike(
-                    x.Position.Title,
-                    $"%{query}%") ||
-
-                EF.Functions.ILike(
-                    x.CandidateProfile.FirstName,
-                    $"%{query}%") ||
-
-                EF.Functions.ILike(
-                    x.CandidateProfile.LastName,
-                    $"%{query}%") ||
-
-                x.AttributeValues.Any(attribute =>
-                    EF.Functions.ILike(
-                        attribute.Value ?? "",
-                        $"%{query}%")) ||
-
-                x.Projects.Any(project =>
-                    project.Project.Name.Contains(
-                        query)));
-
-            model.Cvs = await cvQuery
-                .OrderByDescending(x => x.UpdatedAt)
-                .Take(50)
-                .Select(x => new GlobalSearchCvViewModel
-                
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    PositionId = x.PositionId,
-                    PositionTitle = x.Position.Title,
-                    CandidateName =
-                        x.CandidateProfile.FirstName +
-                        " " +
-                        x.CandidateProfile.LastName,
-                    IsPublished = x.IsPublished,
-                    UpdatedAt = x.UpdatedAt,
-                    LikeCount =_context.CvLikes.Count(
-                      like => like.CvId == x.Id),
-                })
-                
-                .ToListAsync();
-        }
-
-        /*
-         * Submitted CV counts for matching positions.
-         * One grouped query, reused for the result list.
-         */
         if (model.Positions.Count > 0)
         {
             var positionIds =
@@ -197,24 +122,129 @@ public class SearchController : Controller
                     .AsNoTracking()
                     .Where(x =>
                         x.IsPublished &&
-                        positionIds.Contains(x.PositionId))
-                    .GroupBy(x => x.PositionId)
-                    .Select(x => new
-                    {
-                        PositionId = x.Key,
-                        Count = x.Count()
-                    })
+                        positionIds.Contains(
+                            x.PositionId))
+                    .GroupBy(x =>
+                        x.PositionId)
+                    .Select(x =>
+                        new
+                        {
+                            PositionId = x.Key,
+                            Count = x.Count()
+                        })
                     .ToDictionaryAsync(
                         x => x.PositionId,
                         x => x.Count);
 
-            foreach (var position in model.Positions)
+            foreach (var position
+                     in model.Positions)
             {
                 position.SubmittedCvCount =
                     submittedCounts.GetValueOrDefault(
                         position.Id);
             }
         }
+
+
+        // =====================================================
+        // CV search
+        // =====================================================
+
+        if (isCandidate ||
+            isRecruiter ||
+            isAdministrator)
+        {
+            var cvQuery =
+                _context.Cvs
+                    .AsNoTracking()
+                    .AsQueryable();
+
+
+            if (isCandidate)
+            {
+                cvQuery =
+                    cvQuery.Where(x =>
+                        x.CandidateProfile.UserId ==
+                        user!.Id &&
+                        visiblePositionIds.Contains(
+                            x.PositionId));
+            }
+            else if (isRecruiter)
+            {
+                cvQuery =
+                    cvQuery.Where(x =>
+                        x.IsPublished &&
+                        visiblePositionIds.Contains(
+                            x.PositionId));
+            }
+            // Administrator sees all CVs.
+
+
+            var cvSearchQuery =
+                EF.Functions.WebSearchToTsQuery(
+                    "simple",
+                    query);
+
+
+            cvQuery = cvQuery.Where(x =>
+    x.SearchVector.Matches(
+        EF.Functions.WebSearchToTsQuery("simple", query))
+    || EF.Functions.ILike(
+        x.Position.Title,
+        "%" + query + "%")
+    || EF.Functions.ILike(
+        x.CandidateProfile.FirstName,
+        "%" + query + "%")
+    || EF.Functions.ILike(
+        x.CandidateProfile.LastName,
+        "%" + query + "%")
+    || x.CandidateProfile.AttributeValues.Any(av =>
+        EF.Functions.ILike(av.Value ?? string.Empty, "%" + query + "%"))
+    || x.CandidateProfile.Projects.Any(p =>
+        EF.Functions.ILike(p.Name, "%" + query + "%"))
+);
+
+
+            model.Cvs =
+                await cvQuery
+                    .OrderByDescending(
+                        x => x.UpdatedAt)
+                    .Take(50)
+                    .Select(x =>
+                        new GlobalSearchCvViewModel
+                        {
+                            Id = x.Id,
+
+                            Title = x.Title,
+
+                            PositionId =
+                                x.PositionId,
+
+                            PositionTitle =
+                                x.Position.Title,
+
+                            CandidateName =
+                                (
+                                    x.CandidateProfile.FirstName +
+                                    " " +
+                                    x.CandidateProfile.LastName
+                                ).Trim(),
+
+                            IsPublished =
+                                x.IsPublished,
+
+                            LikeCount =
+                                _context.CvLikes.Count(
+                                    like =>
+                                        like.CvId ==
+                                        x.Id),
+
+                            UpdatedAt =
+                                x.UpdatedAt
+                        })
+                    .ToListAsync();
+        }
+
 
         return View(model);
     }
