@@ -632,7 +632,7 @@ if (isRecruiter || isAdmin)
     }
 
 
-    [Authorize(Roles = "Recruiter,Administrator")]
+    [Authorize(Roles = "Recruiter")]
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> ToggleLike(int id)

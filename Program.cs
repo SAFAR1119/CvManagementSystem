@@ -8,25 +8,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================================
-// Configuration
-// ============================================================
-
-// User Secrets are used for the Supabase connection string.
 builder.Configuration.AddUserSecrets<Program>(optional: true);
-
-// ============================================================
-// Localization
-// ============================================================
 
 builder.Services.AddLocalization(options =>
 {
     options.ResourcesPath = "Resources";
 });
-
-// ============================================================
-// MVC + Razor Pages
-// ============================================================
 
 builder.Services
     .AddControllersWithViews()
@@ -35,13 +22,8 @@ builder.Services
 
 builder.Services.AddRazorPages();
 
-// ============================================================
-// Database
-// ============================================================
-
 var connectionString =
-    builder.Configuration.GetConnectionString(
-        "DefaultConnection");
+    builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
@@ -49,21 +31,15 @@ if (string.IsNullOrWhiteSpace(connectionString))
         "DefaultConnection is not configured.");
 }
 
-builder.Services.AddDbContext<ApplicationDbContext>(
-    options =>
-    {
-        options.UseNpgsql(connectionString);
-    });
-
-// ============================================================
-// Identity
-// ============================================================
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+});
 
 builder.Services
     .AddDefaultIdentity<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
-
         options.User.RequireUniqueEmail = true;
 
         options.Password.RequireDigit = true;
@@ -75,23 +51,38 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// ============================================================
-// Application Services
-// ============================================================
+// External authentication providers
+builder.Services
+    .AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId =
+            builder.Configuration[
+                "Authentication:Google:ClientId"]
+            ?? string.Empty;
+
+        options.ClientSecret =
+            builder.Configuration[
+                "Authentication:Google:ClientSecret"]
+            ?? string.Empty;
+    })
+    .AddFacebook(options =>
+    {
+        options.AppId =
+            builder.Configuration[
+                "Authentication:Facebook:AppId"]
+            ?? string.Empty;
+
+        options.AppSecret =
+            builder.Configuration[
+                "Authentication:Facebook:AppSecret"]
+            ?? string.Empty;
+    });
 
 builder.Services.AddScoped<PositionAccessService>();
-
 builder.Services.AddScoped<CvGenerationService>();
 
-// ============================================================
-// Build Application
-// ============================================================
-
 var app = builder.Build();
-
-// ============================================================
-// Supported UI Cultures
-// ============================================================
 
 var supportedCultures = new[]
 {
@@ -105,25 +96,15 @@ var localizationOptions =
         .AddSupportedCultures(supportedCultures)
         .AddSupportedUICultures(supportedCultures);
 
-// ============================================================
-// Error Handling
-// ============================================================
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-
     app.UseHsts();
 }
 
-// ============================================================
-// HTTP Pipeline
-// ============================================================
-
 app.UseHttpsRedirection();
 
-app.UseRequestLocalization(
-    localizationOptions);
+app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
 
@@ -133,30 +114,14 @@ app.UseMiddleware<BlockedUserMiddleware>();
 
 app.UseAuthorization();
 
-// ============================================================
-// Static Assets
-// ============================================================
-
 app.MapStaticAssets();
-
-// ============================================================
-// MVC Routes
-// ============================================================
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-// ============================================================
-// Identity / Razor Pages
-// ============================================================
-
 app.MapRazorPages();
-
-// ============================================================
-// Database Seeders
-// ============================================================
 
 using (var scope = app.Services.CreateScope())
 {
@@ -169,12 +134,7 @@ using (var scope = app.Services.CreateScope())
         services,
         app.Configuration);
 
-    await AttributeLibrarySeeder.SeedAsync(
-        dbContext);
+    await AttributeLibrarySeeder.SeedAsync(dbContext);
 }
-
-// ============================================================
-// Run
-// ============================================================
 
 app.Run();
