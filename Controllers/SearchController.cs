@@ -1,3 +1,4 @@
+using System.Data.Common;
 using CvManagementSystem.Data;
 using CvManagementSystem.Models;
 using CvManagementSystem.Services;
@@ -81,29 +82,46 @@ public class SearchController : Controller
         // Position full-text search
         // =====================================================
 
-        var positionSearchQuery =
-            EF.Functions.WebSearchToTsQuery(
-                "simple",
-                query);
-
-        model.Positions =
-    await _context.Positions
-        .AsNoTracking()
-       .Where(x => visiblePositionIds.Contains(x.Id))
-        .Where(x =>
-            x.SearchVector.Matches(
-                EF.Functions.WebSearchToTsQuery("simple", query)))
-        .OrderByDescending(x => x.UpdatedAt)
-        .Take(50)
-        .Select(x => new GlobalSearchPositionViewModel
+        try
         {
-            Id = x.Id,
-            Title = x.Title,
-            Description = x.Description,
-            IsPublic = x.IsPublic,
-            UpdatedAt = x.UpdatedAt
-        })
-        .ToListAsync();
+            model.Positions = await _context.Positions
+                .AsNoTracking()
+                .Where(x => visiblePositionIds.Contains(x.Id))
+                .Where(x => x.SearchVector.Matches(
+                    EF.Functions.WebSearchToTsQuery("simple", query)))
+                .OrderByDescending(x => x.UpdatedAt)
+                .Take(50)
+                .Select(x => new GlobalSearchPositionViewModel
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    IsPublic = x.IsPublic,
+                    UpdatedAt = x.UpdatedAt
+                })
+                .ToListAsync();
+        }
+        catch (DbException)
+        {
+            // Existing databases created before the FTS migration still get a
+            // useful, database-side search instead of a 500 response.
+            model.Positions = await _context.Positions
+                .AsNoTracking()
+                .Where(x => visiblePositionIds.Contains(x.Id))
+                .Where(x => EF.Functions.ILike(x.Title, "%" + query + "%") ||
+                    EF.Functions.ILike(x.Description ?? string.Empty, "%" + query + "%"))
+                .OrderByDescending(x => x.UpdatedAt)
+                .Take(50)
+                .Select(x => new GlobalSearchPositionViewModel
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    IsPublic = x.IsPublic,
+                    UpdatedAt = x.UpdatedAt
+                })
+                .ToListAsync();
+        }
 
 
         // =====================================================
@@ -180,15 +198,8 @@ public class SearchController : Controller
             // Administrator sees all CVs.
 
 
-            var cvSearchQuery =
-                EF.Functions.WebSearchToTsQuery(
-                    "simple",
-                    query);
-
-
             cvQuery = cvQuery.Where(x =>
-    x.SearchVector.Matches(
-        EF.Functions.WebSearchToTsQuery("simple", query))
+    EF.Functions.ILike(x.Title, "%" + query + "%")
     || EF.Functions.ILike(
         x.Position.Title,
         "%" + query + "%")

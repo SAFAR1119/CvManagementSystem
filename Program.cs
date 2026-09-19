@@ -52,32 +52,41 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // External authentication providers
-builder.Services
-    .AddAuthentication()
-    .AddGoogle(options =>
-    {
-        options.ClientId =
-            builder.Configuration[
-                "Authentication:Google:ClientId"]
-            ?? string.Empty;
+var authentication = builder.Services.AddAuthentication();
 
-        options.ClientSecret =
-            builder.Configuration[
-                "Authentication:Google:ClientSecret"]
-            ?? string.Empty;
-    })
-    .AddFacebook(options =>
-    {
-        options.AppId =
-            builder.Configuration[
-                "Authentication:Facebook:AppId"]
-            ?? string.Empty;
+// Register Google only when valid credentials exist.
+var googleClientId =
+    builder.Configuration["Authentication:Google:ClientId"];
 
-        options.AppSecret =
-            builder.Configuration[
-                "Authentication:Facebook:AppSecret"]
-            ?? string.Empty;
+var googleClientSecret =
+    builder.Configuration["Authentication:Google:ClientSecret"];
+
+if (!string.IsNullOrWhiteSpace(googleClientId) &&
+    !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    authentication.AddGoogle(options =>
+    {
+        options.ClientId = googleClientId;
+        options.ClientSecret = googleClientSecret;
     });
+}
+
+// Register Facebook only when valid credentials exist.
+var facebookAppId =
+    builder.Configuration["Authentication:Facebook:AppId"];
+
+var facebookAppSecret =
+    builder.Configuration["Authentication:Facebook:AppSecret"];
+
+if (!string.IsNullOrWhiteSpace(facebookAppId) &&
+    !string.IsNullOrWhiteSpace(facebookAppSecret))
+{
+    authentication.AddFacebook(options =>
+    {
+        options.AppId = facebookAppId;
+        options.AppSecret = facebookAppSecret;
+    });
+}
 
 builder.Services.AddScoped<PositionAccessService>();
 builder.Services.AddScoped<CvGenerationService>();
@@ -129,6 +138,17 @@ using (var scope = app.Services.CreateScope())
 
     var dbContext =
         services.GetRequiredService<ApplicationDbContext>();
+
+    // Only execute database migrations when there are unapplied
+    // migrations. This prevents EF Core 9 from throwing
+    // PendingModelChangesWarning when the database is already current.
+    var pendingMigrations =
+        await dbContext.Database.GetPendingMigrationsAsync();
+
+    if (pendingMigrations.Any())
+    {
+        await dbContext.Database.MigrateAsync();
+    }
 
     await IdentitySeeder.SeedRolesAsync(
         services,

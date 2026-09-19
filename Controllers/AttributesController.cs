@@ -267,9 +267,36 @@ public class AttributesController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        var ids = selectedIds
+            .Where(x => x > 0)
+            .Distinct()
+            .ToList();
+
         var definitions = await _context.AttributeDefinitions
-            .Where(x => selectedIds.Contains(x.Id))
+            .Where(x => ids.Contains(x.Id))
             .ToListAsync();
+
+        // Definitions are shared by profiles, positions, and CVs. Prevent a
+        // foreign-key failure and keep existing records meaningful.
+        var usedIds = await _context.CandidateAttributeValues
+            .Where(x => ids.Contains(x.AttributeDefinitionId))
+            .Select(x => x.AttributeDefinitionId)
+            .Concat(_context.PositionAttributes
+                .Where(x => ids.Contains(x.AttributeDefinitionId))
+                .Select(x => x.AttributeDefinitionId))
+            .Concat(_context.CvAttributeValues
+                .Where(x => ids.Contains(x.AttributeDefinitionId))
+                .Select(x => x.AttributeDefinitionId))
+            .Distinct()
+            .ToListAsync();
+
+        if (usedIds.Count > 0)
+        {
+            TempData["Error"] =
+                "Attributes already used in a profile, position, or CV cannot be deleted.";
+
+            return RedirectToAction(nameof(Index));
+        }
 
         _context.AttributeDefinitions
             .RemoveRange(definitions);

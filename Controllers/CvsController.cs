@@ -58,15 +58,17 @@ public class CvsController : Controller
             .OrderByDescending(x => x.UpdatedAt)
             .AsQueryable();
 
-        if (isRecruiter)
+        // Administrators have unrestricted access, including drafts. A user
+        // may hold both roles, so the administrator check must come first.
+        if (!isAdmin && isRecruiter)
         {
              query = query.Where(x =>
                  x.IsPublished);
         }
         else if (!isAdmin)
-       {
-             query = query.Where(x =>
-                 x.CandidateProfile.UserId == currentUser.Id);
+        {
+            query = query.Where(x =>
+                x.CandidateProfile.UserId == currentUser.Id);
         }
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -203,9 +205,9 @@ public class CvsController : Controller
             }
         }
 
-       var cv = await _cvGenerationService.GenerateAsync(
-                 positionId,
-                 targetUserId);
+        var cv = await _cvGenerationService.GenerateAsync(
+            positionId,
+            targetUserId);
 
         if (cv == null)
         {

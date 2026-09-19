@@ -60,9 +60,10 @@ public class CvGenerationService
                 position,
                 profile))
         {
-            throw new UnauthorizedAccessException(
-                "The candidate is not currently authorized " +
-                "to create a CV for this position.");
+            // The controller turns a null result into a helpful message.
+            // Throwing here produced a server error for a stale client page
+            // after access rules had changed.
+            return null;
         }
 
         var existing =

@@ -115,6 +115,13 @@
         </div>
     </div>
 
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Tag as string))
+    {
+        <div class="alert alert-info">
+            Showing results for technology tag: <strong>@ViewBag.Tag</strong>
+        </div>
+    }
+
     <div class="card shadow-sm">
 
         <div class="card-body p-0">
@@ -144,14 +151,6 @@
                             <tr>
                                 <th>CV</th>
                                 <th>Position</th>
-                                @if (!string.IsNullOrWhiteSpace(ViewBag.Tag as string))
-                                {
-                                    <div class="alert alert-info">
-                                         Showing results for technology tag:
-                                         <strong>@ViewBag.Tag</strong>
-                                    </div>
-                                }
-
                                 @if (isRecruiter || isAdministrator)
                                 {
                                     <th>Candidate</th>
