@@ -578,42 +578,46 @@ public class ProjectsController : Controller
     }
 
     private async Task<string?>
-        GetTargetUserIdAsync(
-            string? requestedUserId)
+    GetTargetUserIdAsync(
+        string? requestedUserId)
+{
+    var currentUserId =
+        _userManager.GetUserId(User);
+
+    if (string.IsNullOrWhiteSpace(
+            currentUserId))
     {
-        var currentUserId =
-            _userManager.GetUserId(User);
-
-        if (string.IsNullOrWhiteSpace(
-                currentUserId))
-        {
-            return null;
-        }
-
-        if (string.IsNullOrWhiteSpace(
-                requestedUserId))
-        {
-            return currentUserId;
-        }
-
-        if (!User.IsInRole(
-                "Administrator"))
-        {
-            return null;
-        }
-
-        var exists =
-            await _userManager.Users
-                .AsNoTracking()
-                .AnyAsync(
-                    x =>
-                        x.Id ==
-                        requestedUserId);
-
-        return exists
-            ? requestedUserId
-            : null;
+        return null;
     }
+
+    // Candidates may only manage their own projects.
+    // Ignore any posted userId and always use the
+    // currently authenticated user's ID.
+    if (!User.IsInRole(
+            "Administrator"))
+    {
+        return currentUserId;
+    }
+
+    // Administrators may manage another candidate's projects.
+    if (string.IsNullOrWhiteSpace(
+            requestedUserId))
+    {
+        return currentUserId;
+    }
+
+    var exists =
+        await _userManager.Users
+            .AsNoTracking()
+            .AnyAsync(
+                x =>
+                    x.Id ==
+                    requestedUserId);
+
+    return exists
+        ? requestedUserId
+        : null;
+}
 
     private async Task
         LoadAvailableTagsAsync(

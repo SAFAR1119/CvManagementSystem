@@ -485,6 +485,332 @@
         </div>
 
 
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h2 class="h5 mb-0">Professional profile</h2></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><label asp-for="ProfessionalTitle" class="form-label"></label><input asp-for="ProfessionalTitle" class="form-control" placeholder="e.g. Junior Software Engineer" /></div>
+                    <div class="col-md-6"><label asp-for="PhoneNumber" class="form-label"></label><input asp-for="PhoneNumber" class="form-control" /></div>
+                    <div class="col-md-6"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /></div>
+                    <div class="col-md-6"><label asp-for="LinkedInUrl" class="form-label"></label><input asp-for="LinkedInUrl" class="form-control" placeholder="https://linkedin.com/in/..." /></div>
+                    <div class="col-md-6"><label asp-for="GitHubUrl" class="form-label"></label><input asp-for="GitHubUrl" class="form-control" placeholder="https://github.com/..." /></div>
+                    <div class="col-md-6"><label asp-for="PortfolioUrl" class="form-label"></label><input asp-for="PortfolioUrl" class="form-control" placeholder="https://..." /></div>
+                    <div class="col-12"><label asp-for="ProfessionalSummary" class="form-label"></label><textarea asp-for="ProfessionalSummary" class="form-control" rows="4" placeholder="A concise introduction that will appear in your CV."></textarea></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Work Experience</h2>
+        <div class="small text-muted">
+            Add only experience you want recruiters to see. You can leave the extra rows blank.
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        @for (var i = 0; i < Model.WorkExperiences.Count; i++)
+        {
+            var item = Model.WorkExperiences[i];
+
+            <fieldset class="border rounded p-3 mb-3">
+                <legend class="float-none w-auto px-2 fs-6">
+                    Experience @(i + 1)
+                </legend>
+
+                <input type="hidden"
+                       name="WorkExperiences[@i].Id"
+                       value="@item.Id" />
+
+                <input type="hidden"
+                       name="WorkExperiences[@i].SortOrder"
+                       value="@item.SortOrder" />
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Company / organization
+                        </label>
+                        <input type="text"
+                               name="WorkExperiences[@i].CompanyName"
+                               value="@item.CompanyName"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Job title
+                        </label>
+                        <input type="text"
+                               name="WorkExperiences[@i].JobTitle"
+                               value="@item.JobTitle"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Start date
+                        </label>
+                        <input type="date"
+                               name="WorkExperiences[@i].StartDate"
+                               value="@item.StartDate.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            End date
+                        </label>
+                        <input type="date"
+                               name="WorkExperiences[@i].EndDate"
+                               value="@(item.EndDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Responsibilities / achievements
+                        </label>
+                        <textarea name="WorkExperiences[@i].Description"
+                                  class="form-control"
+                                  rows="3">@item.Description</textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Technologies used
+                        </label>
+                        <input type="text"
+                               name="WorkExperiences[@i].Technologies"
+                               value="@item.Technologies"
+                               class="form-control"
+                               placeholder="Java, Spring Boot, MySQL, TypeScript" />
+                    </div>
+
+                </div>
+            </fieldset>
+        }
+
+        @for (var i = Model.WorkExperiences.Count;
+             i < Model.WorkExperiences.Count + 3;
+             i++)
+        {
+            <fieldset class="border rounded p-3 mb-3">
+                <legend class="float-none w-auto px-2 fs-6">
+                    Experience @(i + 1)
+                </legend>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Company / organization
+                        </label>
+                        <input type="text"
+                               name="WorkExperiences[@i].CompanyName"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Job title
+                        </label>
+                        <input type="text"
+                               name="WorkExperiences[@i].JobTitle"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Start date
+                        </label>
+                        <input type="date"
+                               name="WorkExperiences[@i].StartDate"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            End date
+                        </label>
+                        <input type="date"
+                               name="WorkExperiences[@i].EndDate"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Responsibilities / achievements
+                        </label>
+                        <textarea name="WorkExperiences[@i].Description"
+                                  class="form-control"
+                                  rows="3"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Technologies used
+                        </label>
+                        <input type="text"
+                               name="WorkExperiences[@i].Technologies"
+                               class="form-control"
+                               placeholder="Java, Spring Boot, MySQL, TypeScript" />
+                    </div>
+
+                </div>
+            </fieldset>
+        }
+
+    </div>
+</div>
+
+        <div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Education</h2>
+        <div class="small text-muted">
+            Add your academic background. You can leave the extra rows blank.
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        @for (var i = 0; i < Model.EducationEntries.Count; i++)
+        {
+            var item = Model.EducationEntries[i];
+
+            <fieldset class="border rounded p-3 mb-3">
+                <legend class="float-none w-auto px-2 fs-6">
+                    Education @(i + 1)
+                </legend>
+
+                <input type="hidden"
+                       name="EducationEntries[@i].Id"
+                       value="@item.Id" />
+
+                <input type="hidden"
+                       name="EducationEntries[@i].SortOrder"
+                       value="@item.SortOrder" />
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Degree
+                        </label>
+                        <input type="text"
+                               name="EducationEntries[@i].Degree"
+                               value="@item.Degree"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            University / institution
+                        </label>
+                        <input type="text"
+                               name="EducationEntries[@i].Institution"
+                               value="@item.Institution"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Start date
+                        </label>
+                        <input type="date"
+                               name="EducationEntries[@i].StartDate"
+                               value="@item.StartDate.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            End date
+                        </label>
+                        <input type="date"
+                               name="EducationEntries[@i].EndDate"
+                               value="@(item.EndDate?.ToString("yyyy-MM-dd"))"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Achievement / description
+                        </label>
+                        <textarea name="EducationEntries[@i].Description"
+                                  class="form-control"
+                                  rows="2">@item.Description</textarea>
+                    </div>
+
+                </div>
+            </fieldset>
+        }
+
+        @for (var i = Model.EducationEntries.Count;
+             i < Model.EducationEntries.Count + 3;
+             i++)
+        {
+            <fieldset class="border rounded p-3 mb-3">
+                <legend class="float-none w-auto px-2 fs-6">
+                    Education @(i + 1)
+                </legend>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Degree
+                        </label>
+                        <input type="text"
+                               name="EducationEntries[@i].Degree"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            University / institution
+                        </label>
+                        <input type="text"
+                               name="EducationEntries[@i].Institution"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            Start date
+                        </label>
+                        <input type="date"
+                               name="EducationEntries[@i].StartDate"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">
+                            End date
+                        </label>
+                        <input type="date"
+                               name="EducationEntries[@i].EndDate"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">
+                            Achievement / description
+                        </label>
+                        <textarea name="EducationEntries[@i].Description"
+                                  class="form-control"
+                                  rows="2"></textarea>
+                    </div>
+
+                </div>
+            </fieldset>
+        }
+
+    </div>
+</div>
+
         <!-- ================================================= -->
 
         <!-- Info -->

@@ -252,8 +252,12 @@ public class CvsController : Controller
                 .ThenInclude(x => x.AttributeValues)
                     .ThenInclude(x => x.AttributeDefinition)
                         .ThenInclude(x => x.Options)
-            .Include(x => x.Projects)
-                .ThenInclude(x => x.Project)
+            .Include(x => x.CandidateProfile)
+                .ThenInclude(x => x.EducationEntries)
+            .Include(x => x.CandidateProfile)
+                .ThenInclude(x => x.WorkExperiences)
+            .Include(x => x.CandidateProfile)
+                .ThenInclude(x => x.Projects)
                     .ThenInclude(x => x.TechnologyTags)
                         .ThenInclude(x => x.TechnologyTag)
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -302,21 +306,20 @@ if (isRecruiter || isAdmin)
             }
         }
 
-        var attributeValues =
-            cv.CandidateProfile.AttributeValues
-                .GroupBy(x => x.AttributeDefinitionId)
-                .ToDictionary(
-                    x => x.Key,
-                    x => x.First());
+        var requiredAttributeIds = cv.Position.Attributes
+            .Where(x => x.IsRequired)
+            .Select(x => x.AttributeDefinitionId)
+            .ToHashSet();
 
-        var attributes = cv.Position.Attributes
-            .OrderBy(x => x.SortOrder)
+        // A CV is a complete candidate profile.  Position attributes remain
+        // marked as required for publishing, but optional profile attributes
+        // (for example languages, certifications, and custom fields) must not
+        // disappear merely because the position did not explicitly request them.
+        var attributes = cv.CandidateProfile.AttributeValues
+            .OrderBy(x => x.AttributeDefinition.Category!.Name)
+            .ThenBy(x => x.AttributeDefinition.Name)
             .Select(x =>
             {
-                attributeValues.TryGetValue(
-                    x.AttributeDefinitionId,
-                    out var candidateValue);
-
                 return new CvAttributeViewModel
                 {
                     AttributeDefinitionId =
@@ -331,12 +334,12 @@ if (isRecruiter || isAdmin)
                     DataType =
                         x.AttributeDefinition.DataType,
 
-                    Value = candidateValue?.Value,
+                    Value = x.Value,
 
-                    IsRequired = x.IsRequired,
+                    IsRequired = requiredAttributeIds.Contains(
+                        x.AttributeDefinitionId),
 
-                    Version = candidateValue?.Version ??
-                              Guid.Empty,
+                    Version = x.Version,
 
                     Options =
                         x.AttributeDefinition.Options
@@ -347,19 +350,22 @@ if (isRecruiter || isAdmin)
             })
             .ToList();
 
-        var projects = cv.Projects
-            .OrderBy(x => x.SortOrder)
+        // Projects belong to the profile, so a project added after a CV was
+        // generated is immediately visible on every CV and to recruiters.
+        var projects = cv.CandidateProfile.Projects
+            .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+            .ThenByDescending(x => x.StartDate)
             .Select(x => new CvProjectViewModel
             {
-                ProjectId = x.ProjectId,
-                Name = x.Project.Name,
-                Period = x.Project.EndDate.HasValue
-                    ? $"{x.Project.StartDate:MMM yyyy} - {x.Project.EndDate.Value:MMM yyyy}"
-                    : $"{x.Project.StartDate:MMM yyyy} - Present",
+                ProjectId = x.Id,
+                Name = x.Name,
+                Period = x.EndDate.HasValue
+                    ? $"{x.StartDate:MMM yyyy} - {x.EndDate.Value:MMM yyyy}"
+                    : $"{x.StartDate:MMM yyyy} - Present",
                 DescriptionMarkdown =
-                    x.Project.DescriptionMarkdown,
+                    x.DescriptionMarkdown,
                 TechnologyTags =
-                    x.Project.TechnologyTags
+                    x.TechnologyTags
                         .OrderBy(t => t.TechnologyTag.Name)
                         .Select(t => t.TechnologyTag.Name)
                         .ToList()
@@ -382,6 +388,13 @@ if (isRecruiter || isAdmin)
                 cv.CandidateProfile.LastName,
             Location =
                 cv.CandidateProfile.Location,
+            ProfessionalTitle = cv.CandidateProfile.ProfessionalTitle,
+            ProfessionalSummary = cv.CandidateProfile.ProfessionalSummary,
+            PhoneNumber = cv.CandidateProfile.PhoneNumber,
+            Email = cv.CandidateProfile.Email,
+            LinkedInUrl = cv.CandidateProfile.LinkedInUrl,
+            GitHubUrl = cv.CandidateProfile.GitHubUrl,
+            PortfolioUrl = cv.CandidateProfile.PortfolioUrl,
             PhotoUrl =
                 cv.CandidateProfile.PhotoUrl,
             ProfileVersion =
@@ -401,6 +414,16 @@ if (isRecruiter || isAdmin)
                 missingRequired,
             Attributes = attributes,
             Projects = projects,
+            EducationEntries = cv.CandidateProfile.EducationEntries
+                .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                .ThenByDescending(x => x.StartDate)
+                .Select(x => new EducationViewModel { Id = x.Id, Degree = x.Degree, Institution = x.Institution, StartDate = x.StartDate, EndDate = x.EndDate, Description = x.Description, SortOrder = x.SortOrder })
+                .ToList(),
+            WorkExperiences = cv.CandidateProfile.WorkExperiences
+                .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                .ThenByDescending(x => x.StartDate)
+                .Select(x => new WorkExperienceViewModel { Id = x.Id, CompanyName = x.CompanyName, JobTitle = x.JobTitle, StartDate = x.StartDate, EndDate = x.EndDate, Description = x.Description, Technologies = x.Technologies, SortOrder = x.SortOrder })
+                .ToList(),
             LikeCount =
                 await _context.CvLikes.CountAsync(
                     x => x.CvId == cv.Id),
@@ -443,16 +466,6 @@ if (isRecruiter || isAdmin)
             cv.CandidateProfile.UserId != currentUser.Id)
         {
             return Forbid();
-        }
-
-        if (cv.IsPublished && !isAdmin)
-        {
-            TempData["ErrorMessage"] =
-                "A published CV cannot be changed.";
-
-            return RedirectToAction(
-                nameof(Details),
-                new { id = cv.Id });
         }
 
         var canAccess = await _positionAccessService.CanAccessAsync(
@@ -523,6 +536,14 @@ if (isRecruiter || isAdmin)
             string.IsNullOrWhiteSpace(model.Location)
                 ? null
                 : model.Location.Trim();
+
+        cv.CandidateProfile.ProfessionalTitle = Normalize(model.ProfessionalTitle);
+        cv.CandidateProfile.ProfessionalSummary = Normalize(model.ProfessionalSummary);
+        cv.CandidateProfile.PhoneNumber = Normalize(model.PhoneNumber);
+        cv.CandidateProfile.Email = Normalize(model.Email);
+        cv.CandidateProfile.LinkedInUrl = Normalize(model.LinkedInUrl);
+        cv.CandidateProfile.GitHubUrl = Normalize(model.GitHubUrl);
+        cv.CandidateProfile.PortfolioUrl = Normalize(model.PortfolioUrl);
 
         cv.CandidateProfile.PhotoUrl =
             string.IsNullOrWhiteSpace(model.PhotoUrl)
@@ -787,5 +808,12 @@ public async Task<IActionResult> DeleteSelected(
     return RedirectToAction(
         "Index",
         "Profile");
+}
+
+private static string? Normalize(string? value)
+{
+    return string.IsNullOrWhiteSpace(value)
+        ? null
+        : value.Trim();
 }
 }

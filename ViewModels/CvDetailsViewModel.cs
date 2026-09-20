@@ -16,6 +16,20 @@ public class CvDetailsViewModel
 
     public string? Location { get; set; }
 
+    public string? ProfessionalTitle { get; set; }
+
+    public string? ProfessionalSummary { get; set; }
+
+    public string? PhoneNumber { get; set; }
+
+    public string? Email { get; set; }
+
+    public string? LinkedInUrl { get; set; }
+
+    public string? GitHubUrl { get; set; }
+
+    public string? PortfolioUrl { get; set; }
+
     public string? PhotoUrl { get; set; }
 
     public Guid ProfileVersion { get; set; }
@@ -33,6 +47,10 @@ public class CvDetailsViewModel
 
     public List<CvProjectViewModel> Projects { get; set; }
         = new();
+
+    public List<EducationViewModel> EducationEntries { get; set; } = new();
+
+    public List<WorkExperienceViewModel> WorkExperiences { get; set; } = new();
 
     public int LikeCount { get; set; }
 

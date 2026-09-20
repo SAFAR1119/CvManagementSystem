@@ -119,12 +119,60 @@
         </div>
     }
 
-    @if (Model.IsPublished)
+            @if (Model.IsPublished)
     {
         <div class="alert alert-success">
-            This CV is published.
+            This CV is published. Changes you save below are immediately visible to recruiters.
         </div>
     }
+
+    <article class="card shadow-sm mb-4 cv-resume">
+        <div class="card-body p-md-5">
+            <header class="text-center border-bottom pb-4 mb-4">
+                <h1 class="display-6 mb-1">@Model.CandidateFirstName @Model.CandidateLastName</h1>
+                @if (!string.IsNullOrWhiteSpace(Model.ProfessionalTitle)) { <div class="fs-5 text-muted">@Model.ProfessionalTitle</div> }
+                <div class="small mt-2 text-muted">
+                    @string.Join(" | ", new[] { Model.Location, Model.PhoneNumber, Model.Email }.Where(x => !string.IsNullOrWhiteSpace(x)))
+                </div>
+                <div class="small mt-1">
+                    @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl)) { <a href="@Model.LinkedInUrl" target="_blank" rel="noopener">LinkedIn</a> }
+                    @if (!string.IsNullOrWhiteSpace(Model.GitHubUrl)) { <span class="mx-1">|</span><a href="@Model.GitHubUrl" target="_blank" rel="noopener">GitHub</a> }
+                    @if (!string.IsNullOrWhiteSpace(Model.PortfolioUrl)) { <span class="mx-1">|</span><a href="@Model.PortfolioUrl" target="_blank" rel="noopener">Portfolio</a> }
+                </div>
+            </header>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ProfessionalSummary))
+            {
+                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Professional Summary</h2><p class="mb-0" style="white-space: pre-line">@Model.ProfessionalSummary</p></section>
+            }
+
+            @if (Model.Attributes.Count > 0)
+            {
+                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Core Skills & Relevant Information</h2><div class="d-flex flex-wrap gap-2">
+                    @foreach (var resumeItem in Model.Attributes.Where(x => !string.IsNullOrWhiteSpace(x.Value))) { <span class="badge rounded-pill text-bg-light border p-2"><span class="text-muted">@resumeItem.Name:</span> @resumeItem.Value</span> }
+                </div></section>
+            }
+
+            @if (Model.WorkExperiences.Count > 0)
+            {
+                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Work Experience</h2>
+                    @foreach (var experience in Model.WorkExperiences) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@experience.JobTitle</strong><div>@experience.CompanyName</div></div><small class="text-muted text-nowrap">@experience.StartDate.ToString("MMM yyyy") – @(experience.EndDate?.ToString("MMM yyyy") ?? "Present")</small></div>@if (!string.IsNullOrWhiteSpace(experience.Description)) { <p class="mb-1 mt-2" style="white-space:pre-line">@experience.Description</p> }@if (!string.IsNullOrWhiteSpace(experience.Technologies)) { <div class="small"><strong>Technologies:</strong> @experience.Technologies</div> }</article> }
+                </section>
+            }
+
+            @if (Model.EducationEntries.Count > 0)
+            {
+                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Education</h2>
+                    @foreach (var education in Model.EducationEntries) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@education.Degree</strong><div>@education.Institution</div></div><small class="text-muted text-nowrap">@education.StartDate.ToString("MMM yyyy") – @(education.EndDate?.ToString("MMM yyyy") ?? "Present")</small></div>@if (!string.IsNullOrWhiteSpace(education.Description)) { <p class="mb-0 mt-2" style="white-space:pre-line">@education.Description</p> }</article> }
+                </section>
+            }
+
+            <section><h2 class="h5 text-uppercase border-bottom pb-2">Selected Projects</h2>
+                @if (Model.Projects.Count == 0) { <p class="text-muted mb-0">No projects matched this position's technology requirements.</p> }
+                @foreach (var project in Model.Projects) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><strong>@project.Name</strong><small class="text-muted text-nowrap">@project.Period</small></div><p class="mb-1 mt-1" style="white-space:pre-line">@project.DescriptionMarkdown</p><div class="small text-muted">@string.Join(", ", project.TechnologyTags)</div></article> }
+            </section>
+        </div>
+    </article>
 
     <form asp-action="Save"
           method="post">
@@ -168,6 +216,70 @@
                             <input asp-for="CandidateFirstName"
                                    class="form-control" />
                         }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="ProfessionalTitle" class="form-label">Professional title</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.ProfessionalTitle ?? "Not provided")</div> }
+                        else { <input asp-for="ProfessionalTitle" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="PhoneNumber" class="form-label">Phone number</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PhoneNumber ?? "Not provided")</div> }
+                        else { <input asp-for="PhoneNumber" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Email" class="form-label">Email</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.Email ?? "Not provided")</div> }
+                        else { <input asp-for="Email" type="email" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="LinkedInUrl" class="form-label">LinkedIn URL</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.LinkedInUrl ?? "Not provided")</div> }
+                        else { <input asp-for="LinkedInUrl" type="url" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="GitHubUrl" class="form-label">GitHub URL</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.GitHubUrl ?? "Not provided")</div> }
+                        else { <input asp-for="GitHubUrl" type="url" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="PortfolioUrl" class="form-label">Portfolio URL</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PortfolioUrl ?? "Not provided")</div> }
+                        else { <input asp-for="PortfolioUrl" type="url" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="PhotoUrl" class="form-label">Photo URL</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PhotoUrl ?? "Not provided")</div> }
+                        else { <input asp-for="PhotoUrl" type="url" class="form-control" /> }
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label asp-for="ProfessionalSummary" class="form-label">Professional summary</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light" style="white-space:pre-line">@(Model.ProfessionalSummary ?? "Not provided")</div> }
+                        else { <textarea asp-for="ProfessionalSummary" class="form-control" rows="5"></textarea> }
 
                     </div>
 
@@ -449,8 +561,8 @@
 
         <div class="card shadow-sm mb-4">
 
-            <div class="card-header">
-                <strong>Relevant Projects</strong>
+        <div class="card-header">
+                <strong>Projects from Profile</strong>
             </div>
 
             <div class="card-body">
@@ -458,7 +570,7 @@
                 @if (Model.Projects.Count == 0)
                 {
                     <div class="text-muted">
-                        No relevant projects were found for this position.
+                        No projects have been added to this profile yet.
                     </div>
                 }
                 else
@@ -497,6 +609,13 @@
 
                         </article>
                     }
+                }
+
+                @if (!Model.IsReadOnly)
+                {
+                    <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-primary btn-sm">
+                        Manage projects in profile
+                    </a>
                 }
 
             </div>

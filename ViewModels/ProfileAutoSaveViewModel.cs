@@ -19,6 +19,14 @@ public class ProfileAutoSaveViewModel
     [StringLength(200)]
     public string? Location { get; set; }
 
+    public string? ProfessionalTitle { get; set; }
+    public string? ProfessionalSummary { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Email { get; set; }
+    public string? LinkedInUrl { get; set; }
+    public string? GitHubUrl { get; set; }
+    public string? PortfolioUrl { get; set; }
+
     [StringLength(500)]
     public string? PhotoUrl { get; set; }
 

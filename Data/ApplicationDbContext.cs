@@ -43,6 +43,10 @@ public class ApplicationDbContext
         CandidateAttributeValues =>
         Set<CandidateAttributeValue>();
 
+    public DbSet<Education> EducationEntries => Set<Education>();
+
+    public DbSet<WorkExperience> WorkExperiences => Set<WorkExperience>();
+
 
     // =========================================================
     // Projects
@@ -209,6 +213,18 @@ public class ApplicationDbContext
                         x.CandidateProfileId)
                     .OnDelete(
                         DeleteBehavior.Cascade);
+
+                entity
+                    .HasMany(x => x.EducationEntries)
+                    .WithOne(x => x.CandidateProfile)
+                    .HasForeignKey(x => x.CandidateProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity
+                    .HasMany(x => x.WorkExperiences)
+                    .WithOne(x => x.CandidateProfile)
+                    .HasForeignKey(x => x.CandidateProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity
                     .HasMany(x => x.Cvs)

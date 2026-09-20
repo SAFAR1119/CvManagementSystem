@@ -152,6 +152,8 @@ public class ProfileController : Controller
         var profile =
             await _context.CandidateProfiles
                 .Include(x => x.AttributeValues)
+                .Include(x => x.EducationEntries)
+                .Include(x => x.WorkExperiences)
                 .FirstOrDefaultAsync(
                     x =>
                         x.UserId ==
@@ -205,6 +207,13 @@ public class ProfileController : Controller
                 model.PhotoUrl)
                 ? null
                 : model.PhotoUrl.Trim();
+
+        ApplyResumeFields(profile, model.ProfessionalTitle,
+            model.ProfessionalSummary, model.PhoneNumber, model.Email,
+            model.LinkedInUrl, model.GitHubUrl, model.PortfolioUrl);
+
+        UpdateEducation(profile, model.EducationEntries);
+        UpdateWorkExperience(profile, model.WorkExperiences);
 
 
         // ------------------------------------------------------
@@ -405,6 +414,10 @@ public class ProfileController : Controller
                 model.PhotoUrl)
                 ? null
                 : model.PhotoUrl.Trim();
+
+        ApplyResumeFields(profile, model.ProfessionalTitle,
+            model.ProfessionalSummary, model.PhoneNumber, model.Email,
+            model.LinkedInUrl, model.GitHubUrl, model.PortfolioUrl);
 
 
         var submittedAttributeIds =
@@ -862,6 +875,8 @@ public class ProfileController : Controller
                     x.TechnologyTags)
                     .ThenInclude(x =>
                         x.TechnologyTag)
+            .Include(x => x.EducationEntries)
+            .Include(x => x.WorkExperiences)
             .Include(x =>
                 x.Cvs)
                 .ThenInclude(x =>
@@ -1044,6 +1059,14 @@ public class ProfileController : Controller
                 Location =
                     profile.Location,
 
+                ProfessionalTitle = profile.ProfessionalTitle,
+                ProfessionalSummary = profile.ProfessionalSummary,
+                PhoneNumber = profile.PhoneNumber,
+                Email = profile.Email,
+                LinkedInUrl = profile.LinkedInUrl,
+                GitHubUrl = profile.GitHubUrl,
+                PortfolioUrl = profile.PortfolioUrl,
+
                 PhotoUrl =
                     profile.PhotoUrl,
 
@@ -1139,6 +1162,18 @@ public class ProfileController : Controller
                                 })
                         .ToList(),
 
+                EducationEntries = profile.EducationEntries
+                    .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                    .ThenByDescending(x => x.StartDate)
+                    .Select(x => new EducationViewModel { Id = x.Id, Degree = x.Degree, Institution = x.Institution, StartDate = x.StartDate, EndDate = x.EndDate, Description = x.Description, SortOrder = x.SortOrder })
+                    .ToList(),
+
+                WorkExperiences = profile.WorkExperiences
+                    .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                    .ThenByDescending(x => x.StartDate)
+                    .Select(x => new WorkExperienceViewModel { Id = x.Id, CompanyName = x.CompanyName, JobTitle = x.JobTitle, StartDate = x.StartDate, EndDate = x.EndDate, Description = x.Description, Technologies = x.Technologies, SortOrder = x.SortOrder })
+                    .ToList(),
+
                 Cvs =
                     visibleCvs
                         .Select(
@@ -1165,5 +1200,51 @@ public class ProfileController : Controller
 
 
         return model;
+    }
+
+    private static void ApplyResumeFields(CandidateProfile profile,
+        string? title, string? summary, string? phone, string? email,
+        string? linkedIn, string? gitHub, string? portfolio)
+    {
+        profile.ProfessionalTitle = NullIfWhiteSpace(title);
+        profile.ProfessionalSummary = NullIfWhiteSpace(summary);
+        profile.PhoneNumber = NullIfWhiteSpace(phone);
+        profile.Email = NullIfWhiteSpace(email);
+        profile.LinkedInUrl = NullIfWhiteSpace(linkedIn);
+        profile.GitHubUrl = NullIfWhiteSpace(gitHub);
+        profile.PortfolioUrl = NullIfWhiteSpace(portfolio);
+    }
+
+    private static string? NullIfWhiteSpace(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static void UpdateEducation(CandidateProfile profile,
+        IEnumerable<EducationViewModel> entries)
+    {
+        var submitted = entries.Where(x => !string.IsNullOrWhiteSpace(x.Degree) || !string.IsNullOrWhiteSpace(x.Institution)).ToList();
+        var ids = submitted.Where(x => x.Id > 0).Select(x => x.Id).ToHashSet();
+        foreach (var entity in profile.EducationEntries.Where(x => !ids.Contains(x.Id)).ToList()) profile.EducationEntries.Remove(entity);
+        foreach (var item in submitted)
+        {
+            if (string.IsNullOrWhiteSpace(item.Degree) || string.IsNullOrWhiteSpace(item.Institution)) continue;
+            var entity = item.Id > 0 ? profile.EducationEntries.FirstOrDefault(x => x.Id == item.Id) : null;
+            if (entity == null) { entity = new Education(); profile.EducationEntries.Add(entity); }
+            entity.Degree = item.Degree.Trim(); entity.Institution = item.Institution.Trim(); entity.StartDate = item.StartDate; entity.EndDate = item.EndDate; entity.Description = NullIfWhiteSpace(item.Description); entity.SortOrder = item.SortOrder;
+        }
+    }
+
+    private static void UpdateWorkExperience(CandidateProfile profile,
+        IEnumerable<WorkExperienceViewModel> entries)
+    {
+        var submitted = entries.Where(x => !string.IsNullOrWhiteSpace(x.CompanyName) || !string.IsNullOrWhiteSpace(x.JobTitle)).ToList();
+        var ids = submitted.Where(x => x.Id > 0).Select(x => x.Id).ToHashSet();
+        foreach (var entity in profile.WorkExperiences.Where(x => !ids.Contains(x.Id)).ToList()) profile.WorkExperiences.Remove(entity);
+        foreach (var item in submitted)
+        {
+            if (string.IsNullOrWhiteSpace(item.CompanyName) || string.IsNullOrWhiteSpace(item.JobTitle)) continue;
+            var entity = item.Id > 0 ? profile.WorkExperiences.FirstOrDefault(x => x.Id == item.Id) : null;
+            if (entity == null) { entity = new WorkExperience(); profile.WorkExperiences.Add(entity); }
+            entity.CompanyName = item.CompanyName.Trim(); entity.JobTitle = item.JobTitle.Trim(); entity.StartDate = item.StartDate; entity.EndDate = item.EndDate; entity.Description = NullIfWhiteSpace(item.Description); entity.Technologies = NullIfWhiteSpace(item.Technologies); entity.SortOrder = item.SortOrder;
+        }
     }
 }

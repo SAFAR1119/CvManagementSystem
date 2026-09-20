@@ -45,6 +45,12 @@ public class CvGenerationService
         var profile =
             await _context.CandidateProfiles
                 .Include(x => x.AttributeValues)
+                // Resume sections are profile-owned rather than copied into
+                // each CV. CV Details assembles them with the position's
+                // selected attributes and projects, so later profile edits
+                // are reflected without losing position-specific filtering.
+                .Include(x => x.EducationEntries)
+                .Include(x => x.WorkExperiences)
                 .Include(x => x.Projects)
                     .ThenInclude(
                         x => x.TechnologyTags)
@@ -80,12 +86,6 @@ public class CvGenerationService
             return existing;
         }
 
-        var profileValues = profile.AttributeValues
-          .GroupBy(x => x.AttributeDefinitionId)
-          .ToDictionary(
-             x => x.Key,
-             x => x.FirstOrDefault()?.Value);
-
         var cv =
             new Cv
             {
@@ -111,27 +111,23 @@ public class CvGenerationService
                     Guid.NewGuid()
             };
 
-        foreach (
-            var positionAttribute
-            in position.Attributes
-                .OrderBy(x => x.SortOrder))
+        // Persist a complete snapshot for searching and backwards-compatible
+        // CV data. The Details page also reads the live profile so later
+        // additions are immediately available on existing CVs.
+        foreach (var profileValue in profile.AttributeValues
+            .GroupBy(x => x.AttributeDefinitionId)
+            .Select(x => x.First())
+            .OrderBy(x => x.AttributeDefinitionId))
         {
-            profileValues.TryGetValue(
-                positionAttribute
-                    .AttributeDefinitionId,
-                out var value);
-
             cv.AttributeValues.Add(
                 new CvAttributeValue
                 {
                     Cv = cv,
 
                     AttributeDefinitionId =
-                        positionAttribute
-                            .AttributeDefinitionId,
+                        profileValue.AttributeDefinitionId,
 
-                    Value =
-                        value,
+                    Value = profileValue.Value,
 
                     UpdatedAt =
                         DateTime.UtcNow,
@@ -141,38 +137,10 @@ public class CvGenerationService
                 });
         }
 
-        var positionTagIds =
-            position.ProjectTags
-                .Select(x => x.TechnologyTagId)
-                .ToHashSet();
-
         var projectCandidates =
             profile.Projects
-                .Select(
-                    project =>
-                    {
-                        var matchingTags =
-                            project.TechnologyTags
-                                .Count(
-                                    tag =>
-                                        positionTagIds.Contains(
-                                            tag.TechnologyTagId));
-
-                        return new
-                        {
-                            Project = project,
-                            MatchCount = matchingTags
-                        };
-                    })
-                .Where(
-                    x =>
-                        positionTagIds.Count == 0 ||
-                        x.MatchCount > 0)
-                .OrderByDescending(
-                    x => x.MatchCount)
-                .ThenByDescending(
-                    x => x.Project.StartDate)
-                .Take(position.MaxProjects)
+                .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                .ThenByDescending(x => x.StartDate)
                 .ToList();
 
         for (var i = 0;
@@ -184,9 +152,7 @@ public class CvGenerationService
                 {
                     Cv = cv,
 
-                    ProjectId =
-                        projectCandidates[i]
-                            .Project.Id,
+                    ProjectId = projectCandidates[i].Id,
 
                     SortOrder = i
                 });
