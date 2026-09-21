@@ -61,6 +61,18 @@
   <data name="Dark" xml:space="preserve">
     <value>ডার্ক</value>
   </data>
+  <data name="Achievements" xml:space="preserve">
+    <value>অর্জনসমূহ</value>
+  </data>
+  <data name="DownloadBadgesSvg" xml:space="preserve">
+    <value>ব্যাজ ডাউনলোড করুন (SVG)</value>
+  </data>
+  <data name="NoBadgesYet" xml:space="preserve">
+    <value>এখনও কোনো ব্যাজ অর্জিত হয়নি। প্রকল্প যোগ করুন, একটি সিভি প্রকাশ করুন, অথবা রিক্রুটারের লাইক পান আপনার প্রথম ব্যাজ অর্জনের জন্য।</value>
+  </data>
+  <data name="ExportCsv" xml:space="preserve">
+    <value>CSV এক্সপোর্ট করুন</value>
+  </data>
   <data name="Login" xml:space="preserve">
     <value>লগইন</value>
   </data>

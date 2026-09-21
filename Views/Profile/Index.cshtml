@@ -480,6 +480,23 @@
 
                 </div>
 
+                @if (Model.Id != 0)
+                {
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">@L["Achievements"]</h6>
+
+                        <a asp-action="DownloadBadges"
+                           asp-route-userId="@(Model.IsAdministratorView ? Model.UserId : null)"
+                           class="btn btn-sm btn-outline-secondary">
+                            @L["DownloadBadgesSvg"]
+                        </a>
+                    </div>
+
+                    @await Html.PartialAsync("_BadgePanel", Model.Badges)
+                }
+
             </div>
 
         </div>

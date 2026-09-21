@@ -250,4 +250,13 @@ public class HomeController : Controller
     {
         return View();
     }
+
+    [Route("Home/StatusCode/{statusCode}")]
+    [ActionName("StatusCode")]
+    public IActionResult StatusPage(int statusCode)
+    {
+        Response.StatusCode = statusCode;
+        ViewData["StatusCode"] = statusCode;
+        return View("StatusCode");
+    }
 }

@@ -36,10 +36,21 @@
             StringComparison.OrdinalIgnoreCase)
             ? "বাংলা"
             : "English";
+
+    // Theme is persisted the same way the UI culture is: a long-lived,
+    // JS-readable cookie. Reading it here lets us render the correct
+    // data-bs-theme attribute on the very first response, so there is no
+    // flash of the wrong theme and no dependency on client-side storage.
+    var currentTheme =
+        Context.Request.Cookies[
+            CvManagementSystem.Controllers.ThemeController.CookieName]
+            is "dark"
+            ? "dark"
+            : "light";
 }
 
 <!DOCTYPE html>
-<html lang="@currentCulture">
+<html lang="@currentCulture" data-bs-theme="@currentTheme">
 
 <head>
 
@@ -51,19 +62,6 @@
     <title>
         @ViewData["Title"] - @L["AppName"]
     </title>
-
-    <!-- Apply the saved theme before the page is rendered -->
-    <script>
-        (() => {
-            const savedTheme =
-                localStorage.getItem("cv-theme") || "light";
-
-            document.documentElement.setAttribute(
-                "data-bs-theme",
-                savedTheme
-            );
-        })();
-    </script>
 
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -570,6 +568,32 @@
 
     </footer>
 
+    @{
+        var toastSuccess = TempData["SuccessMessage"] as string ??
+            TempData["Success"] as string;
+        var toastError = TempData["ErrorMessage"] as string ??
+            TempData["Error"] as string;
+    }
+
+    @if (!string.IsNullOrWhiteSpace(toastSuccess) ||
+         !string.IsNullOrWhiteSpace(toastError))
+    {
+        <div class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true">
+            @if (!string.IsNullOrWhiteSpace(toastSuccess))
+            {
+                <div class="toast align-items-center text-bg-success border-0" role="status" data-auto-toast="true">
+                    <div class="d-flex"><div class="toast-body">@toastSuccess</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(toastError))
+            {
+                <div class="toast align-items-center text-bg-danger border-0" role="alert" data-auto-toast="true">
+                    <div class="d-flex"><div class="toast-body">@toastError</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>
+                </div>
+            }
+        </div>
+    }
+
 
     <!-- ===================================================== -->
     <!-- SCRIPTS -->
@@ -581,6 +605,11 @@
 
     <script src="~/js/site.js"
             asp-append-version="true"></script>
+
+    <script>
+        document.querySelectorAll('[data-auto-toast="true"]').forEach(
+            element => new bootstrap.Toast(element, { delay: 5500 }).show());
+    </script>
 
 
     <!-- ===================================================== -->
@@ -635,9 +664,15 @@
                             "data-bs-theme",
                             newTheme);
 
-                    localStorage.setItem(
-                        "cv-theme",
-                        newTheme);
+                    // Same cookie ThemeController writes and _Layout
+                    // reads server-side, kept in sync here so the
+                    // toggle is instant (no round trip) while still
+                    // being persisted for the next page load.
+                    document.cookie =
+                        "cv-theme=" + newTheme +
+                        "; path=/; max-age=" +
+                        (60 * 60 * 24 * 365) +
+                        "; SameSite=Lax";
 
                     updateButton();
 

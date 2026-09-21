@@ -41,6 +41,13 @@ public class LanguageController : Controller
                 SameSite = SameSiteMode.Lax
             });
 
+        // This makes the selected culture available to the response as well
+        // as every later request that carries the cookie.
+        HttpContext.Features.Set<IRequestCultureFeature>(
+            new RequestCultureFeature(
+                new RequestCulture(culture),
+                new CookieRequestCultureProvider()));
+
         if (!string.IsNullOrWhiteSpace(returnUrl) &&
             Url.IsLocalUrl(returnUrl))
         {

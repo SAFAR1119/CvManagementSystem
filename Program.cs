@@ -90,6 +90,7 @@ if (!string.IsNullOrWhiteSpace(facebookAppId) &&
 
 builder.Services.AddScoped<PositionAccessService>();
 builder.Services.AddScoped<CvGenerationService>();
+builder.Services.AddScoped<BadgeService>();
 
 var app = builder.Build();
 
@@ -105,11 +106,21 @@ var localizationOptions =
         .AddSupportedCultures(supportedCultures)
         .AddSupportedUICultures(supportedCultures);
 
+// Prefer the language selected in the application over browser preferences.
+localizationOptions.RequestCultureProviders =
+[
+    new CookieRequestCultureProvider(),
+    new QueryStringRequestCultureProvider(),
+    new AcceptLanguageHeaderRequestCultureProvider()
+];
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithReExecute("/Home/StatusCode/{0}");
 
 app.UseHttpsRedirection();
 

@@ -448,7 +448,8 @@ if (isRecruiter || isAdmin)
 
         var cv = await _context.Cvs
             .Include(x => x.Position)
-                .ThenInclude(x => x.Attributes)
+            .ThenInclude(x => x.Attributes)
+            .ThenInclude(x => x.AttributeDefinition)
             .Include(x => x.CandidateProfile)
                 .ThenInclude(x => x.AttributeValues)
             .FirstOrDefaultAsync(x => x.Id == model.Id);
@@ -581,6 +582,7 @@ if (isRecruiter || isAdmin)
         var cv = await _context.Cvs
             .Include(x => x.Position)
                 .ThenInclude(x => x.Attributes)
+                    .ThenInclude(x => x.AttributeDefinition)
             .Include(x => x.CandidateProfile)
                 .ThenInclude(x => x.AttributeValues)
             .FirstOrDefaultAsync(x => x.Id == id);
@@ -620,20 +622,37 @@ if (isRecruiter || isAdmin)
 
         var missingRequired = cv.Position.Attributes
             .Where(x => x.IsRequired)
-            .Any(x =>
+            .Where(x =>
                 !values.TryGetValue(
                     x.AttributeDefinitionId,
                     out var value) ||
-                string.IsNullOrWhiteSpace(value));
+                string.IsNullOrWhiteSpace(value))
+            .Select(x => x.AttributeDefinition?.Name ?? "Required attribute")
+            .ToList();
 
-        if (missingRequired ||
+        if (missingRequired.Count > 0 ||
             string.IsNullOrWhiteSpace(
                 cv.CandidateProfile.FirstName) ||
             string.IsNullOrWhiteSpace(
                 cv.CandidateProfile.LastName))
         {
+            var missingFields = new List<string>();
+
+            if (string.IsNullOrWhiteSpace(cv.CandidateProfile.FirstName))
+            {
+                missingFields.Add("First name");
+            }
+
+            if (string.IsNullOrWhiteSpace(cv.CandidateProfile.LastName))
+            {
+                missingFields.Add("Last name");
+            }
+
+            missingFields.AddRange(missingRequired);
+
             TempData["ErrorMessage"] =
-                "Complete all required CV fields before publishing.";
+                "Complete the required fields before publishing: " +
+                string.Join(", ", missingFields) + ".";
 
             return RedirectToAction(
                 nameof(Details),

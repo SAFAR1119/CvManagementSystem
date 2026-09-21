@@ -61,6 +61,18 @@
   <data name="Dark" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="Achievements" xml:space="preserve">
+    <value>Achievements</value>
+  </data>
+  <data name="DownloadBadgesSvg" xml:space="preserve">
+    <value>Download badges (SVG)</value>
+  </data>
+  <data name="NoBadgesYet" xml:space="preserve">
+    <value>No badges earned yet. Add projects, publish a CV, or get liked by a recruiter to earn your first one.</value>
+  </data>
+  <data name="ExportCsv" xml:space="preserve">
+    <value>Export CSV</value>
+  </data>
   <data name="Login" xml:space="preserve">
     <value>Login</value>
   </data>

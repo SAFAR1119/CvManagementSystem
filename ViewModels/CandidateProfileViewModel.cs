@@ -58,6 +58,8 @@ public class CandidateProfileViewModel
     public List<CandidateAttributeViewModel> Attributes { get; set; }
         = new();
 
+    public BadgeSummaryViewModel Badges { get; set; } = new();
+
     public List<AvailableProfileAttributeViewModel> AvailableAttributes { get; set; }
         = new();
 

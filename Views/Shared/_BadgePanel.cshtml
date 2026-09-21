@@ -1,0 +1,40 @@
+@model CvManagementSystem.ViewModels.BadgeSummaryViewModel
+
+@{
+    // Same colors/icons used here are reused server-side by
+    // ProfileController.BuildBadgePanelSvg for the downloadable file, so
+    // the on-page panel and the downloaded SVG always match.
+    var palette = new (string Category, string Color)[]
+    {
+        ("project", "#0d6efd"),
+        ("cv", "#198754"),
+        ("like", "#dc3545")
+    };
+}
+
+@if (Model.Earned.Count == 0)
+{
+    <p class="text-muted small mb-0">
+        @L["NoBadgesYet"]
+    </p>
+}
+else
+{
+    <div class="d-flex flex-wrap gap-3">
+        @foreach (var badge in Model.Earned)
+        {
+            var color = palette.FirstOrDefault(p => p.Category == badge.Category).Color ?? "#6c757d";
+
+            <div class="d-flex flex-column align-items-center" style="width: 110px;">
+                <svg width="72" height="72" viewBox="0 0 72 72" role="img" aria-label="@badge.Label">
+                    <circle cx="36" cy="36" r="34" fill="@color" fill-opacity="0.12" stroke="@color" stroke-width="3" />
+                    <circle cx="36" cy="36" r="22" fill="@color" />
+                    <text x="36" y="42" text-anchor="middle" font-size="18" font-family="Segoe UI, Arial, sans-serif" fill="#fff" font-weight="bold">
+                        @badge.Value
+                    </text>
+                </svg>
+                <span class="small text-center mt-1">@badge.Label</span>
+            </div>
+        }
+    </div>
+}

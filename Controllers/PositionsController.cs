@@ -650,6 +650,118 @@ public class PositionsController : Controller
     }
 
     // =========================================================
+    // EXPORT CVS (optional feature: aggregate CSV export)
+    // =========================================================
+
+    [Authorize(Roles = "Recruiter,Administrator")]
+    [HttpGet]
+    public async Task<IActionResult> ExportCvs(int id)
+    {
+        var position = await _context.Positions
+            .AsNoTracking()
+            .Include(x => x.Attributes)
+                .ThenInclude(x => x.AttributeDefinition)
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (position == null)
+        {
+            return NotFound();
+        }
+
+        var orderedAttributes = position.Attributes
+            .OrderBy(x => x.SortOrder)
+            .Select(x => x.AttributeDefinition)
+            .ToList();
+
+        var cvs = await _context.Cvs
+            .AsNoTracking()
+            .Where(x => x.PositionId == id && x.IsPublished)
+            .Include(x => x.CandidateProfile)
+            .OrderBy(x => x.CandidateProfile.LastName)
+            .ThenBy(x => x.CandidateProfile.FirstName)
+            .ToListAsync();
+
+        // Single batched query for every CV's attribute values instead of
+        // one query per CV/attribute pair inside a loop.
+        var cvIds = cvs.Select(x => x.Id).ToList();
+
+        var attributeValues = cvIds.Count == 0
+            ? new List<CvAttributeValue>()
+            : await _context.CvAttributeValues
+                .AsNoTracking()
+                .Where(x => cvIds.Contains(x.CvId))
+                .ToListAsync();
+
+        var valuesByCv = attributeValues
+            .GroupBy(x => x.CvId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToDictionary(x => x.AttributeDefinitionId, x => x.Value));
+
+        var likeCounts = cvIds.Count == 0
+            ? new Dictionary<int, int>()
+            : await _context.CvLikes
+                .AsNoTracking()
+                .Where(x => cvIds.Contains(x.CvId))
+                .GroupBy(x => x.CvId)
+                .Select(g => new { CvId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.CvId, x => x.Count);
+
+        var sb = new System.Text.StringBuilder();
+
+        var header = new List<string>
+        {
+            "Candidate Name",
+            "CV Title",
+            "Updated",
+            "Likes"
+        };
+
+        header.AddRange(orderedAttributes.Select(a => a.Name));
+
+        sb.AppendLine(string.Join(",", header.Select(CsvEscape)));
+
+        foreach (var cv in cvs)
+        {
+            var row = new List<string>
+            {
+                $"{cv.CandidateProfile.FirstName} {cv.CandidateProfile.LastName}".Trim(),
+                cv.Title,
+                cv.UpdatedAt.ToString("yyyy-MM-dd"),
+                likeCounts.GetValueOrDefault(cv.Id).ToString()
+            };
+
+            var cvValues = valuesByCv.GetValueOrDefault(cv.Id)
+                ?? new Dictionary<int, string?>();
+
+            row.AddRange(
+                orderedAttributes.Select(
+                    a => cvValues.GetValueOrDefault(a.Id) ?? string.Empty));
+
+            sb.AppendLine(string.Join(",", row.Select(CsvEscape)));
+        }
+
+        var bytes = new System.Text.UTF8Encoding(true).GetBytes(sb.ToString());
+
+        var fileName =
+            $"{position.Title.Replace(" ", "-")}-cvs.csv";
+
+        return File(bytes, "text/csv", fileName);
+    }
+
+    private static string CsvEscape(string? value)
+    {
+        value ??= string.Empty;
+
+        if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+        {
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
+        }
+
+        return value;
+    }
+
+    // =========================================================
     // DUPLICATE
     // =========================================================
 

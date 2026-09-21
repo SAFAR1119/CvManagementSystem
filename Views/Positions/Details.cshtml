@@ -579,11 +579,20 @@
     {
         <div class="card shadow-sm mb-4">
 
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
 
                 <h2 class="h5 mb-0">
                     @L["CandidateCVs"]
                 </h2>
+
+                @if (Model.Cvs.Count > 0)
+                {
+                    <a asp-action="ExportCvs"
+                       asp-route-id="@Model.Id"
+                       class="btn btn-sm btn-outline-secondary">
+                        @L["ExportCsv"]
+                    </a>
+                }
 
             </div>
 
