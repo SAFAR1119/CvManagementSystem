@@ -146,26 +146,20 @@ app.MapRazorPages();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
     var dbContext =
         services.GetRequiredService<ApplicationDbContext>();
 
-    // Only execute database migrations when there are unapplied
-    // migrations. This prevents EF Core 9 from throwing
-    // PendingModelChangesWarning when the database is already current.
-    var pendingMigrations =
-        await dbContext.Database.GetPendingMigrationsAsync();
-
-    if (pendingMigrations.Any())
-    {
-        await dbContext.Database.MigrateAsync();
-    }
+    // Database migrations are applied manually before deployment.
+    // Do not run MigrateAsync() during Render production startup,
+    // because EF Core 9 throws when the runtime model differs
+    // from the latest migration snapshot.
 
     await IdentitySeeder.SeedRolesAsync(
         services,
         app.Configuration);
 
-    await AttributeLibrarySeeder.SeedAsync(dbContext);
+    await AttributeLibrarySeeder.SeedAsync(
+        dbContext);
 }
 
 app.Run();
