@@ -282,6 +282,7 @@ public class PositionsController : Controller
 
         ViewBag.CanGenerateCv = false;
         ViewBag.ExistingCvId = (int?)null;
+        ViewBag.ExistingCvIsPublished = false;
 
         if (User.IsInRole("Candidate") &&
             currentUser != null)
@@ -294,13 +295,15 @@ public class PositionsController : Controller
                     currentUser.Id)
                 .Select(x => new
                 {
-                    x.Id
+                    x.Id,
+                    x.IsPublished
                 })
                 .FirstOrDefaultAsync();
 
             if (existingCv != null)
             {
                 ViewBag.ExistingCvId = existingCv.Id;
+                ViewBag.ExistingCvIsPublished = existingCv.IsPublished;
             }
             else
             {

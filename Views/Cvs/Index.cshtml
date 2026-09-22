@@ -208,8 +208,8 @@
                                     </td>
 
                                     <td>
-                                        @item.UpdatedAt.ToLocalTime()
-                                            .ToString("dd MMM yyyy, HH:mm")
+                                        @(item.UpdatedAt.ToLocalTime()
+                                            .ToString("dd MMM yyyy, HH:mm"))
                                     </td>
                                 </tr>
                             }

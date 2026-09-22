@@ -231,9 +231,9 @@
                                         </td>
 
                                         <td>
-                                            @user.CreatedAt
+                                            @(user.CreatedAt
                                                 .ToLocalTime()
-                                                .ToString("dd MMM yyyy")
+                                                .ToString("dd MMM yyyy"))
                                         </td>
 
                                     </tr>

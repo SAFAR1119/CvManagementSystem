@@ -98,10 +98,10 @@
     <value>সিভি তৈরি করুন</value>
   </data>
   <data name="GenerateCV" xml:space="preserve">
-    <value>সিভি তৈরি করুন</value>
+    <value>এখনই আবেদন করুন</value>
   </data>
   <data name="OpenMyCV" xml:space="preserve">
-    <value>আমার সিভি খুলুন</value>
+    <value>আবেদন দেখুন</value>
   </data>
   <data name="Discussion" xml:space="preserve">
     <value>আলোচনা</value>
@@ -295,15 +295,15 @@
 </data>
 
 <data name="CreateCVForPosition" xml:space="preserve">
-  <value>এই পজিশনের জন্য সিভি তৈরি করুন</value>
+  <value>এই পজিশনের জন্য আবেদন করুন</value>
 </data>
 
 <data name="GenerateCVDescription" xml:space="preserve">
-  <value>এই পজিশন অনুযায়ী সিভি তৈরি করতে আপনার প্রোফাইলের তথ্য ব্যবহার করা হবে।</value>
+  <value>এই পজিশনের জন্য উপযোগী আবেদন তৈরি করতে আপনার প্রোফাইলের তথ্য ব্যবহার করা হবে।</value>
 </data>
 
 <data name="CVUnavailable" xml:space="preserve">
-  <value>সিভি পাওয়া যাচ্ছে না</value>
+  <value>আপনি এখনই আবেদন করতে পারবেন না</value>
 </data>
 
 <data name="AccessRequirementMessage" xml:space="preserve">
@@ -311,11 +311,11 @@
 </data>
 
 <data name="AlreadyHaveCV" xml:space="preserve">
-  <value>এই পজিশনের জন্য আপনার ইতিমধ্যে একটি সিভি আছে।</value>
+  <value>এই পজিশনের জন্য আপনার আবেদন জমা দেওয়া হয়েছে এবং তা নিয়োগকারী দলের কাছে দৃশ্যমান।</value>
 </data>
 
 <data name="YourCV" xml:space="preserve">
-  <value>আপনার সিভি</value>
+  <value>আবেদন জমা হয়েছে</value>
 </data>
 
 <data name="Created" xml:space="preserve">
@@ -435,11 +435,11 @@
 </data>
 
 <data name="NoCVs" xml:space="preserve">
-  <value>এখনও কোনো সিভি তৈরি হয়নি।</value>
+  <value>আপনি এখনও কোনো পজিশনে আবেদন করেননি।</value>
 </data>
 
 <data name="CreateCVFromPosition" xml:space="preserve">
-  <value>একটি পজিশন খুলে তার জন্য সিভি তৈরি করুন।</value>
+  <value>খোলা পজিশনগুলো দেখুন এবং আবেদন করুন।</value>
 </data>
 
 <data name="Status" xml:space="preserve">
@@ -556,5 +556,33 @@
 
 <data name="SaveConflict" xml:space="preserve">
   <value>এই প্রোফাইলটি অন্য কোথাও পরিবর্তিত হয়েছে। পেজটি পুনরায় লোড করে আবার চেষ্টা করুন।</value>
+</data>
+
+<data name="MyApplications" xml:space="preserve">
+  <value>আমার আবেদনসমূহ</value>
+</data>
+
+<data name="Application" xml:space="preserve">
+  <value>আবেদন</value>
+</data>
+
+<data name="Applied" xml:space="preserve">
+  <value>আবেদন করা হয়েছে</value>
+</data>
+
+<data name="InProgress" xml:space="preserve">
+  <value>চলমান</value>
+</data>
+
+<data name="ApplicationInProgress" xml:space="preserve">
+  <value>আবেদন প্রক্রিয়াধীন</value>
+</data>
+
+<data name="ApplicationInProgressDescription" xml:space="preserve">
+  <value>আপনি এই পজিশনের জন্য আবেদন শুরু করেছেন। প্রস্তুত হলে এটি সম্পূর্ণ করে জমা দিন।</value>
+</data>
+
+<data name="ContinueApplication" xml:space="preserve">
+  <value>আবেদন চালিয়ে যান</value>
 </data>
 </root>

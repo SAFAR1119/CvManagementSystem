@@ -1623,7 +1623,7 @@
 
                 <h2 class="h5 mb-0">
 
-                    @L["MyCVs"]
+                    @L["MyApplications"]
 
                 </h2>
 
@@ -1721,7 +1721,7 @@
 
                                 <th>
 
-                                    @L["CVs"]
+                                    @L["Application"]
 
                                 </th>
 
@@ -1794,7 +1794,7 @@
 
                                             <span class="badge text-bg-success">
 
-                                                @L["Published"]
+                                                @L["Applied"]
 
                                             </span>
 
@@ -1806,7 +1806,7 @@
 
                                             <span class="badge text-bg-secondary">
 
-                                                @L["Draft"]
+                                                @L["InProgress"]
 
                                             </span>
 
@@ -1816,11 +1816,11 @@
 
                                     <td>
 
-                                        @cv.UpdatedAt
+                                        @(cv.UpdatedAt
 
                                             .ToLocalTime()
 
-                                            .ToString("dd MMM yyyy, HH\:mm")
+                                            .ToString("dd MMM yyyy, HH:mm"))
 
                                     </td>
 

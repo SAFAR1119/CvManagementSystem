@@ -16,6 +16,9 @@
     var existingCvId =
         ViewBag.ExistingCvId as int?;
 
+    var existingCvIsPublished =
+        ViewBag.ExistingCvIsPublished ?? false;
+
     var discussions =
         ViewBag.Discussions
         as IReadOnlyList<PositionDiscussionViewModel>
@@ -135,7 +138,7 @@
 
             <div class="card-body">
 
-                @if (existingCvId.HasValue)
+                @if (existingCvId.HasValue && (bool)existingCvIsPublished)
                 {
                     <div class="d-flex flex-column
                                 flex-md-row
@@ -145,8 +148,8 @@
 
                         <div>
 
-                            <h2 class="h5 mb-1">
-                                @L["YourCV"]
+                            <h2 class="h5 mb-1 text-success">
+                                ✓ @L["YourCV"]
                             </h2>
 
                             <p class="text-muted mb-0">
@@ -158,9 +161,40 @@
                         <a asp-controller="Cvs"
                            asp-action="Details"
                            asp-route-id="@existingCvId.Value"
-                           class="btn btn-primary">
+                           class="btn btn-outline-primary">
 
                             @L["OpenMyCV"]
+
+                        </a>
+
+                    </div>
+                }
+                else if (existingCvId.HasValue)
+                {
+                    <div class="d-flex flex-column
+                                flex-md-row
+                                justify-content-between
+                                align-items-md-center
+                                gap-3">
+
+                        <div>
+
+                            <h2 class="h5 mb-1">
+                                @L["ApplicationInProgress"]
+                            </h2>
+
+                            <p class="text-muted mb-0">
+                                @L["ApplicationInProgressDescription"]
+                            </p>
+
+                        </div>
+
+                        <a asp-controller="Cvs"
+                           asp-action="Details"
+                           asp-route-id="@existingCvId.Value"
+                           class="btn btn-primary">
+
+                            @L["ContinueApplication"]
 
                         </a>
 
@@ -383,9 +417,9 @@
 
                 <dd class="col-sm-9">
 
-                    @Model.UpdatedAt
+                    @(Model.UpdatedAt
                         .ToLocalTime()
-                        .ToString("dd MMM yyyy, HH:mm")
+                        .ToString("dd MMM yyyy, HH:mm"))
 
                 </dd>
 
@@ -736,9 +770,9 @@
 
                                         <td>
 
-                                            @cv.UpdatedAt
+                                            @(cv.UpdatedAt
                                                 .ToLocalTime()
-                                                .ToString("dd MMM yyyy")
+                                                .ToString("dd MMM yyyy"))
 
                                         </td>
 
@@ -826,10 +860,10 @@
 
                                 <small class="text-muted text-nowrap">
 
-                                    @post.CreatedAt
+                                    @(post.CreatedAt
                                         .ToLocalTime()
                                         .ToString(
-                                            "dd MMM yyyy, HH:mm")
+                                            "dd MMM yyyy, HH:mm"))
 
                                 </small>
 
