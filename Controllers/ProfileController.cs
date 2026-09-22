@@ -14,13 +14,16 @@ public class ProfileController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly BadgeService _badgeService;
 
     public ProfileController(
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        BadgeService badgeService)
     {
         _context = context;
         _userManager = userManager;
+        _badgeService = badgeService;
     }
 
 
@@ -799,17 +802,21 @@ public class ProfileController : Controller
 
 
         var profile =
-            await _context.CandidateProfiles
-                .AsNoTracking()
-                .Include(x => x.Projects)
-                    .ThenInclude(x =>
-                        x.TechnologyTags)
-                        .ThenInclude(x =>
-                            x.TechnologyTag)
-                .FirstOrDefaultAsync(
-                    x =>
-                        x.UserId ==
-                        userId);
+    await _context.CandidateProfiles
+        .AsNoTracking()
+        .AsSplitQuery()
+        .Include(x => x.AttributeValues)
+            .ThenInclude(x => x.AttributeDefinition)
+                .ThenInclude(x => x.Category)
+        .Include(x => x.Projects)
+            .ThenInclude(x => x.TechnologyTags)
+                .ThenInclude(x => x.TechnologyTag)
+        .Include(x => x.EducationEntries)
+        .Include(x => x.WorkExperiences)
+        .FirstOrDefaultAsync(
+            x =>
+                x.UserId ==
+                userId);
 
 
         if (profile == null)
@@ -844,6 +851,128 @@ public class ProfileController : Controller
         return View(
             "Public",
             profile);
+    }
+
+
+    // =========================================================
+    // DOWNLOAD BADGES
+    // =========================================================
+
+    [HttpGet]
+    public async Task<IActionResult> DownloadBadges(
+        string? userId)
+    {
+        var currentUser =
+            await _userManager.GetUserAsync(User);
+
+        if (currentUser == null)
+        {
+            return Challenge();
+        }
+
+        var isAdministrator =
+            await _userManager.IsInRoleAsync(
+                currentUser,
+                "Administrator");
+
+        var targetUserId =
+            isAdministrator &&
+            !string.IsNullOrWhiteSpace(userId)
+                ? userId
+                : currentUser.Id;
+
+        var profile =
+            await _context.CandidateProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.UserId == targetUserId);
+
+        if (profile == null)
+        {
+            return NotFound();
+        }
+
+        var badges =
+            await _badgeService.GetBadgesAsync(profile.Id);
+
+        var svg =
+            BuildBadgePanelSvg(
+                $"{profile.FirstName} {profile.LastName}".Trim(),
+                badges);
+
+        var bytes =
+            System.Text.Encoding.UTF8.GetBytes(svg);
+
+        return File(
+            bytes,
+            "image/svg+xml",
+            "badges.svg");
+    }
+
+    // Mirrors the colors/layout of Views/Shared/_BadgePanel.cshtml so the
+    // downloaded file matches what is shown on the profile page.
+    private static string BuildBadgePanelSvg(
+        string displayName,
+        BadgeSummaryViewModel badges)
+    {
+        var colors =
+            new Dictionary<string, string>
+            {
+                ["project"] = "#0d6efd",
+                ["cv"] = "#198754",
+                ["like"] = "#dc3545"
+            };
+
+        const int badgeWidth = 130;
+        const int badgeHeight = 150;
+        var width = Math.Max(badgeWidth * Math.Max(badges.Earned.Count, 1), 260);
+        const int height = badgeHeight + 40;
+
+        var sb = new System.Text.StringBuilder();
+
+        sb.Append(
+            $"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"{width}\" height=\"{height}\" viewBox=\"0 0 {width} {height}\" font-family=\"Segoe UI, Arial, sans-serif\">");
+
+        sb.Append(
+            $"<rect x=\"0\" y=\"0\" width=\"{width}\" height=\"{height}\" fill=\"#ffffff\" />");
+
+        sb.Append(
+            $"<text x=\"12\" y=\"24\" font-size=\"16\" font-weight=\"bold\" fill=\"#212529\">{System.Net.WebUtility.HtmlEncode(displayName)} — Achievements</text>");
+
+        if (badges.Earned.Count == 0)
+        {
+            sb.Append(
+                $"<text x=\"12\" y=\"48\" font-size=\"13\" fill=\"#6c757d\">No badges earned yet.</text>");
+        }
+        else
+        {
+            var x = 10;
+
+            foreach (var badge in badges.Earned)
+            {
+                var color =
+                    colors.TryGetValue(badge.Category, out var c)
+                        ? c
+                        : "#6c757d";
+
+                var cx = x + badgeWidth / 2 - 15;
+                var cy = 40 + 36;
+
+                sb.Append(
+                    $"<g>" +
+                    $"<circle cx=\"{cx}\" cy=\"{cy}\" r=\"34\" fill=\"{color}\" fill-opacity=\"0.12\" stroke=\"{color}\" stroke-width=\"3\" />" +
+                    $"<circle cx=\"{cx}\" cy=\"{cy}\" r=\"22\" fill=\"{color}\" />" +
+                    $"<text x=\"{cx}\" y=\"{cy + 6}\" text-anchor=\"middle\" font-size=\"18\" fill=\"#fff\" font-weight=\"bold\">{badge.Value}</text>" +
+                    $"<text x=\"{cx}\" y=\"{cy + 55}\" text-anchor=\"middle\" font-size=\"12\" fill=\"#212529\">{System.Net.WebUtility.HtmlEncode(badge.Label)}</text>" +
+                    $"</g>");
+
+                x += badgeWidth;
+            }
+        }
+
+        sb.Append("</svg>");
+
+        return sb.ToString();
     }
 
 
@@ -1084,6 +1213,10 @@ public class ProfileController : Controller
 
                 AvailableAttributes =
                     availableAttributes,
+
+                Badges =
+                    await _badgeService.GetBadgesAsync(
+                        profile.Id),
 
                 Attributes =
                     profile.AttributeValues

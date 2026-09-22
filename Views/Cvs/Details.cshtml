@@ -8,7 +8,8 @@
 @if (User.IsInRole("Recruiter") ||
      User.IsInRole("Administrator"))
 {
-    <div class="d-flex align-items-center gap-3 mb-4">
+    <div class="container pt-4">
+    <div class="d-flex align-items-center gap-3 mb-0 cv-feedback">
 
         <form id="like-form"
               asp-controller="Cvs"
@@ -43,6 +44,7 @@
         </span>
 
     </div>
+    </div>
 }
 
 <div class="container py-4">
@@ -63,6 +65,10 @@
         </div>
 
         <div class="d-flex flex-wrap gap-2">
+
+            <button type="button" class="btn btn-outline-primary" data-print-cv>
+                Print CV
+            </button>
 
             <a asp-controller="Positions"
                asp-action="Details"
@@ -126,15 +132,16 @@
         </div>
     }
 
-    <article class="card shadow-sm mb-4 cv-resume">
-        <div class="card-body p-md-5">
-            <header class="text-center border-bottom pb-4 mb-4">
-                <h1 class="display-6 mb-1">@Model.CandidateFirstName @Model.CandidateLastName</h1>
-                @if (!string.IsNullOrWhiteSpace(Model.ProfessionalTitle)) { <div class="fs-5 text-muted">@Model.ProfessionalTitle</div> }
-                <div class="small mt-2 text-muted">
+    <article class="cv-resume mb-5" aria-label="Candidate CV">
+        <div class="cv-sheet">
+            <header class="cv-header">
+                <div class="cv-eyebrow">Professional resume</div>
+                <h1>@Model.CandidateFirstName @Model.CandidateLastName</h1>
+                @if (!string.IsNullOrWhiteSpace(Model.ProfessionalTitle)) { <div class="cv-role">@Model.ProfessionalTitle</div> }
+                <div class="cv-contact">
                     @string.Join(" | ", new[] { Model.Location, Model.PhoneNumber, Model.Email }.Where(x => !string.IsNullOrWhiteSpace(x)))
                 </div>
-                <div class="small mt-1">
+                <div class="cv-links">
                     @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl)) { <a href="@Model.LinkedInUrl" target="_blank" rel="noopener">LinkedIn</a> }
                     @if (!string.IsNullOrWhiteSpace(Model.GitHubUrl)) { <span class="mx-1">|</span><a href="@Model.GitHubUrl" target="_blank" rel="noopener">GitHub</a> }
                     @if (!string.IsNullOrWhiteSpace(Model.PortfolioUrl)) { <span class="mx-1">|</span><a href="@Model.PortfolioUrl" target="_blank" rel="noopener">Portfolio</a> }
@@ -143,37 +150,44 @@
 
             @if (!string.IsNullOrWhiteSpace(Model.ProfessionalSummary))
             {
-                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Professional Summary</h2><p class="mb-0" style="white-space: pre-line">@Model.ProfessionalSummary</p></section>
+                <section class="cv-section"><h2>Professional Summary</h2><p class="mb-0" style="white-space: pre-line">@Model.ProfessionalSummary</p></section>
             }
 
             @if (Model.Attributes.Count > 0)
             {
-                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Core Skills & Relevant Information</h2><div class="d-flex flex-wrap gap-2">
-                    @foreach (var resumeItem in Model.Attributes.Where(x => !string.IsNullOrWhiteSpace(x.Value))) { <span class="badge rounded-pill text-bg-light border p-2"><span class="text-muted">@resumeItem.Name:</span> @resumeItem.Value</span> }
+                <section class="cv-section"><h2>Core Skills & Relevant Information</h2><div class="d-flex flex-wrap gap-2">
+                    @foreach (var resumeItem in Model.Attributes.Where(x => !string.IsNullOrWhiteSpace(x.Value))) { <span class="cv-skill"><span>@resumeItem.Name:</span> @resumeItem.Value</span> }
                 </div></section>
             }
 
             @if (Model.WorkExperiences.Count > 0)
             {
-                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Work Experience</h2>
+                <section class="cv-section"><h2>Work Experience</h2>
                     @foreach (var experience in Model.WorkExperiences) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@experience.JobTitle</strong><div>@experience.CompanyName</div></div><small class="text-muted text-nowrap">@experience.StartDate.ToString("MMM yyyy") – @(experience.EndDate?.ToString("MMM yyyy") ?? "Present")</small></div>@if (!string.IsNullOrWhiteSpace(experience.Description)) { <p class="mb-1 mt-2" style="white-space:pre-line">@experience.Description</p> }@if (!string.IsNullOrWhiteSpace(experience.Technologies)) { <div class="small"><strong>Technologies:</strong> @experience.Technologies</div> }</article> }
                 </section>
             }
 
             @if (Model.EducationEntries.Count > 0)
             {
-                <section class="mb-4"><h2 class="h5 text-uppercase border-bottom pb-2">Education</h2>
+                <section class="cv-section"><h2>Education</h2>
                     @foreach (var education in Model.EducationEntries) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@education.Degree</strong><div>@education.Institution</div></div><small class="text-muted text-nowrap">@education.StartDate.ToString("MMM yyyy") – @(education.EndDate?.ToString("MMM yyyy") ?? "Present")</small></div>@if (!string.IsNullOrWhiteSpace(education.Description)) { <p class="mb-0 mt-2" style="white-space:pre-line">@education.Description</p> }</article> }
                 </section>
             }
 
-            <section><h2 class="h5 text-uppercase border-bottom pb-2">Selected Projects</h2>
+            <section class="cv-section mb-0"><h2>Selected Projects</h2>
                 @if (Model.Projects.Count == 0) { <p class="text-muted mb-0">No projects matched this position's technology requirements.</p> }
                 @foreach (var project in Model.Projects) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><strong>@project.Name</strong><small class="text-muted text-nowrap">@project.Period</small></div><p class="mb-1 mt-1" style="white-space:pre-line">@project.DescriptionMarkdown</p><div class="small text-muted">@string.Join(", ", project.TechnologyTags)</div></article> }
             </section>
         </div>
     </article>
 
+    @if (!Model.IsReadOnly)
+    {
+    <section class="cv-editor">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div><div class="section-kicker">Manage</div><h2 class="h4 mb-0">Edit CV details</h2></div>
+            <span class="text-muted small">Changes update this CV preview immediately after saving.</span>
+        </div>
     <form asp-action="Save"
           method="post">
 
@@ -635,8 +649,16 @@
         }
 
     </form>
+    </section>
+    }
 
 </div>
+
+@section Scripts {
+<script>
+    document.querySelector('[data-print-cv]')?.addEventListener('click', () => window.print());
+</script>
+}
 
 <script>
     (() => {

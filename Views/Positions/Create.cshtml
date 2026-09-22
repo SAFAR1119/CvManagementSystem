@@ -4,6 +4,7 @@
     ViewData["Title"] = L["CreatePosition"];
 }
 
+
 <div class="container py-4">
 
     <div class="mb-4">
@@ -23,6 +24,148 @@
         <div asp-validation-summary="ModelOnly"
              class="alert alert-danger">
         </div>
+
+
+        
+@if (User.IsInRole("Recruiter"))
+{
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <label asp-for="Department"
+                   class="form-label">
+                Department
+            </label>
+
+            <input asp-for="Department"
+                   class="form-control"
+                   placeholder="e.g. Engineering, HR, Marketing" />
+
+            <span asp-validation-for="Department"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Experience"
+                   class="form-label">
+                Experience
+            </label>
+
+            <select asp-for="Experience"
+                    class="form-select">
+
+                <option value="0">Fresher</option>
+                <option value="1">1 Year</option>
+                <option value="2">2 Years</option>
+                <option value="3">3 Years</option>
+                <option value="4">4 Years</option>
+                <option value="5">5 Years</option>
+                <option value="6">6 Years</option>
+                <option value="7">7 Years</option>
+                <option value="8">8 Years</option>
+                <option value="9">9 Years</option>
+                <option value="10">10 Years</option>
+
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="EmploymentType"
+                   class="form-label">
+                Employment Type
+            </label>
+
+            <select asp-for="EmploymentType"
+                    class="form-select">
+
+                <option value="1">Full Time</option>
+                <option value="2">Part Time</option>
+
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="WorkMode"
+                   class="form-label">
+                Work Mode
+            </label>
+
+            <select asp-for="WorkMode"
+                    class="form-select">
+
+                <option value="1">On-site</option>
+                <option value="2">Remote</option>
+                <option value="3">Hybrid</option>
+
+            </select>
+        </div>
+
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <label class="form-label">
+                Department
+            </label>
+            <div class="form-control bg-body-secondary">
+                @Model.Department
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">
+                Experience
+            </label>
+            <div class="form-control bg-body-secondary">
+                @Model.Experience switch
+                {
+                    ExperienceLevel.Fresher => "Fresher",
+                    ExperienceLevel.OneYear => "1 Year",
+                    ExperienceLevel.TwoYears => "2 Years",
+                    ExperienceLevel.ThreeYears => "3 Years",
+                    ExperienceLevel.FourYears => "4 Years",
+                    ExperienceLevel.FiveYears => "5 Years",
+                    ExperienceLevel.SixYears => "6 Years",
+                    ExperienceLevel.SevenYears => "7 Years",
+                    ExperienceLevel.EightYears => "8 Years",
+                    ExperienceLevel.NineYears => "9 Years",
+                    ExperienceLevel.TenYears => "10 Years",
+                    _ => "Fresher"
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">
+                Employment Type
+            </label>
+            <div class="form-control bg-body-secondary">
+                @(Model.EmploymentType == EmploymentType.FullTime
+                    ? "Full Time"
+                    : "Part Time")
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">
+                Work Mode
+            </label>
+            <div class="form-control bg-body-secondary">
+                @(Model.WorkMode switch
+                {
+                    WorkMode.OnSite => "On-site",
+                    WorkMode.Remote => "Remote",
+                    WorkMode.Hybrid => "Hybrid",
+                    _ => "On-site"
+                })
+            </div>
+        </div>
+
+    </div>
+}
 
         <!-- ================================================= -->
         <!-- BASIC INFORMATION -->

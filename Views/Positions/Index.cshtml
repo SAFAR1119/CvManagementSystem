@@ -339,9 +339,7 @@
                                         </td>
 
                                         <td>
-                                            @position.UpdatedAt
-                                                .ToLocalTime()
-                                                .ToString("dd MMM yyyy")
+                                            @(position.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))
                                         </td>
 
                                     </tr>
@@ -488,9 +486,7 @@
                                     </td>
 
                                     <td>
-                                        @position.UpdatedAt
-                                            .ToLocalTime()
-                                            .ToString("dd MMM yyyy")
+                                       @(position.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))
                                     </td>
 
                                 </tr>

@@ -254,6 +254,76 @@
                     @(Model.Title)
                 </dd>
 
+                <div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <div class="small text-muted">
+                    Department
+                </div>
+                <div class="fw-semibold">
+                    @(string.IsNullOrWhiteSpace(Model.Department)
+                        ? "Not specified"
+                        : Model.Department)
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="small text-muted">
+                    Experience
+                </div>
+                <div class="fw-semibold">
+                    @(Model.Experience switch
+                    {
+                        ExperienceLevel.Fresher => "Fresher",
+                        ExperienceLevel.OneYear => "1 Year",
+                        ExperienceLevel.TwoYears => "2 Years",
+                        ExperienceLevel.ThreeYears => "3 Years",
+                        ExperienceLevel.FourYears => "4 Years",
+                        ExperienceLevel.FiveYears => "5 Years",
+                        ExperienceLevel.SixYears => "6 Years",
+                        ExperienceLevel.SevenYears => "7 Years",
+                        ExperienceLevel.EightYears => "8 Years",
+                        ExperienceLevel.NineYears => "9 Years",
+                        ExperienceLevel.TenYears => "10 Years",
+                        _ => "Fresher"
+                    })
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="small text-muted">
+                    Employment Type
+                </div>
+                <div class="fw-semibold">
+                    @(Model.EmploymentType == EmploymentType.FullTime
+                        ? "Full Time"
+                        : "Part Time")
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="small text-muted">
+                    Work Mode
+                </div>
+                <div class="fw-semibold">
+                    @(Model.WorkMode switch
+                    {
+                        WorkMode.OnSite => "On-site",
+                        WorkMode.Remote => "Remote",
+                        WorkMode.Hybrid => "Hybrid",
+                        _ => "On-site"
+                    })
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
 
                 <dt class="col-sm-3">
                     @L["ShortDescription"]

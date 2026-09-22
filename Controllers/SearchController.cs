@@ -163,98 +163,82 @@ public class SearchController : Controller
             }
         }
 
+// =====================================================
+// CV search
+// =====================================================
 
-        // =====================================================
-        // CV search
-        // =====================================================
+if (isCandidate ||
+    isRecruiter ||
+    isAdministrator)
+{
+    var cvQuery =
+        _context.Cvs
+            .AsNoTracking()
+            .AsQueryable();
 
-        if (isCandidate ||
-            isRecruiter ||
-            isAdministrator)
-        {
-            var cvQuery =
-                _context.Cvs
-                    .AsNoTracking()
-                    .AsQueryable();
+    if (isCandidate)
+    {
+        cvQuery =
+            cvQuery.Where(x =>
+                x.CandidateProfile.UserId ==
+                user!.Id &&
+                visiblePositionIds.Contains(
+                    x.PositionId));
+    }
+    else if (isRecruiter)
+    {
+        cvQuery =
+            cvQuery.Where(x =>
+                x.IsPublished &&
+                visiblePositionIds.Contains(
+                    x.PositionId));
+    }
 
+    // Administrator sees all CVs.
 
-            if (isCandidate)
-            {
-                cvQuery =
-                    cvQuery.Where(x =>
-                        x.CandidateProfile.UserId ==
-                        user!.Id &&
-                        visiblePositionIds.Contains(
-                            x.PositionId));
-            }
-            else if (isRecruiter)
-            {
-                cvQuery =
-                    cvQuery.Where(x =>
-                        x.IsPublished &&
-                        visiblePositionIds.Contains(
-                            x.PositionId));
-            }
-            // Administrator sees all CVs.
+    // PostgreSQL full-text search.
+    cvQuery = cvQuery.Where(x =>
+        x.SearchVector.Matches(
+            EF.Functions.WebSearchToTsQuery(
+                "simple",
+                query)));
 
+    model.Cvs =
+        await cvQuery
+            .OrderByDescending(x => x.UpdatedAt)
+            .Take(50)
+            .Select(x =>
+                new GlobalSearchCvViewModel
+                {
+                    Id = x.Id,
 
-            cvQuery = cvQuery.Where(x =>
-    EF.Functions.ILike(x.Title, "%" + query + "%")
-    || EF.Functions.ILike(
-        x.Position.Title,
-        "%" + query + "%")
-    || EF.Functions.ILike(
-        x.CandidateProfile.FirstName,
-        "%" + query + "%")
-    || EF.Functions.ILike(
-        x.CandidateProfile.LastName,
-        "%" + query + "%")
-    || x.CandidateProfile.AttributeValues.Any(av =>
-        EF.Functions.ILike(av.Value ?? string.Empty, "%" + query + "%"))
-    || x.CandidateProfile.Projects.Any(p =>
-        EF.Functions.ILike(p.Name, "%" + query + "%"))
-);
+                    Title = x.Title,
 
+                    PositionId = x.PositionId,
 
-            model.Cvs =
-                await cvQuery
-                    .OrderByDescending(
-                        x => x.UpdatedAt)
-                    .Take(50)
-                    .Select(x =>
-                        new GlobalSearchCvViewModel
-                        {
-                            Id = x.Id,
+                    PositionTitle =
+                        x.Position.Title,
 
-                            Title = x.Title,
+                    CandidateName =
+                        (
+                            x.CandidateProfile.FirstName +
+                            " " +
+                            x.CandidateProfile.LastName
+                        ).Trim(),
 
-                            PositionId =
-                                x.PositionId,
+                    IsPublished =
+                        x.IsPublished,
 
-                            PositionTitle =
-                                x.Position.Title,
+                    LikeCount =
+                        _context.CvLikes.Count(
+                            like =>
+                                like.CvId == x.Id),
 
-                            CandidateName =
-                                (
-                                    x.CandidateProfile.FirstName +
-                                    " " +
-                                    x.CandidateProfile.LastName
-                                ).Trim(),
-
-                            IsPublished =
-                                x.IsPublished,
-
-                            LikeCount =
-                                _context.CvLikes.Count(
-                                    like =>
-                                        like.CvId ==
-                                        x.Id),
-
-                            UpdatedAt =
-                                x.UpdatedAt
-                        })
-                    .ToListAsync();
-        }
+                    UpdatedAt =
+                        x.UpdatedAt
+                })
+            .ToListAsync();
+}
 
 
         return View(model);

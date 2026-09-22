@@ -112,6 +112,13 @@ public class PositionsController : Controller
             {
                 Id = x.Id,
                 Title = x.Title,
+                Department = x.Department,
+
+                Experience = x.Experience,
+
+                EmploymentType = x.EmploymentType,
+
+                WorkMode = x.WorkMode,
                 Description = x.Description,
                 IsPublic = x.IsPublic,
                 MaxProjects = x.MaxProjects,
@@ -203,6 +210,13 @@ public class PositionsController : Controller
         {
             Id = position.Id,
             Title = position.Title,
+            Department = position.Department,
+
+            Experience = position.Experience,
+
+            EmploymentType = position.EmploymentType,
+
+            WorkMode = position.WorkMode,
             Description = position.Description,
             IsPublic = position.IsPublic,
             MaxProjects = position.MaxProjects,
@@ -444,6 +458,16 @@ public class PositionsController : Controller
         var position = new Position
         {
             Title = model.Title.Trim(),
+
+            Department = model.Department.Trim(),
+
+            Experience = model.Experience,
+
+            EmploymentType = model.EmploymentType,
+
+            WorkMode = model.WorkMode,
+
+
             Description =
                 string.IsNullOrWhiteSpace(model.Description)
                     ? null
@@ -506,6 +530,14 @@ public class PositionsController : Controller
             Id = position.Id,
 
             Title = position.Title,
+
+            Department = position.Department,
+
+            Experience = position.Experience,
+
+            EmploymentType = position.EmploymentType,
+
+            WorkMode = position.WorkMode,
 
             Description = position.Description,
 
@@ -606,6 +638,18 @@ public class PositionsController : Controller
 
         position.Title =
             model.Title.Trim();
+
+    position.Department =
+        model.Department.Trim();
+
+    position.Experience =
+        model.Experience;
+
+    position.EmploymentType =
+        model.EmploymentType;
+
+    position.WorkMode =
+        model.WorkMode;
 
         position.Description =
             string.IsNullOrWhiteSpace(model.Description)
@@ -785,6 +829,18 @@ public class PositionsController : Controller
         var duplicate = new Position
         {
             Title = source.Title + " (Copy)",
+
+            Department =
+                 source.Department,
+
+            Experience =
+                 source.Experience,
+
+            EmploymentType =
+                 source.EmploymentType,
+
+            WorkMode =
+                 source.WorkMode,
 
             Description =
                 source.Description,
@@ -1533,108 +1589,4 @@ public class PositionsController : Controller
             _ => false
         };
     }
-}
-
-
-// =============================================================
-// POSITION LIST VIEW MODEL
-// =============================================================
-
-public class PositionListViewModel
-{
-    public int Id { get; set; }
-
-    public string Title { get; set; } = string.Empty;
-
-    public string? Description { get; set; }
-
-    public bool IsPublic { get; set; }
-
-    public int MaxProjects { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
-    public Guid Version { get; set; }
-
-    public int SubmittedCvCount { get; set; }
-
-    public List<string> TechnologyTags { get; set; } = new();
-}
-
-
-// =============================================================
-// POSITION DETAILS VIEW MODEL
-// =============================================================
-
-public class PositionDetailsViewModel
-{
-    public int Id { get; set; }
-
-    public string Title { get; set; } = string.Empty;
-
-    public string? Description { get; set; }
-
-    public bool IsPublic { get; set; }
-
-    public int MaxProjects { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
-    public Guid Version { get; set; }
-
-    public List<PositionAttributeListViewModel> Attributes
-        { get; set; } = new();
-
-    public List<string> ProjectTags
-        { get; set; } = new();
-
-    public List<PositionAccessRuleViewModel> AccessRules
-        { get; set; } = new();
-
-    public List<PositionCvSummaryViewModel> Cvs
-        { get; set; } = new();
-}
-
-
-// =============================================================
-// POSITION ATTRIBUTE VIEW MODEL
-// =============================================================
-
-public class PositionAttributeListViewModel
-{
-    public int AttributeDefinitionId { get; set; }
-
-    public string Name { get; set; } = string.Empty;
-
-    public string Category { get; set; } = string.Empty;
-
-    public AttributeDataType DataType { get; set; }
-
-    public bool IsRequired { get; set; }
-
-    public int SortOrder { get; set; }
-}
-
-
-// =============================================================
-// POSITION CV SUMMARY
-// =============================================================
-
-public class PositionCvSummaryViewModel
-{
-    public int Id { get; set; }
-
-    public string Title { get; set; } = string.Empty;
-
-    public string CandidateName { get; set; } = string.Empty;
-
-    public bool IsPublished { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
-    public int LikeCount { get; set; }
 }

@@ -1,9 +1,11 @@
 :root {
-  --app-primary: #315fda;
-  --app-primary-dark: #2449ad;
+  --app-primary: #1c5d99;
+  --app-primary-dark: #124573;
   --app-surface: #ffffff;
-  --app-page: #f4f7fb;
-  --app-border: #e2e8f3;
+  --app-page: #f4f7fa;
+  --app-border: #dfe7ef;
+  --app-ink: #142234;
+  --app-muted: #66758a;
 }
 
 html { font-size: 16px; min-height: 100%; }
@@ -11,25 +13,30 @@ html { font-size: 16px; min-height: 100%; }
 body {
   min-height: 100vh;
   margin: 0;
-  color: #1d2939;
+  color: var(--app-ink);
   background: var(--app-page);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 [data-bs-theme="dark"] body { color: #e5ecf6; background: #121927; }
 
-.navbar {
-  background: color-mix(in srgb, var(--bs-body-bg) 94%, #dbe7ff);
-  backdrop-filter: blur(12px);
+.app-navbar {
+  min-height: 4.7rem;
+  background: color-mix(in srgb, var(--bs-body-bg) 95%, #d9e9f6);
+  border-bottom: 1px solid var(--app-border);
+  box-shadow: 0 .2rem 1.2rem rgba(20, 34, 52, .045);
+  backdrop-filter: blur(14px);
 }
 
-.navbar-brand { letter-spacing: -.03em; }
-.nav-link { font-weight: 500; }
+.app-brand { align-items: center; color: var(--app-ink); display: inline-flex; font-size: 1.05rem; font-weight: 750; gap: .55rem; letter-spacing: -.025em; }
+.app-brand-mark { align-items: center; background: var(--app-primary); border-radius: .55rem; color: white; display: inline-flex; font-size: .67rem; font-weight: 800; height: 1.9rem; justify-content: center; letter-spacing: .04em; width: 1.9rem; }
+.nav-link { font-weight: 600; font-size: .92rem; }
 .nav-link:hover { color: var(--app-primary); }
+.app-main { padding-top: .5rem; }
 
 .card {
   border: 1px solid var(--app-border);
-  border-radius: .85rem;
+  border-radius: 1rem;
   background: var(--app-surface);
   box-shadow: 0 .25rem 1.25rem rgba(31, 52, 89, .055) !important;
 }
@@ -46,7 +53,7 @@ body {
 .table > :not(caption) > * > * { padding: .9rem 1rem; border-bottom-color: var(--app-border); }
 .table thead th { color: #667085; font-size: .75rem; letter-spacing: .045em; text-transform: uppercase; }
 
-.btn { border-radius: .55rem; font-weight: 600; }
+.btn { border-radius: .6rem; font-weight: 650; padding: .55rem .9rem; }
 .btn-primary { background: var(--app-primary); border-color: var(--app-primary); }
 .btn-primary:hover, .btn-primary:focus { background: var(--app-primary-dark); border-color: var(--app-primary-dark); }
 .form-control, .form-select { border-color: #cdd7e7; border-radius: .55rem; }
@@ -57,6 +64,33 @@ body {
 
 main { min-height: calc(100vh - 150px); }
 footer { border-color: var(--app-border) !important; }
+
+.section-kicker, .cv-eyebrow { color: var(--app-primary); font-size: .72rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.cv-feedback { color: var(--app-muted); font-size: .9rem; }
+.cv-resume { margin-left: auto; margin-right: auto; max-width: 920px; }
+.cv-sheet { background: #fff; border: 1px solid #dce4eb; border-radius: 1rem; box-shadow: 0 1.25rem 3rem rgba(19, 39, 61, .10); overflow: hidden; padding: clamp(2rem, 5vw, 4.25rem); }
+.cv-header { border-bottom: 2px solid #dce8f2; margin-bottom: 2rem; padding-bottom: 1.75rem; text-align: center; }
+.cv-header h1 { color: #10253a; font-size: clamp(2rem, 5vw, 3rem); font-weight: 750; letter-spacing: -.045em; line-height: 1.08; margin: .35rem 0; }
+.cv-role { color: #36556f; font-size: 1.1rem; font-weight: 600; }
+.cv-contact, .cv-links { color: #64748b; font-size: .9rem; margin-top: .7rem; }
+.cv-links a { color: var(--app-primary); font-weight: 600; text-decoration: none; }
+.cv-links a:hover { text-decoration: underline; }
+.cv-section { break-inside: avoid; margin-bottom: 2rem; }
+.cv-section h2 { border-bottom: 1px solid #dce4eb; color: #173b5b; font-size: .77rem; font-weight: 800; letter-spacing: .1em; margin-bottom: 1rem; padding-bottom: .6rem; text-transform: uppercase; }
+.cv-section article { break-inside: avoid; }
+.cv-section article strong { color: #142d45; }
+.cv-skill { background: #f0f6fa; border: 1px solid #d8e7f1; border-radius: 999px; color: #24435d; font-size: .85rem; padding: .38rem .7rem; }
+.cv-skill span { color: #62768a; font-weight: 600; }
+.cv-editor { border-top: 1px solid var(--app-border); margin: 0 auto; max-width: 960px; padding-top: 2.5rem; }
+
+@media print {
+  body { background: #fff !important; }
+  header, footer, .cv-editor, .cv-feedback, .btn, .alert, .toast-container { display: none !important; }
+  .app-main, main, .container { margin: 0 !important; max-width: none !important; padding: 0 !important; }
+  .cv-resume { max-width: none; }
+  .cv-sheet { border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+  .cv-section, .cv-section article { break-inside: avoid; }
+}
 
 @media (max-width: 991.98px) {
   .navbar .d-flex[role="search"] { width: 100%; }

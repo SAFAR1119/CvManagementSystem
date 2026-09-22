@@ -1,116 +1,540 @@
-@model CvManagementSystem.Models.CandidateProfile?
+@model CvManagementSystem.Models.CandidateProfile
 
 @{
-    ViewData["Title"] = "Public Profile";
+    ViewData["Title"] = "Candidate Profile";
+
+    var displayName =
+        $"{Model.FirstName} {Model.LastName}".Trim();
+
+    if (string.IsNullOrWhiteSpace(displayName))
+    {
+        displayName =
+            ViewBag.DisplayName as string ?? "Candidate";
+    }
 }
 
 <div class="container py-4">
 
-    <div class="mb-4">
-        <h1 class="h3 mb-1">
-            Public Profile
-        </h1>
+    <!-- Header -->
 
-        <p class="text-muted mb-0">
-            Read-only profile information.
-        </p>
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="row align-items-center g-4">
+
+                <div class="col-md-auto">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
+                    {
+                        <img src="@Model.PhotoUrl"
+                             alt="@displayName"
+                             class="rounded-circle border"
+                             style="width: 120px; height: 120px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle border d-flex
+                                    align-items-center justify-content-center
+                                    bg-body-secondary"
+                             style="width: 120px; height: 120px;">
+
+                            <span class="fs-1 text-muted">
+                                @(displayName.Length > 0
+                                    ? displayName[..1].ToUpper()
+                                    : "?")
+                            </span>
+
+                        </div>
+                    }
+
+                </div>
+
+                <div class="col">
+
+                    <h1 class="h2 mb-1">
+                        @displayName
+                    </h1>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ProfessionalTitle))
+                    {
+                        <div class="fs-5 text-primary mb-2">
+                            @Model.ProfessionalTitle
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Location))
+                    {
+                        <div class="text-muted">
+                            @Model.Location
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-    @if (Model == null)
-    {
-        <div class="card shadow-sm">
-            <div class="card-body">
 
-                <h2 class="h5">
-                    @(ViewBag.DisplayName ?? "User")
-                </h2>
+    <!-- Professional Summary -->
 
-                <p class="text-muted mb-0">
-                    No candidate profile has been created for this account.
-                </p>
-
-            </div>
-        </div>
-    }
-    else
+    @if (!string.IsNullOrWhiteSpace(Model.ProfessionalSummary))
     {
         <div class="card shadow-sm mb-4">
-            <div class="card-body">
-
-                <h2 class="h4">
-                    @(Model.FirstName) @(Model.LastName)
-                </h2>
-
-                @if (!string.IsNullOrWhiteSpace(Model.Location))
-                {
-                    <p class="text-muted mb-0">
-                        @Model.Location
-                    </p>
-                }
-
-            </div>
-        </div>
-
-        <div class="card shadow-sm">
 
             <div class="card-header">
                 <h2 class="h5 mb-0">
-                    Projects
+                    Professional Summary
                 </h2>
             </div>
 
             <div class="card-body">
 
-                @if (Model.Projects.Count == 0)
-                {
-                    <p class="text-muted mb-0">
-                        No projects available.
-                    </p>
-                }
-                else
-                {
-                    @foreach (var project in Model.Projects
-                        .OrderByDescending(x => x.StartDate))
-                    {
-                        <article class="border-bottom pb-3 mb-3">
-
-                            <h3 class="h6">
-                                @project.Name
-                            </h3>
-
-                            <div class="small text-muted mb-2">
-                                @(
-                                    project.EndDate.HasValue
-                                        ? $"{project.StartDate:MMM yyyy} - {project.EndDate.Value:MMM yyyy}"
-                                        : $"{project.StartDate:MMM yyyy} - Present"
-                                )
-                            </div>
-
-                            <div class="mb-2">
-                                @project.DescriptionMarkdown
-                            </div>
-
-                            @if (project.TechnologyTags.Count > 0)
-                            {
-                                <div class="d-flex flex-wrap gap-2">
-
-                                    @foreach (var tag in project.TechnologyTags)
-                                    {
-                                        <span class="badge text-bg-light border">
-                                            @tag.TechnologyTag.Name
-                                        </span>
-                                    }
-
-                                </div>
-                            }
-
-                        </article>
-                    }
-                }
+                <p class="mb-0">
+                    @Model.ProfessionalSummary
+                </p>
 
             </div>
 
         </div>
     }
+
+
+    <!-- Contact -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h2 class="h5 mb-0">
+                Contact & Links
+            </h2>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                @if (!string.IsNullOrWhiteSpace(Model.Email))
+                {
+                    <div class="col-md-6">
+
+                        <div class="small text-muted">
+                            Email
+                        </div>
+
+                        <a href="mailto:@Model.Email">
+                            @Model.Email
+                        </a>
+
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+                {
+                    <div class="col-md-6">
+
+                        <div class="small text-muted">
+                            Phone
+                        </div>
+
+                        <div>
+                            @Model.PhoneNumber
+                        </div>
+
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl))
+                {
+                    <div class="col-md-4">
+
+                        <div class="small text-muted">
+                            LinkedIn
+                        </div>
+
+                        <a href="@Model.LinkedInUrl"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            View LinkedIn
+                        </a>
+
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.GitHubUrl))
+                {
+                    <div class="col-md-4">
+
+                        <div class="small text-muted">
+                            GitHub
+                        </div>
+
+                        <a href="@Model.GitHubUrl"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            View GitHub
+                        </a>
+
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.PortfolioUrl))
+                {
+                    <div class="col-md-4">
+
+                        <div class="small text-muted">
+                            Portfolio
+                        </div>
+
+                        <a href="@Model.PortfolioUrl"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            View Portfolio
+                        </a>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Skills / Attributes -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h2 class="h5 mb-0">
+                Skills & Attributes
+            </h2>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.AttributeValues.Count == 0)
+            {
+                <div class="p-4 text-muted">
+                    No profile attributes added.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>
+                                    Attribute
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Value
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var attribute in Model.AttributeValues
+                                .OrderBy(x =>
+                                    x.AttributeDefinition.Category.Name)
+                                .ThenBy(x =>
+                                    x.AttributeDefinition.Name))
+                            {
+                                <tr>
+
+                                    <td class="fw-semibold">
+                                        @(attribute.AttributeDefinition.Name)
+                                    </td>
+
+                                    <td>
+                                        @(attribute.AttributeDefinition.Category?.Name
+                                            ?? "General")
+                                    </td>
+
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(attribute.Value)
+                                            ? "—"
+                                            : attribute.Value)
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- Work Experience -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h2 class="h5 mb-0">
+                Work Experience
+            </h2>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.WorkExperiences.Count == 0)
+            {
+                <div class="text-muted">
+                    No work experience added.
+                </div>
+            }
+            else
+            {
+                @foreach (var experience in Model.WorkExperiences
+                    .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                    .ThenByDescending(x => x.StartDate))
+                {
+                    <div class="border rounded p-3 mb-3">
+
+                        <div class="d-flex flex-column
+                                    flex-md-row
+                                    justify-content-between
+                                    gap-2">
+
+                            <div>
+
+                                <h3 class="h6 mb-1">
+                                    @experience.JobTitle
+                                </h3>
+
+                                <div class="fw-semibold">
+                                    @experience.CompanyName
+                                </div>
+
+                            </div>
+
+                            <div class="text-muted small">
+
+                                @experience.StartDate.ToString("MMM yyyy")
+                                -
+                                @(experience.EndDate?.ToString("MMM yyyy")
+                                    ?? "Present")
+
+                            </div>
+
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(
+                            experience.Description))
+                        {
+                            <p class="mt-3 mb-2">
+                                @experience.Description
+                            </p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(
+                            experience.Technologies))
+                        {
+                            <div class="small">
+
+                                <span class="text-muted">
+                                    Technologies:
+                                </span>
+
+                                @experience.Technologies
+
+                            </div>
+                        }
+
+                    </div>
+                }
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- Education -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h2 class="h5 mb-0">
+                Education
+            </h2>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.EducationEntries.Count == 0)
+            {
+                <div class="text-muted">
+                    No education information added.
+                </div>
+            }
+            else
+            {
+                @foreach (var education in Model.EducationEntries
+                    .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+                    .ThenByDescending(x => x.StartDate))
+                {
+                    <div class="border rounded p-3 mb-3">
+
+                        <div class="d-flex flex-column
+                                    flex-md-row
+                                    justify-content-between
+                                    gap-2">
+
+                            <div>
+
+                                <h3 class="h6 mb-1">
+                                    @education.Degree
+                                </h3>
+
+                                <div class="fw-semibold">
+                                    @education.Institution
+                                </div>
+
+                            </div>
+
+                            <div class="text-muted small">
+
+                                @education.StartDate.ToString("MMM yyyy")
+                                -
+                                @(education.EndDate?.ToString("MMM yyyy")
+                                    ?? "Present")
+
+                            </div>
+
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(
+                            education.Description))
+                        {
+                            <p class="mt-3 mb-0">
+                                @education.Description
+                            </p>
+                        }
+
+                    </div>
+                }
+            }
+
+        </div>
+
+    </div>
+
+
+    <!-- Projects -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h2 class="h5 mb-0">
+                Projects
+            </h2>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Projects.Count == 0)
+            {
+                <div class="text-muted">
+                    No projects added.
+                </div>
+            }
+            else
+            {
+                @foreach (var project in Model.Projects
+                    .OrderByDescending(x => x.StartDate))
+                {
+                    <div class="border rounded p-3 mb-3">
+
+                        <div class="d-flex flex-column
+                                    flex-md-row
+                                    justify-content-between
+                                    gap-2">
+
+                            <h3 class="h6 mb-0">
+                                @project.Name
+                            </h3>
+
+                            <div class="text-muted small">
+
+                                @project.StartDate.ToString("MMM yyyy")
+                                -
+                                @(project.EndDate?.ToString("MMM yyyy")
+                                    ?? "Present")
+
+                            </div>
+
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(
+                            project.DescriptionMarkdown))
+                        {
+                            <div class="mt-3">
+                                @project.DescriptionMarkdown
+                            </div>
+                        }
+
+                        @if (project.TechnologyTags.Count > 0)
+                        {
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+
+                                @foreach (var tag in project.TechnologyTags
+                                    .OrderBy(x =>
+                                        x.TechnologyTag.Name))
+                                {
+                                    <span class="badge text-bg-light border">
+                                        @tag.TechnologyTag.Name
+                                    </span>
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+                }
+            }
+
+        </div>
+
+    </div>
+
+
+    <div class="text-muted small">
+        Candidate profile — read only
+    </div>
 
 </div>
