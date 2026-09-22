@@ -3,6 +3,7 @@ using CvManagementSystem.Data;
 using CvManagementSystem.Models;
 using CvManagementSystem.Services;
 using CvManagementSystem.ViewModels;
+using Markdig;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -244,6 +245,8 @@ public class CvsController : Controller
             .Include(x => x.Position)
                 .ThenInclude(x => x.AccessRules)
                     .ThenInclude(x => x.AttributeDefinition)
+            .Include(x => x.Position)
+                .ThenInclude(x => x.ProjectTags)
             .Include(x => x.CandidateProfile)
                 .ThenInclude(x => x.AttributeValues)
                     .ThenInclude(x => x.AttributeDefinition)
@@ -315,6 +318,12 @@ if (isRecruiter || isAdmin)
         // marked as required for publishing, but optional profile attributes
         // (for example languages, certifications, and custom fields) must not
         // disappear merely because the position did not explicitly request them.
+        var markdownPipeline =
+            new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .DisableHtml()
+                .Build();
+
         var attributes = cv.CandidateProfile.AttributeValues
             .OrderBy(x => x.AttributeDefinition.Category!.Name)
             .ThenBy(x => x.AttributeDefinition.Name)
@@ -336,6 +345,12 @@ if (isRecruiter || isAdmin)
 
                     Value = x.Value,
 
+                    ValueHtml =
+                        x.AttributeDefinition.DataType == AttributeDataType.Text &&
+                        !string.IsNullOrWhiteSpace(x.Value)
+                            ? Markdown.ToHtml(x.Value, markdownPipeline)
+                            : null,
+
                     IsRequired = requiredAttributeIds.Contains(
                         x.AttributeDefinitionId),
 
@@ -352,9 +367,21 @@ if (isRecruiter || isAdmin)
 
         // Projects belong to the profile, so a project added after a CV was
         // generated is immediately visible on every CV and to recruiters.
+        // The position may restrict which projects are relevant (by tag) and
+        // how many appear, matching the rules applied at CV generation time.
+        var positionProjectTagIds =
+            cv.Position.ProjectTags
+                .Select(x => x.TechnologyTagId)
+                .ToHashSet();
+
         var projects = cv.CandidateProfile.Projects
+            .Where(x =>
+                positionProjectTagIds.Count == 0 ||
+                x.TechnologyTags.Any(t =>
+                    positionProjectTagIds.Contains(t.TechnologyTagId)))
             .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
             .ThenByDescending(x => x.StartDate)
+            .Take(cv.Position.MaxProjects)
             .Select(x => new CvProjectViewModel
             {
                 ProjectId = x.Id,

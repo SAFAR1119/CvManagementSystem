@@ -137,10 +137,23 @@ public class CvGenerationService
                 });
         }
 
+        // Positions may restrict a generated CV to projects tagged with their
+        // configured technologies, capped at MaxProjects. An untagged position
+        // (no ProjectTags configured) imposes no relevance filter, only the cap.
+        var positionTagIds =
+            position.ProjectTags
+                .Select(x => x.TechnologyTagId)
+                .ToHashSet();
+
         var projectCandidates =
             profile.Projects
+                .Where(x =>
+                    positionTagIds.Count == 0 ||
+                    x.TechnologyTags.Any(t =>
+                        positionTagIds.Contains(t.TechnologyTagId)))
                 .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
                 .ThenByDescending(x => x.StartDate)
+                .Take(position.MaxProjects)
                 .ToList();
 
         for (var i = 0;

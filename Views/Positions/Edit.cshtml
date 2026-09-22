@@ -286,12 +286,25 @@ else
 
             <div class="card-body">
 
-                <div class="mb-3">
+                <div class="row g-2 mb-3">
 
-                    <input type="text"
-                           id="attributeSearch"
-                           class="form-control"
-                           placeholder="Filter attributes..." />
+                    <div class="col-md-8">
+                        <input type="text"
+                               id="attributeSearch"
+                               class="form-control"
+                               placeholder="Search attributes by name..." />
+                    </div>
+
+                    <div class="col-md-4">
+                        <select id="attributeCategoryFilter"
+                                class="form-select">
+                            <option value="">All categories</option>
+                            @foreach (var category in Model.AttributeCategories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
 
                 </div>
 
@@ -344,7 +357,8 @@ else
                                     Model.RequiredAttributeIds.Contains(
                                         item.Id);
 
-                                <tr data-search="@($"{item.Name} {item.Category} {item.DataType}")">
+                                <tr data-name="@item.Name.ToLowerInvariant()"
+                                    data-category-id="@item.CategoryId">
 
                                     <td>
 
@@ -696,32 +710,58 @@ else
     // ATTRIBUTE SEARCH
     // =========================================================
 
-    document
-        .getElementById("attributeSearch")
-        .addEventListener(
-            "input",
-            function ()
-            {
-                const term =
-                    this.value
-                        .trim()
-                        .toLowerCase();
+    const attributeSearch =
+        document.getElementById("attributeSearch");
 
-                document
-                    .querySelectorAll(
-                        "#attributeTable tbody tr"
-                    )
-                    .forEach(
-                        row =>
-                        {
-                            row.style.display =
-                                row.dataset.search
-                                    .toLowerCase()
-                                    .includes(term)
-                                    ? ""
-                                    : "none";
-                        });
-            });
+    const attributeCategoryFilter =
+        document.getElementById("attributeCategoryFilter");
+
+    function filterAttributeRows()
+    {
+        const term =
+            (attributeSearch?.value || "")
+                .trim()
+                .toLowerCase();
+
+        const categoryId =
+            attributeCategoryFilter?.value || "";
+
+        document
+            .querySelectorAll(
+                "#attributeTable tbody tr"
+            )
+            .forEach(
+                row =>
+                {
+                    const matchesName =
+                        !term ||
+                        (row.dataset.name || "")
+                            .startsWith(term);
+
+                    const matchesCategory =
+                        !categoryId ||
+                        row.dataset.categoryId === categoryId;
+
+                    row.style.display =
+                        matchesName && matchesCategory
+                            ? ""
+                            : "none";
+                });
+    }
+
+    if (attributeSearch)
+    {
+        attributeSearch.addEventListener(
+            "input",
+            filterAttributeRows);
+    }
+
+    if (attributeCategoryFilter)
+    {
+        attributeCategoryFilter.addEventListener(
+            "change",
+            filterAttributeRows);
+    }
 
 
     // =========================================================

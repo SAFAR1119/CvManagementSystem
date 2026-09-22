@@ -304,12 +304,25 @@ else
                 }
                 else
                 {
-                    <div class="mb-3">
+                    <div class="row g-2 mb-3">
 
-                        <input type="text"
-                               id="attributeSearch"
-                               class="form-control"
-                               placeholder="Filter attributes..." />
+                        <div class="col-md-8">
+                            <input type="text"
+                                   id="attributeSearch"
+                                   class="form-control"
+                                   placeholder="Search attributes by name..." />
+                        </div>
+
+                        <div class="col-md-4">
+                            <select id="attributeCategoryFilter"
+                                    class="form-select">
+                                <option value="">All categories</option>
+                                @foreach (var category in Model.AttributeCategories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                        </div>
 
                     </div>
 
@@ -362,7 +375,8 @@ else
                                         Model.RequiredAttributeIds.Contains(
                                             item.Id);
 
-                                    <tr data-search="@($"{item.Name} {item.Category} {item.DataType}")">
+                                    <tr data-name="@item.Name.ToLowerInvariant()"
+                                        data-category-id="@item.CategoryId">
 
                                         <td>
 
@@ -647,34 +661,54 @@ else
     const attributeSearch =
         document.getElementById("attributeSearch");
 
+    const attributeCategoryFilter =
+        document.getElementById("attributeCategoryFilter");
+
+    function filterAttributeRows()
+    {
+        const term =
+            (attributeSearch?.value || "")
+                .trim()
+                .toLowerCase();
+
+        const categoryId =
+            attributeCategoryFilter?.value || "";
+
+        document
+            .querySelectorAll(
+                "#attributeTable tbody tr"
+            )
+            .forEach(
+                row =>
+                {
+                    const matchesName =
+                        !term ||
+                        (row.dataset.name || "")
+                            .startsWith(term);
+
+                    const matchesCategory =
+                        !categoryId ||
+                        row.dataset.categoryId === categoryId;
+
+                    row.style.display =
+                        matchesName && matchesCategory
+                            ? ""
+                            : "none";
+                });
+    }
+
     if (attributeSearch)
     {
         attributeSearch.addEventListener(
             "input",
-            function ()
-            {
-                const term =
-                    this.value
-                        .trim()
-                        .toLowerCase();
+            filterAttributeRows);
+    }
 
-                document
-                    .querySelectorAll(
-                        "#attributeTable tbody tr"
-                    )
-                    .forEach(
-                        row =>
-                        {
-                            const text =
-                                row.dataset.search
-                                    .toLowerCase();
-
-                            row.style.display =
-                                text.includes(term)
-                                    ? ""
-                                    : "none";
-                        });
-            });
+    if (attributeCategoryFilter)
+    {
+        attributeCategoryFilter.addEventListener(
+            "change",
+            filterAttributeRows);
     }
 
 

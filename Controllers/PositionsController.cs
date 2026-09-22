@@ -1183,10 +1183,13 @@ public class PositionsController : Controller
     private async Task LoadSelectionDataAsync(
         PositionViewModel model)
     {
+        // Ordered by most-recently-used first (matching the same picker
+        // pattern on the candidate Profile page) so the library stays
+        // navigable as it grows, per the Attribute Library requirements.
         var attributes = await _context.AttributeDefinitions
             .AsNoTracking()
             .Include(x => x.Category)
-            .OrderBy(x => x.Category.Name)
+            .OrderByDescending(x => x.LastUsedAt)
             .ThenBy(x => x.Name)
             .ToListAsync();
 
@@ -1209,12 +1212,17 @@ public class PositionsController : Controller
 
                         Name = x.Name,
 
+                        CategoryId = x.CategoryId,
+
                         Category =
                             x.Category?.Name ??
                             "General",
 
                         DataType =
-                            x.DataType
+                            x.DataType,
+
+                        LastUsedAt =
+                            x.LastUsedAt
                     })
                 .ToList();
 

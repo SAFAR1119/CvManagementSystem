@@ -13,13 +13,16 @@ public class AdminController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
     public AdminController(
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
     {
         _context = context;
         _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     [HttpGet]
@@ -223,6 +226,8 @@ public class AdminController : Controller
             }
         }
 
+        await RefreshAuthenticationForSelectedUsers(users);
+
         return RedirectToAction(nameof(Users));
     }
 
@@ -279,6 +284,8 @@ public class AdminController : Controller
             }
         }
 
+        await RefreshAuthenticationForSelectedUsers(users);
+
         return RedirectToAction(nameof(Users));
     }
 
@@ -333,7 +340,16 @@ public class AdminController : Controller
             return;
         }
 
-        await _userManager.UpdateSecurityStampAsync(
-            users.First(x => x.Id == currentUserId));
+        var currentUser =
+            users.First(x => x.Id == currentUserId);
+
+        await _userManager.UpdateSecurityStampAsync(currentUser);
+
+        // UpdateSecurityStampAsync alone only invalidates the stamp for the
+        // *next* periodic re-validation of the existing cookie (which can be
+        // minutes away). RefreshSignInAsync re-issues the cookie for this
+        // session immediately, so a role change (e.g. an admin removing their
+        // own Administrator role) takes effect on the very next request.
+        await _signInManager.RefreshSignInAsync(currentUser);
     }
 }

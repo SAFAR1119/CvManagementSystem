@@ -1676,6 +1676,29 @@
 
             {
 
+                <form asp-controller="Cvs"
+                      asp-action="DeleteSelected"
+                      method="post"
+                      id="cv-list-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <div class="d-flex align-items-center gap-2 px-3 pt-3">
+
+                        <button type="submit"
+                                id="delete-selected-cvs"
+                                class="btn btn-outline-danger btn-sm"
+                                disabled
+                                onclick="return confirm('Delete the selected CV(s)? This cannot be undone.')">
+                            @L["RemoveSelected"]
+                        </button>
+
+                        <span id="cv-selection-status"
+                              class="small text-muted">
+                        </span>
+
+                    </div>
+
                 <div class="table-responsive">
 
                     <table class="table table-hover
@@ -1687,6 +1710,14 @@
                         <thead class="table-light">
 
                             <tr>
+
+                                <th style="width: 45px;">
+
+                                    <input type="checkbox"
+                                           id="select-all-cvs"
+                                           class="form-check-input" />
+
+                                </th>
 
                                 <th>
 
@@ -1723,6 +1754,15 @@
                             {
 
                                 <tr>
+
+                                    <td>
+
+                                        <input type="checkbox"
+                                               class="form-check-input cv-checkbox"
+                                               name="selectedIds"
+                                               value="@cv.Id" />
+
+                                    </td>
 
                                     <td>
 
@@ -1793,6 +1833,8 @@
                     </table>
 
                 </div>
+
+                </form>
 
             }
 
@@ -2004,6 +2046,58 @@
             );
 
         }
+
+
+        // -----------------------------------------------------
+        // CV list: bulk selection for delete
+        // -----------------------------------------------------
+        const selectAllCvs =
+            document.getElementById("select-all-cvs");
+
+        const cvCheckboxes =
+            Array.from(
+                document.querySelectorAll(".cv-checkbox")
+            );
+
+        const deleteSelectedCvsButton =
+            document.getElementById("delete-selected-cvs");
+
+        const cvSelectionStatus =
+            document.getElementById("cv-selection-status");
+
+        function updateCvSelectionState() {
+            const count =
+                cvCheckboxes.filter(x => x.checked).length;
+
+            if (deleteSelectedCvsButton) {
+                deleteSelectedCvsButton.disabled = count === 0;
+            }
+
+            if (cvSelectionStatus) {
+                cvSelectionStatus.textContent =
+                    count > 0 ? `${count} selected` : "";
+            }
+        }
+
+        if (selectAllCvs) {
+            selectAllCvs.addEventListener("change", () => {
+                cvCheckboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCvs.checked;
+                });
+
+                updateCvSelectionState();
+            });
+        }
+
+        cvCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", () => {
+                if (!checkbox.checked && selectAllCvs) {
+                    selectAllCvs.checked = false;
+                }
+
+                updateCvSelectionState();
+            });
+        });
 
 
         // -----------------------------------------------------

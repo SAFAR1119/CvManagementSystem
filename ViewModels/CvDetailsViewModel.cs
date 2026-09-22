@@ -69,6 +69,8 @@ public class CvAttributeViewModel
 
     public string? Value { get; set; }
 
+    public string? ValueHtml { get; set; }
+
     public bool IsRequired { get; set; }
 
     public Guid Version { get; set; }

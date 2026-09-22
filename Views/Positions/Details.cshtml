@@ -920,6 +920,12 @@
         const positionId =
             @Model.Id;
 
+        const showDiscussionProfileLinks =
+            @(((bool)showDiscussionProfileLinks) ? "true" : "false");
+
+        const profileBaseUrl =
+            "@Url.Action("Public", "Profile")";
+
         const discussionList =
             document.getElementById(
                 "discussion-list"
@@ -959,9 +965,17 @@
                 );
 
             const authorElement =
-                document.createElement(
-                    "strong"
-                );
+                (showDiscussionProfileLinks && post.authorId)
+                    ? document.createElement("a")
+                    : document.createElement("strong");
+
+            if (showDiscussionProfileLinks && post.authorId) {
+                authorElement.className =
+                    "fw-semibold text-decoration-none";
+
+                authorElement.href =
+                    `${profileBaseUrl}?userId=${encodeURIComponent(post.authorId)}`;
+            }
 
             authorElement.textContent =
                 post.authorName || "User";
