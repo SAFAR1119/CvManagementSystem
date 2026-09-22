@@ -1,94 +1,271 @@
+/* ============================================================================
+   Theme — adapted from the "Industry" design system: a muted blue-grey ink
+   palette, Barlow / Barlow Condensed type, and square, hairline-bordered
+   components (a technical-drafting look, fitting for a CV/spec document
+   tool). Fonts are loaded from Google Fonts in _Layout.cshtml.
+
+   Tokens below are the source of truth. The block after retunes Bootstrap's
+   own CSS variables so every Bootstrap component (buttons, cards, forms,
+   tables, dropdowns, modals, toasts) picks the theme up automatically,
+   without having to restyle each component by hand.
+   ============================================================================ */
+
 :root {
-  --app-primary: #1c5d99;
-  --app-primary-dark: #124573;
-  --app-surface: #ffffff;
-  --app-page: #f4f7fa;
-  --app-border: #dfe7ef;
-  --app-ink: #142234;
-  --app-muted: #66758a;
+  --color-bg: #f2f2f3;
+  --color-surface: #e9e9ea;
+  --color-text: #1d1f20;
+  --color-accent: #5980a6;
+  --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+
+  --color-neutral-100: #f5f5f8;
+
+  --color-accent-100: #eef6ff;
+  --color-accent-700: #416180;
+  --color-accent-800: #2c455d;
+
+  --font-heading: "Barlow Condensed", system-ui, sans-serif;
+  --font-heading-weight: 600;
+  --font-body: "Barlow", system-ui, sans-serif;
+
+  /* Elevation — ink-tinted rather than pure black, so shadows read as part
+     of the same palette instead of a generic UI-kit drop shadow. */
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
 }
+
+[data-bs-theme="dark"] {
+  --color-bg: #191b1d;
+  --color-surface: #212426;
+  --color-text: #e9eaeb;
+  --color-accent: #82a7cb;
+  --color-divider: color-mix(in srgb, #e9eaeb 20%, transparent);
+
+  --color-accent-100: #22313e;
+  --color-accent-700: #a8c6e2;
+  --color-accent-800: #c9dcee;
+  --color-neutral-100: #262a2c;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-md: 0 3px 10px rgba(0, 0, 0, .45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, .55);
+}
+
+/* ── Bootstrap variable bridge ───────────────────────────────────────────
+   Bootstrap 5.3 builds every component from these root-level custom
+   properties, so retuning them here reskins buttons/cards/forms/tables/
+   dropdowns/modals/toasts without touching each component's own rules. */
+:root,
+[data-bs-theme="light"] {
+  --bs-body-bg: var(--color-bg);
+  --bs-body-bg-rgb: 242, 242, 243;
+  --bs-body-color: var(--color-text);
+  --bs-body-color-rgb: 29, 31, 32;
+  --bs-body-font-family: var(--font-body);
+  --bs-font-sans-serif: var(--font-body), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bs-emphasis-color: var(--color-text);
+  --bs-secondary-color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  --bs-tertiary-color: color-mix(in srgb, var(--color-text) 40%, transparent);
+  --bs-tertiary-bg: var(--color-neutral-100);
+  --bs-secondary-bg: var(--color-neutral-100);
+  --bs-border-color: var(--color-divider);
+  --bs-border-color-translucent: var(--color-divider);
+  --bs-link-color: var(--color-accent);
+  --bs-link-color-rgb: 89, 128, 166;
+  --bs-link-hover-color: var(--color-accent-700);
+  --bs-link-hover-color-rgb: 65, 97, 128;
+  --bs-primary: var(--color-accent);
+  --bs-primary-rgb: 89, 128, 166;
+  --bs-light: var(--color-surface);
+  --bs-light-rgb: 233, 233, 234;
+
+  /* Blueprint components read as square, hairline-bordered objects rather
+     than soft rounded cards — see readme.md in the source design system. */
+  --bs-border-radius: 0;
+  --bs-border-radius-sm: 0;
+  --bs-border-radius-lg: 0;
+  --bs-border-radius-xl: 0;
+  --bs-border-radius-xxl: 0;
+  --bs-border-radius-pill: 0;
+
+  --bs-box-shadow: var(--shadow-md);
+  --bs-box-shadow-sm: var(--shadow-sm);
+  --bs-box-shadow-lg: var(--shadow-lg);
+}
+
+[data-bs-theme="dark"] {
+  --bs-body-bg-rgb: 25, 27, 29;
+  --bs-body-color-rgb: 233, 234, 235;
+  --bs-link-color-rgb: 130, 167, 203;
+  --bs-link-hover-color-rgb: 168, 198, 226;
+  --bs-primary-rgb: 130, 167, 203;
+  --bs-light-rgb: 33, 36, 38;
+}
+
+/* ── Base typography ────────────────────────────────────────────────── */
 
 html { font-size: 16px; min-height: 100%; }
 
 body {
   min-height: 100vh;
   margin: 0;
-  color: var(--app-ink);
-  background: var(--app-page);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
-[data-bs-theme="dark"] body { color: #e5ecf6; background: #121927; }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  letter-spacing: -0.015em;
+}
+
+a:hover { color: var(--color-accent-700); }
+:focus-visible { outline-color: var(--color-accent); }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+
+/* ── Navbar ─────────────────────────────────────────────────────────── */
 
 .app-navbar {
   min-height: 4.7rem;
-  background: color-mix(in srgb, var(--bs-body-bg) 95%, #d9e9f6);
-  border-bottom: 1px solid var(--app-border);
-  box-shadow: 0 .2rem 1.2rem rgba(20, 34, 52, .045);
-  backdrop-filter: blur(14px);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-divider);
+  box-shadow: none;
 }
 
-.app-brand { align-items: center; color: var(--app-ink); display: inline-flex; font-size: 1.05rem; font-weight: 750; gap: .55rem; letter-spacing: -.025em; }
-.app-brand-mark { align-items: center; background: var(--app-primary); border-radius: .55rem; color: white; display: inline-flex; font-size: .67rem; font-weight: 800; height: 1.9rem; justify-content: center; letter-spacing: .04em; width: 1.9rem; }
+.app-brand { align-items: center; color: var(--color-text); display: inline-flex; font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 1.15rem; gap: .55rem; letter-spacing: -.01em; }
+.app-brand-mark {
+  align-items: center; background: transparent; border: 1.5px solid var(--color-accent);
+  color: var(--color-accent); display: inline-flex; font-family: var(--font-heading);
+  font-size: .7rem; font-weight: 700; height: 1.9rem; justify-content: center;
+  letter-spacing: .04em; width: 1.9rem; position: relative;
+}
 .nav-link { font-weight: 600; font-size: .92rem; }
-.nav-link:hover { color: var(--app-primary); }
+.nav-link:hover, .nav-link[aria-current='page'] { color: var(--color-accent); }
 .app-main { padding-top: .5rem; }
 
-.card {
-  border: 1px solid var(--app-border);
-  border-radius: 1rem;
-  background: var(--app-surface);
-  box-shadow: 0 .25rem 1.25rem rgba(31, 52, 89, .055) !important;
+/* ── Buttons ────────────────────────────────────────────────────────── */
+
+.btn { font-family: var(--font-heading); font-weight: var(--font-heading-weight); letter-spacing: .01em; }
+
+.btn-primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg); }
+.btn-primary:hover, .btn-primary:focus { background: var(--color-accent-700); border-color: var(--color-accent-700); }
+.btn-primary:active { background: var(--color-accent-800) !important; border-color: var(--color-accent-800) !important; }
+
+.btn-outline-primary { color: var(--color-accent); border-color: var(--color-accent); }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active {
+  background: var(--color-accent) !important; border-color: var(--color-accent) !important; color: var(--color-bg) !important;
 }
 
-[data-bs-theme="dark"] .card { --app-surface: #1b2638; --app-border: #314057; }
+.btn-outline-secondary { color: var(--color-text); border-color: var(--color-divider); }
+.btn-outline-secondary:hover, .btn-outline-secondary:focus, .btn-outline-secondary:active {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent) !important;
+  border-color: var(--color-divider) !important; color: var(--color-text) !important;
+}
 
-.card-header {
+.btn-link { font-weight: 600; }
+
+/* ── Forms ──────────────────────────────────────────────────────────── */
+
+.form-control, .form-select { border-color: var(--color-divider); caret-color: var(--color-accent); }
+.form-control:hover, .form-select:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.form-control:focus, .form-select:focus, .form-check-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--color-accent) 22%, transparent);
+}
+.form-check-input:checked { background-color: var(--color-accent); border-color: var(--color-accent); }
+.form-check-input[type="radio"] { border-radius: 50%; }
+
+/* ── Cards ──────────────────────────────────────────────────────────── */
+
+.card {
+  border: 1px solid var(--color-divider);
+  background: var(--color-bg);
+  box-shadow: none !important;
+}
+.card.shadow-sm, .card.shadow, .card.shadow-lg { box-shadow: none !important; }
+
+.card-header, .card-footer {
   padding: 1rem 1.25rem;
   background: transparent;
-  border-bottom-color: var(--app-border);
+  border-color: var(--color-divider);
 }
 
-.table { --bs-table-bg: transparent; --bs-table-hover-bg: rgba(49, 95, 218, .045); }
-.table > :not(caption) > * > * { padding: .9rem 1rem; border-bottom-color: var(--app-border); }
-.table thead th { color: #667085; font-size: .75rem; letter-spacing: .045em; text-transform: uppercase; }
+/* ── Tables ─────────────────────────────────────────────────────────── */
 
-.btn { border-radius: .6rem; font-weight: 650; padding: .55rem .9rem; }
-.btn-primary { background: var(--app-primary); border-color: var(--app-primary); }
-.btn-primary:hover, .btn-primary:focus { background: var(--app-primary-dark); border-color: var(--app-primary-dark); }
-.form-control, .form-select { border-color: #cdd7e7; border-radius: .55rem; }
-.form-control:focus, .form-select:focus, .form-check-input:focus {
-  border-color: #8daaf7;
-  box-shadow: 0 0 0 .2rem rgba(49, 95, 218, .14);
+.table { --bs-table-hover-bg: color-mix(in srgb, var(--color-text) 4%, transparent); }
+.table > :not(caption) > * > * { padding: .9rem 1rem; border-bottom-color: var(--color-divider); }
+.table thead th { color: color-mix(in srgb, var(--color-text) 55%, transparent); font-family: var(--font-heading); font-size: .75rem; letter-spacing: .07em; text-transform: uppercase; }
+
+.table-light {
+  --bs-table-color: var(--color-text);
+  --bs-table-bg: var(--color-surface);
+  --bs-table-border-color: var(--color-divider);
+  --bs-table-striped-bg: color-mix(in srgb, var(--color-text) 4%, var(--color-surface));
+  --bs-table-hover-bg: color-mix(in srgb, var(--color-text) 6%, var(--color-surface));
 }
+
+/* ── Badges / tags ──────────────────────────────────────────────────── */
+
+.badge { font-family: var(--font-heading); font-weight: 600; letter-spacing: .02em; }
+.text-bg-light { background: var(--color-surface) !important; color: var(--color-text) !important; }
+
+/* ── Footer / misc ──────────────────────────────────────────────────── */
 
 main { min-height: calc(100vh - 150px); }
-footer { border-color: var(--app-border) !important; }
+footer { border-color: var(--color-divider) !important; }
 
-.section-kicker, .cv-eyebrow { color: var(--app-primary); font-size: .72rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-.cv-feedback { color: var(--app-muted); font-size: .9rem; }
+.section-kicker, .cv-eyebrow { color: var(--color-accent); font-family: var(--font-heading); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.cv-feedback { color: color-mix(in srgb, var(--color-text) 60%, transparent); font-size: .9rem; }
 .cv-resume { margin-left: auto; margin-right: auto; max-width: 920px; }
-.cv-sheet { background: #fff; border: 1px solid #dce4eb; border-radius: 1rem; box-shadow: 0 1.25rem 3rem rgba(19, 39, 61, .10); overflow: hidden; padding: clamp(2rem, 5vw, 4.25rem); }
-.cv-header { border-bottom: 2px solid #dce8f2; margin-bottom: 2rem; padding-bottom: 1.75rem; text-align: center; }
-.cv-header h1 { color: #10253a; font-size: clamp(2rem, 5vw, 3rem); font-weight: 750; letter-spacing: -.045em; line-height: 1.08; margin: .35rem 0; }
-.cv-role { color: #36556f; font-size: 1.1rem; font-weight: 600; }
-.cv-contact, .cv-links { color: #64748b; font-size: .9rem; margin-top: .7rem; }
-.cv-links a { color: var(--app-primary); font-weight: 600; text-decoration: none; }
+.cv-editor { border-top: 1px solid var(--color-divider); margin: 0 auto; max-width: 960px; padding-top: 2.5rem; }
+
+/* ── Blueprint accents ──────────────────────────────────────────────────
+   Registration-mark corners for the surfaces meant to read as the app's
+   "technical document" — the brand mark and the CV sheet itself. Purely
+   decorative; safe to drop from an element without affecting layout. */
+
+.blueprint { position: relative; }
+.blueprint > .corner {
+  position: absolute; width: 9px; height: 9px;
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.blueprint > .corner::before, .blueprint > .corner::after { content: ""; position: absolute; background: currentColor; }
+.blueprint > .corner::before { left: 4px; top: 0; width: 1px; height: 100%; }
+.blueprint > .corner::after { top: 4px; left: 0; width: 100%; height: 1px; }
+.blueprint > .corner.tl { top: -5px; left: -5px; }
+.blueprint > .corner.tr { top: -5px; right: -5px; }
+.blueprint > .corner.bl { bottom: -5px; left: -5px; }
+.blueprint > .corner.br { bottom: -5px; right: -5px; }
+
+/* ── CV document ────────────────────────────────────────────────────── */
+
+.cv-sheet {
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  padding: clamp(2rem, 5vw, 4.25rem);
+}
+.cv-header { border-bottom: 2px solid var(--color-divider); margin-bottom: 2rem; padding-bottom: 1.75rem; text-align: center; }
+.cv-header h1 { color: var(--color-text); font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.03em; line-height: 1.08; margin: .35rem 0; }
+.cv-role { color: var(--color-accent-700); font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; }
+.cv-contact, .cv-links { color: color-mix(in srgb, var(--color-text) 60%, transparent); font-size: .9rem; margin-top: .7rem; }
+.cv-links a { color: var(--color-accent); font-weight: 600; text-decoration: none; }
 .cv-links a:hover { text-decoration: underline; }
 .cv-section { break-inside: avoid; margin-bottom: 2rem; }
-.cv-section h2 { border-bottom: 1px solid #dce4eb; color: #173b5b; font-size: .77rem; font-weight: 800; letter-spacing: .1em; margin-bottom: 1rem; padding-bottom: .6rem; text-transform: uppercase; }
+.cv-section h2 { border-bottom: 1px solid var(--color-divider); color: var(--color-text); font-size: .77rem; font-weight: 700; letter-spacing: .1em; margin-bottom: 1rem; padding-bottom: .6rem; text-transform: uppercase; }
 .cv-section article { break-inside: avoid; }
-.cv-section article strong { color: #142d45; }
-.cv-skill { background: #f0f6fa; border: 1px solid #d8e7f1; border-radius: 999px; color: #24435d; font-size: .85rem; padding: .38rem .7rem; }
-.cv-skill span { color: #62768a; font-weight: 600; }
-.cv-editor { border-top: 1px solid var(--app-border); margin: 0 auto; max-width: 960px; padding-top: 2.5rem; }
+.cv-section article strong { color: var(--color-text); }
+.cv-skill { background: var(--color-accent-100); border: 1px solid var(--color-divider); color: var(--color-accent-800); font-size: .85rem; padding: .38rem .7rem; }
+.cv-skill span { color: color-mix(in srgb, var(--color-text) 65%, transparent); font-weight: 600; }
+
+[data-bs-theme="dark"] .cv-skill { background: var(--color-accent-100); color: var(--color-accent-800); }
 
 @media print {
   body { background: #fff !important; }
   header, footer, .cv-editor, .cv-feedback, .btn, .alert, .toast-container { display: none !important; }
   .app-main, main, .container { margin: 0 !important; max-width: none !important; padding: 0 !important; }
   .cv-resume { max-width: none; }
-  .cv-sheet { border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+  .cv-sheet { background: #fff; border: 0; box-shadow: none; padding: 0; }
+  .blueprint > .corner { display: none; }
   .cv-section, .cv-section article { break-inside: avoid; }
 }
 

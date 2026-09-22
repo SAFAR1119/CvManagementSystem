@@ -445,4 +445,116 @@
 <data name="Status" xml:space="preserve">
   <value>স্ট্যাটাস</value>
 </data>
+
+<data name="Profile" xml:space="preserve">
+  <value>প্রোফাইল</value>
+</data>
+
+<data name="PersonalProfile" xml:space="preserve">
+  <value>আপনার ব্যক্তিগত তথ্য, পেশাদার প্রোফাইল এবং সিভি অ্যাট্রিবিউট পরিচালনা করুন।</value>
+</data>
+
+<data name="Me" xml:space="preserve">
+  <value>ব্যক্তিগত তথ্য</value>
+</data>
+
+<data name="FirstName" xml:space="preserve">
+  <value>নামের প্রথম অংশ</value>
+</data>
+
+<data name="LastName" xml:space="preserve">
+  <value>নামের শেষ অংশ</value>
+</data>
+
+<data name="Location" xml:space="preserve">
+  <value>অবস্থান</value>
+</data>
+
+<data name="PersonalPhoto" xml:space="preserve">
+  <value>প্রোফাইল ছবি</value>
+</data>
+
+<data name="Info" xml:space="preserve">
+  <value>অতিরিক্ত তথ্য</value>
+</data>
+
+<data name="Projects" xml:space="preserve">
+  <value>প্রজেক্টসমূহ</value>
+</data>
+
+<data name="Project" xml:space="preserve">
+  <value>প্রজেক্ট</value>
+</data>
+
+<data name="Period" xml:space="preserve">
+  <value>সময়কাল</value>
+</data>
+
+<data name="ManageProjects" xml:space="preserve">
+  <value>আপনার সিভিতে প্রদর্শিত প্রজেক্টগুলো পরিচালনা করুন।</value>
+</data>
+
+<data name="NoProjects" xml:space="preserve">
+  <value>এখনও কোনো প্রজেক্ট যোগ করা হয়নি।</value>
+</data>
+
+<data name="AddProfileAttribute" xml:space="preserve">
+  <value>প্রোফাইল অ্যাট্রিবিউট যোগ করুন</value>
+</data>
+
+<data name="SearchAttributes" xml:space="preserve">
+  <value>অ্যাট্রিবিউট অনুসন্ধান করুন</value>
+</data>
+
+<data name="AllCategories" xml:space="preserve">
+  <value>সব ক্যাটাগরি</value>
+</data>
+
+<data name="Select" xml:space="preserve">
+  <value>নির্বাচন করুন</value>
+</data>
+
+<data name="AddAttribute" xml:space="preserve">
+  <value>অ্যাট্রিবিউট যোগ করুন</value>
+</data>
+
+<data name="SelectAttribute" xml:space="preserve">
+  <value>আপনার প্রোফাইলে যোগ করতে নিচে একটি অ্যাট্রিবিউট নির্বাচন করুন।</value>
+</data>
+
+<data name="NoAttributesSelected" xml:space="preserve">
+  <value>এখনও কোনো অ্যাট্রিবিউট যোগ করা হয়নি।</value>
+</data>
+
+<data name="NoAvailableAttributes" xml:space="preserve">
+  <value>কোনো মিল খুঁজে পাওয়া যায়নি। ভিন্ন অনুসন্ধান বা ক্যাটাগরি চেষ্টা করুন।</value>
+</data>
+
+<data name="RemoveSelected" xml:space="preserve">
+  <value>নির্বাচিত মুছুন</value>
+</data>
+
+<data name="SaveProfile" xml:space="preserve">
+  <value>প্রোফাইল সংরক্ষণ করুন</value>
+</data>
+
+<data name="Saved" xml:space="preserve">
+  <value>সব পরিবর্তন সংরক্ষিত হয়েছে</value>
+</data>
+
+<data name="Saving" xml:space="preserve">
+  <value>সংরক্ষণ করা হচ্ছে…</value>
+</data>
+
+<data name="AutoSaved" xml:space="preserve">
+  <value>সব পরিবর্তন সংরক্ষিত হয়েছে</value>
+</data>
+
+<data name="UnsavedChanges" xml:space="preserve">
+  <value>সংরক্ষণ করা হয়নি</value>
+</data>
+
+<data name="SaveConflict" xml:space="preserve">
+  <value>এই প্রোফাইলটি অন্য কোথাও পরিবর্তিত হয়েছে। পেজটি পুনরায় লোড করে আবার চেষ্টা করুন।</value>
+</data>
 </root>

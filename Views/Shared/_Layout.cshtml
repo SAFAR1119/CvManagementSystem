@@ -66,6 +66,11 @@
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=Noto+Sans+Bengali:wght@400;500;600&display=swap" />
+
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
@@ -94,7 +99,13 @@
                    asp-controller="Home"
                    asp-action="Index">
 
-                    <span class="app-brand-mark">CV</span>
+                    <span class="app-brand-mark blueprint">
+                        <span class="corner tl"></span>
+                        <span class="corner tr"></span>
+                        <span class="corner bl"></span>
+                        <span class="corner br"></span>
+                        CV
+                    </span>
                     <span>@L["AppName"]</span>
 
                 </a>

@@ -446,4 +446,116 @@
 <data name="Status" xml:space="preserve">
   <value>Status</value>
 </data>
+
+<data name="Profile" xml:space="preserve">
+  <value>Profile</value>
+</data>
+
+<data name="PersonalProfile" xml:space="preserve">
+  <value>Manage your personal details, professional profile, and CV attributes.</value>
+</data>
+
+<data name="Me" xml:space="preserve">
+  <value>Personal Details</value>
+</data>
+
+<data name="FirstName" xml:space="preserve">
+  <value>First Name</value>
+</data>
+
+<data name="LastName" xml:space="preserve">
+  <value>Last Name</value>
+</data>
+
+<data name="Location" xml:space="preserve">
+  <value>Location</value>
+</data>
+
+<data name="PersonalPhoto" xml:space="preserve">
+  <value>Profile Photo</value>
+</data>
+
+<data name="Info" xml:space="preserve">
+  <value>Additional Information</value>
+</data>
+
+<data name="Projects" xml:space="preserve">
+  <value>Projects</value>
+</data>
+
+<data name="Project" xml:space="preserve">
+  <value>Project</value>
+</data>
+
+<data name="Period" xml:space="preserve">
+  <value>Period</value>
+</data>
+
+<data name="ManageProjects" xml:space="preserve">
+  <value>Manage the projects that appear on your CVs.</value>
+</data>
+
+<data name="NoProjects" xml:space="preserve">
+  <value>No projects added yet.</value>
+</data>
+
+<data name="AddProfileAttribute" xml:space="preserve">
+  <value>Add Profile Attribute</value>
+</data>
+
+<data name="SearchAttributes" xml:space="preserve">
+  <value>Search Attributes</value>
+</data>
+
+<data name="AllCategories" xml:space="preserve">
+  <value>All Categories</value>
+</data>
+
+<data name="Select" xml:space="preserve">
+  <value>Select</value>
+</data>
+
+<data name="AddAttribute" xml:space="preserve">
+  <value>Add Attribute</value>
+</data>
+
+<data name="SelectAttribute" xml:space="preserve">
+  <value>Select an attribute below to add it to your profile.</value>
+</data>
+
+<data name="NoAttributesSelected" xml:space="preserve">
+  <value>No attributes added yet.</value>
+</data>
+
+<data name="NoAvailableAttributes" xml:space="preserve">
+  <value>No matching attributes found. Try a different search or category.</value>
+</data>
+
+<data name="RemoveSelected" xml:space="preserve">
+  <value>Remove Selected</value>
+</data>
+
+<data name="SaveProfile" xml:space="preserve">
+  <value>Save Profile</value>
+</data>
+
+<data name="Saved" xml:space="preserve">
+  <value>All changes saved</value>
+</data>
+
+<data name="Saving" xml:space="preserve">
+  <value>Saving…</value>
+</data>
+
+<data name="AutoSaved" xml:space="preserve">
+  <value>All changes saved</value>
+</data>
+
+<data name="UnsavedChanges" xml:space="preserve">
+  <value>Unsaved changes</value>
+</data>
+
+<data name="SaveConflict" xml:space="preserve">
+  <value>This profile was changed elsewhere. Please reload the page and try again.</value>
+</data>
 </root>
