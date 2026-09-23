@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -13,8 +13,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 
-  <data name="AppName" xml:space="preserve">
-    <value>CV Management System</value>
+  <data name="CvMaster" xml:space="preserve">
+    <value>CvMaster</value>
   </data>
   <data name="Home" xml:space="preserve">
     <value>Home</value>
@@ -586,4 +586,926 @@
 <data name="ContinueApplication" xml:space="preserve">
   <value>Continue Application</value>
 </data>
+
+<data name="ToggleNavigation" xml:space="preserve">
+  <value>Toggle navigation</value>
+</data>
+
+<data name="Account" xml:space="preserve">
+  <value>Account</value>
+</data>
+
+<data name="Close" xml:space="preserve">
+  <value>Close</value>
+</data>
+
+<data name="Privacy" xml:space="preserve">
+  <value>Privacy</value>
+</data>
+
+<data name="PrivacyPolicy" xml:space="preserve">
+  <value>Privacy Policy</value>
+</data>
+
+<data name="PrivacyPolicyBody" xml:space="preserve">
+  <value>Use this page to detail your site's privacy policy.</value>
+</data>
+
+<data name="PageNotFoundTitle" xml:space="preserve">
+  <value>Page not found</value>
+</data>
+
+<data name="SomethingWentWrongTitle" xml:space="preserve">
+  <value>Something went wrong</value>
+</data>
+
+<data name="ErrorCodeLabel" xml:space="preserve">
+  <value>Error {0}</value>
+</data>
+
+<data name="PageNotFoundHeading" xml:space="preserve">
+  <value>We couldn't find that page.</value>
+</data>
+
+<data name="RequestFailedHeading" xml:space="preserve">
+  <value>We couldn't complete that request.</value>
+</data>
+
+<data name="PageNotFoundMessage" xml:space="preserve">
+  <value>The link may be outdated, or the page may have moved.</value>
+</data>
+
+<data name="RequestFailedMessage" xml:space="preserve">
+  <value>Please try again. If the issue continues, contact an administrator.</value>
+</data>
+
+<data name="ReturnToHome" xml:space="preserve">
+  <value>Return to home</value>
+</data>
+
+<data name="ErrorTitle" xml:space="preserve">
+  <value>Error</value>
+</data>
+
+<data name="ApplicationErrorLabel" xml:space="preserve">
+  <value>Application error</value>
+</data>
+
+<data name="RequestIdLabel" xml:space="preserve">
+  <value>Request ID:</value>
+</data>
+
+<data name="ManageAttributesDescription" xml:space="preserve">
+  <value>Manage reusable attributes shared across positions and candidate profiles.</value>
+</data>
+
+<data name="CreateAttribute" xml:space="preserve">
+  <value>Create Attribute</value>
+</data>
+
+<data name="SearchByAttributePrefix" xml:space="preserve">
+  <value>Search by attribute prefix...</value>
+</data>
+
+<data name="Attribute" xml:space="preserve">
+  <value>Attribute</value>
+</data>
+
+<data name="Type" xml:space="preserve">
+  <value>Type</value>
+</data>
+
+<data name="LastUsed" xml:space="preserve">
+  <value>Last Used</value>
+</data>
+
+<data name="NoAttributesFound" xml:space="preserve">
+  <value>No attributes found.</value>
+</data>
+
+<data name="Never" xml:space="preserve">
+  <value>Never</value>
+</data>
+
+<data name="SelectedCount" xml:space="preserve">
+  <value>{0} selected</value>
+</data>
+
+<data name="SelectExactlyOneAttribute" xml:space="preserve">
+  <value>Select exactly one attribute to edit.</value>
+</data>
+
+<data name="SelectAtLeastOneAttribute" xml:space="preserve">
+  <value>Select at least one attribute.</value>
+</data>
+
+<data name="ConfirmDeleteAttributes" xml:space="preserve">
+  <value>Delete the selected attribute(s)?</value>
+</data>
+
+<data name="CreateAttributeDescription" xml:space="preserve">
+  <value>Create a reusable attribute for candidate profiles and position templates.</value>
+</data>
+
+<data name="NamePlaceholderExample" xml:space="preserve">
+  <value>e.g. English Level</value>
+</data>
+
+<data name="DescribeAttributePlaceholder" xml:space="preserve">
+  <value>Describe this attribute</value>
+</data>
+
+<data name="SelectCategory" xml:space="preserve">
+  <value>Select category</value>
+</data>
+
+<data name="DropdownOptions" xml:space="preserve">
+  <value>Dropdown Options</value>
+</data>
+
+<data name="OptionsExamplePlaceholder" xml:space="preserve">
+  <value>Beginner&#10;Intermediate&#10;Advanced&#10;Native</value>
+</data>
+
+<data name="EnterOnePerLine" xml:space="preserve">
+  <value>Enter one option per line.</value>
+</data>
+
+<data name="EditAttribute" xml:space="preserve">
+  <value>Edit Attribute</value>
+</data>
+
+<data name="EditAttributeDescription" xml:space="preserve">
+  <value>Update the reusable attribute definition.</value>
+</data>
+
+<data name="OnePerLine" xml:space="preserve">
+  <value>One option per line.</value>
+</data>
+
+<data name="SaveChanges" xml:space="preserve">
+  <value>Save Changes</value>
+</data>
+
+<data name="BrowseCandidateCvs" xml:space="preserve">
+  <value>Browse candidate CVs.</value>
+</data>
+
+<data name="ManageYourCvs" xml:space="preserve">
+  <value>Manage your CVs.</value>
+</data>
+
+<data name="SearchCvs" xml:space="preserve">
+  <value>Search CVs</value>
+</data>
+
+<data name="CvSearchPlaceholder" xml:space="preserve">
+  <value>CV title, position, or candidate...</value>
+</data>
+
+<data name="AllPositions" xml:space="preserve">
+  <value>All positions</value>
+</data>
+
+<data name="ShowingResultsForTag" xml:space="preserve">
+  <value>Showing results for technology tag:</value>
+</data>
+
+<data name="NoCvsFound" xml:space="preserve">
+  <value>No CVs found</value>
+</data>
+
+<data name="NoCvsMatchingFilters" xml:space="preserve">
+  <value>There are no CVs matching the current filters.</value>
+</data>
+
+<data name="ViewPositions" xml:space="preserve">
+  <value>View Positions</value>
+</data>
+
+<data name="CV" xml:space="preserve">
+  <value>CV</value>
+</data>
+
+<data name="Likes" xml:space="preserve">
+  <value>Likes</value>
+</data>
+
+<data name="GeneratedFromProfileDescription" xml:space="preserve">
+  <value>Generated from your profile and the selected position template.</value>
+</data>
+
+<data name="BackToPositions" xml:space="preserve">
+  <value>Back to Positions</value>
+</data>
+
+<data name="PublishCv" xml:space="preserve">
+  <value>Publish CV</value>
+</data>
+
+<data name="MissingRequiredAttributesMessage" xml:space="preserve">
+  <value>{0} required attribute(s) still need information before this CV can be published.</value>
+</data>
+
+<data name="ProfileInformation" xml:space="preserve">
+  <value>Profile Information</value>
+</data>
+
+<data name="InformationRequiredPlaceholder" xml:space="preserve">
+  <value>Information required...</value>
+</data>
+
+<data name="RelevantProjects" xml:space="preserve">
+  <value>Relevant Projects</value>
+</data>
+
+<data name="NoRelevantProjects" xml:space="preserve">
+  <value>No relevant projects are available for this position.</value>
+</data>
+
+<data name="LikesSuffix" xml:space="preserve">
+  <value>like(s)</value>
+</data>
+
+<data name="TailoredCvDescription" xml:space="preserve">
+  <value>Tailored CV generated from the candidate profile and the position template.</value>
+</data>
+
+<data name="PrintCv" xml:space="preserve">
+  <value>Print CV</value>
+</data>
+
+<data name="ViewPosition" xml:space="preserve">
+  <value>View Position</value>
+</data>
+
+<data name="MissingRequiredAttributesFull" xml:space="preserve">
+  <value>{0} required attribute(s) are still missing. They must be completed before the CV can be published.</value>
+</data>
+
+<data name="CvPublishedNotice" xml:space="preserve">
+  <value>This CV is published. Changes you save below are immediately visible to recruiters.</value>
+</data>
+
+<data name="ProfessionalResume" xml:space="preserve">
+  <value>Professional resume</value>
+</data>
+
+<data name="ProfessionalSummary" xml:space="preserve">
+  <value>Professional Summary</value>
+</data>
+
+<data name="CoreSkills" xml:space="preserve">
+  <value>Core Skills &amp; Relevant Information</value>
+</data>
+
+<data name="WorkExperience" xml:space="preserve">
+  <value>Work Experience</value>
+</data>
+
+<data name="Present" xml:space="preserve">
+  <value>Present</value>
+</data>
+
+<data name="TechnologiesLabel" xml:space="preserve">
+  <value>Technologies:</value>
+</data>
+
+<data name="Education" xml:space="preserve">
+  <value>Education</value>
+</data>
+
+<data name="SelectedProjects" xml:space="preserve">
+  <value>Selected Projects</value>
+</data>
+
+<data name="NoProjectsMatched" xml:space="preserve">
+  <value>No projects matched this position's technology requirements.</value>
+</data>
+
+<data name="Manage" xml:space="preserve">
+  <value>Manage</value>
+</data>
+
+<data name="EditCvDetails" xml:space="preserve">
+  <value>Edit CV details</value>
+</data>
+
+<data name="ChangesUpdatePreview" xml:space="preserve">
+  <value>Changes update this CV preview immediately after saving.</value>
+</data>
+
+<data name="ProfessionalTitleLabel" xml:space="preserve">
+  <value>Professional title</value>
+</data>
+
+<data name="PhoneNumber" xml:space="preserve">
+  <value>Phone number</value>
+</data>
+
+<data name="Email" xml:space="preserve">
+  <value>Email</value>
+</data>
+
+<data name="LinkedInUrl" xml:space="preserve">
+  <value>LinkedIn URL</value>
+</data>
+
+<data name="GitHubUrl" xml:space="preserve">
+  <value>GitHub URL</value>
+</data>
+
+<data name="PortfolioUrl" xml:space="preserve">
+  <value>Portfolio URL</value>
+</data>
+
+<data name="PhotoUrl" xml:space="preserve">
+  <value>Photo URL</value>
+</data>
+
+<data name="NotProvided" xml:space="preserve">
+  <value>Not provided</value>
+</data>
+
+<data name="LikesLabel" xml:space="preserve">
+  <value>Likes:</value>
+</data>
+
+<data name="RelevantInformation" xml:space="preserve">
+  <value>Relevant Information</value>
+</data>
+
+<data name="InformationMissing" xml:space="preserve">
+  <value>Information missing</value>
+</data>
+
+<data name="Yes" xml:space="preserve">
+  <value>Yes</value>
+</data>
+
+<data name="No" xml:space="preserve">
+  <value>No</value>
+</data>
+
+<data name="SelectEllipsis" xml:space="preserve">
+  <value>Select...</value>
+</data>
+
+<data name="DragImageHere" xml:space="preserve">
+  <value>Drag an image here, or</value>
+</data>
+
+<data name="ChooseFile" xml:space="preserve">
+  <value>choose a file</value>
+</data>
+
+<data name="ImagesUploadedDirectly" xml:space="preserve">
+  <value>Images are uploaded directly to configured cloud storage.</value>
+</data>
+
+<data name="FieldRequiredMessage" xml:space="preserve">
+  <value>This required field must be completed.</value>
+</data>
+
+<data name="Checked" xml:space="preserve">
+  <value>Checked</value>
+</data>
+
+<data name="ProjectsFromProfile" xml:space="preserve">
+  <value>Projects from Profile</value>
+</data>
+
+<data name="NoProjectsAddedToProfile" xml:space="preserve">
+  <value>No projects have been added to this profile yet.</value>
+</data>
+
+<data name="ManageProjectsInProfile" xml:space="preserve">
+  <value>Manage projects in profile</value>
+</data>
+
+<data name="SaveCv" xml:space="preserve">
+  <value>Save CV</value>
+</data>
+
+<data name="ChooseImageFile" xml:space="preserve">
+  <value>Please choose an image file.</value>
+</data>
+
+<data name="ImageSizeLimit" xml:space="preserve">
+  <value>Images must be 10 MB or smaller.</value>
+</data>
+
+<data name="CloudUploadNotConfigured" xml:space="preserve">
+  <value>Cloud upload is not configured. Paste an external image URL instead.</value>
+</data>
+
+<data name="UploadingImage" xml:space="preserve">
+  <value>Uploading image…</value>
+</data>
+
+<data name="UploadFailed" xml:space="preserve">
+  <value>Upload failed.</value>
+</data>
+
+<data name="ImageUploadedReady" xml:space="preserve">
+  <value>Uploaded. The external image URL is ready to save.</value>
+</data>
+
+<data name="CandidateProjects" xml:space="preserve">
+  <value>Candidate Projects</value>
+</data>
+
+<data name="ManageProjectsDescription" xml:space="preserve">
+  <value>Manage projects that can be selected for position-specific CVs.</value>
+</data>
+
+<data name="AddProject" xml:space="preserve">
+  <value>Add Project</value>
+</data>
+
+<data name="SelectAll" xml:space="preserve">
+  <value>Select All</value>
+</data>
+
+<data name="ClearSelection" xml:space="preserve">
+  <value>Clear Selection</value>
+</data>
+
+<data name="SelectExactlyOneProject" xml:space="preserve">
+  <value>Select exactly one project to edit.</value>
+</data>
+
+<data name="SelectAtLeastOneProject" xml:space="preserve">
+  <value>Select at least one project.</value>
+</data>
+
+<data name="ConfirmDeleteProjects" xml:space="preserve">
+  <value>Delete the selected project(s)?</value>
+</data>
+
+<data name="AddProjectDescription" xml:space="preserve">
+  <value>Add a reusable project to your profile.</value>
+</data>
+
+<data name="ProjectInformation" xml:space="preserve">
+  <value>Project Information</value>
+</data>
+
+<data name="ProjectNamePlaceholder" xml:space="preserve">
+  <value>Example: E-commerce Website</value>
+</data>
+
+<data name="LeaveEmptyOngoing" xml:space="preserve">
+  <value>Leave empty for an ongoing project.</value>
+</data>
+
+<data name="DescribeProjectMarkdown" xml:space="preserve">
+  <value>Describe the project using Markdown...</value>
+</data>
+
+<data name="MarkdownSupported" xml:space="preserve">
+  <value>Markdown formatting is supported.</value>
+</data>
+
+<data name="TechnologyTagsHelp" xml:space="preserve">
+  <value>Enter technologies used in this project. Previously entered tags are suggested automatically.</value>
+</data>
+
+<data name="TechnologyPlaceholder" xml:space="preserve">
+  <value>Type a technology, e.g. Java...</value>
+</data>
+
+<data name="PressEnterToAddTag" xml:space="preserve">
+  <value>Press Enter to add a tag. Select a suggestion to reuse an existing technology tag.</value>
+</data>
+
+<data name="SaveProject" xml:space="preserve">
+  <value>Save Project</value>
+</data>
+
+<data name="EditProject" xml:space="preserve">
+  <value>Edit Project</value>
+</data>
+
+<data name="UpdateProjectDescription" xml:space="preserve">
+  <value>Update the project information and technology tags.</value>
+</data>
+
+<data name="TypeTechnologyPlaceholder" xml:space="preserve">
+  <value>Type a technology...</value>
+</data>
+
+<data name="ProjectDetails" xml:space="preserve">
+  <value>Project Details</value>
+</data>
+
+<data name="BackToProjects" xml:space="preserve">
+  <value>Back to Projects</value>
+</data>
+
+<data name="ProjectName" xml:space="preserve">
+  <value>Project Name</value>
+</data>
+
+<data name="StartDate" xml:space="preserve">
+  <value>Start Date</value>
+</data>
+
+<data name="EndDate" xml:space="preserve">
+  <value>End Date</value>
+</data>
+
+<data name="DescriptionMarkdownNote" xml:space="preserve">
+  <value>This content is stored as Markdown. Markdown rendering can be added when we build the final CV renderer.</value>
+</data>
+
+<data name="NoTechnologyTagsAdded" xml:space="preserve">
+  <value>No technology tags have been added.</value>
+</data>
+
+<data name="UserManagement" xml:space="preserve">
+  <value>User Management</value>
+</data>
+
+<data name="ManageUsersDescription" xml:space="preserve">
+  <value>Manage users, account status and application roles.</value>
+</data>
+
+<data name="SelectedLabel" xml:space="preserve">
+  <value>Selected:</value>
+</data>
+
+<data name="Block" xml:space="preserve">
+  <value>Block</value>
+</data>
+
+<data name="Unblock" xml:space="preserve">
+  <value>Unblock</value>
+</data>
+
+<data name="Delete" xml:space="preserve">
+  <value>Delete</value>
+</data>
+
+<data name="AssignRole" xml:space="preserve">
+  <value>Assign Role</value>
+</data>
+
+<data name="RemoveRole" xml:space="preserve">
+  <value>Remove Role</value>
+</data>
+
+<data name="Username" xml:space="preserve">
+  <value>Username</value>
+</data>
+
+<data name="Roles" xml:space="preserve">
+  <value>Roles</value>
+</data>
+
+<data name="NoUsersFound" xml:space="preserve">
+  <value>No users found.</value>
+</data>
+
+<data name="NoRole" xml:space="preserve">
+  <value>No role</value>
+</data>
+
+<data name="Blocked" xml:space="preserve">
+  <value>Blocked</value>
+</data>
+
+<data name="Active" xml:space="preserve">
+  <value>Active</value>
+</data>
+
+<data name="SelectAtLeastOneUser" xml:space="preserve">
+  <value>Select at least one user.</value>
+</data>
+
+<data name="ConfirmDeleteUsers" xml:space="preserve">
+  <value>Delete the selected user account(s)?</value>
+</data>
+
+<data name="CandidateProfileTitle" xml:space="preserve">
+  <value>Candidate Profile</value>
+</data>
+
+<data name="ContactAndLinks" xml:space="preserve">
+  <value>Contact &amp; Links</value>
+</data>
+
+<data name="Phone" xml:space="preserve">
+  <value>Phone</value>
+</data>
+
+<data name="LinkedIn" xml:space="preserve">
+  <value>LinkedIn</value>
+</data>
+
+<data name="ViewLinkedIn" xml:space="preserve">
+  <value>View LinkedIn</value>
+</data>
+
+<data name="GitHub" xml:space="preserve">
+  <value>GitHub</value>
+</data>
+
+<data name="ViewGitHub" xml:space="preserve">
+  <value>View GitHub</value>
+</data>
+
+<data name="Portfolio" xml:space="preserve">
+  <value>Portfolio</value>
+</data>
+
+<data name="ViewPortfolio" xml:space="preserve">
+  <value>View Portfolio</value>
+</data>
+
+<data name="SkillsAndAttributes" xml:space="preserve">
+  <value>Skills &amp; Attributes</value>
+</data>
+
+<data name="NoProfileAttributesAdded" xml:space="preserve">
+  <value>No profile attributes added.</value>
+</data>
+
+<data name="General" xml:space="preserve">
+  <value>General</value>
+</data>
+
+<data name="NoWorkExperienceAdded" xml:space="preserve">
+  <value>No work experience added.</value>
+</data>
+
+<data name="NoEducationAdded" xml:space="preserve">
+  <value>No education information added.</value>
+</data>
+
+<data name="CandidateProfileReadOnly" xml:space="preserve">
+  <value>Candidate profile — read only</value>
+</data>
+
+<data name="Candidates" xml:space="preserve">
+  <value>Candidates</value>
+</data>
+
+<data name="CreatePositionDescription" xml:space="preserve">
+  <value>Define the role, requirements and access rules for this position.</value>
+</data>
+
+<data name="OfThePosition" xml:space="preserve">
+  <value>of the position</value>
+</data>
+
+<data name="SearchResults" xml:space="preserve">
+  <value>Search results for</value>
+</data>
+
+<data name="UpdatePositionDescription" xml:space="preserve">
+  <value>Update the role, requirements and access rules for this position.</value>
+</data>
+
+<data name="Department" xml:space="preserve">
+  <value>Department</value>
+</data>
+
+<data name="ExperienceLabel" xml:space="preserve">
+  <value>Experience</value>
+</data>
+
+<data name="EmploymentTypeLabel" xml:space="preserve">
+  <value>Employment Type</value>
+</data>
+
+<data name="WorkModeLabel" xml:space="preserve">
+  <value>Work Mode</value>
+</data>
+
+<data name="Fresher" xml:space="preserve">
+  <value>Fresher</value>
+</data>
+
+<data name="OneYear" xml:space="preserve">
+  <value>1 Year</value>
+</data>
+
+<data name="YearsFormat" xml:space="preserve">
+  <value>{0} Years</value>
+</data>
+
+<data name="FullTimeOption" xml:space="preserve">
+  <value>Full Time</value>
+</data>
+
+<data name="PartTimeOption" xml:space="preserve">
+  <value>Part Time</value>
+</data>
+
+<data name="OnSite" xml:space="preserve">
+  <value>On-site</value>
+</data>
+
+<data name="RemoteOption" xml:space="preserve">
+  <value>Remote</value>
+</data>
+
+<data name="HybridOption" xml:space="preserve">
+  <value>Hybrid</value>
+</data>
+
+<data name="DepartmentPlaceholder" xml:space="preserve">
+  <value>e.g. Engineering, HR, Marketing</value>
+</data>
+
+<data name="PositionTitlePlaceholderExample" xml:space="preserve">
+  <value>Example: Backend Developer</value>
+</data>
+
+<data name="MaxProjectsHelp" xml:space="preserve">
+  <value>Maximum relevant projects included in generated CVs.</value>
+</data>
+
+<data name="PublicPositionsHelp" xml:space="preserve">
+  <value>Public positions are available to all authenticated candidates. Restricted positions use access rules.</value>
+</data>
+
+<data name="CvAttributes" xml:space="preserve">
+  <value>CV Attributes</value>
+</data>
+
+<data name="SelectAttributesFromLibrary" xml:space="preserve">
+  <value>Select reusable attributes from the shared Attribute Library. Required attributes must be completed before a candidate can publish the CV.</value>
+</data>
+
+<data name="NoAttributesInLibrary" xml:space="preserve">
+  <value>No attributes exist in the Attribute Library yet.</value>
+</data>
+
+<data name="ProjectTechnologyTags" xml:space="preserve">
+  <value>Project Technology Tags</value>
+</data>
+
+<data name="CandidateProjectsMatchingTags" xml:space="preserve">
+  <value>Candidate projects matching these tags can be considered when generating the CV.</value>
+</data>
+
+<data name="NoTechnologyTagsCreated" xml:space="preserve">
+  <value>No technology tags have been created yet.</value>
+</data>
+
+<data name="PublicPositionsNoAccessRules" xml:space="preserve">
+  <value>Public positions do not require access rules. Select Restricted above to configure candidate filters.</value>
+</data>
+
+<data name="CandidatesMustSatisfyRules" xml:space="preserve">
+  <value>Candidates must satisfy these rules to create a CV for this position.</value>
+</data>
+
+<data name="SelectAttributeEllipsis" xml:space="preserve">
+  <value>Select attribute...</value>
+</data>
+
+<data name="SelectOperatorEllipsis" xml:space="preserve">
+  <value>Select operator...</value>
+</data>
+
+<data name="FilterValuePlaceholder" xml:space="preserve">
+  <value>Filter value...</value>
+</data>
+
+<data name="OperatorEquals" xml:space="preserve">
+  <value>Equals</value>
+</data>
+
+<data name="OperatorNotEquals" xml:space="preserve">
+  <value>Not equals</value>
+</data>
+
+<data name="OperatorContains" xml:space="preserve">
+  <value>Contains</value>
+</data>
+
+<data name="OperatorStartsWith" xml:space="preserve">
+  <value>Starts with</value>
+</data>
+
+<data name="OperatorGreaterThan" xml:space="preserve">
+  <value>Greater than</value>
+</data>
+
+<data name="OperatorGreaterThanOrEqual" xml:space="preserve">
+  <value>Greater than or equal</value>
+</data>
+
+<data name="OperatorLessThan" xml:space="preserve">
+  <value>Less than</value>
+</data>
+
+<data name="OperatorLessThanOrEqual" xml:space="preserve">
+  <value>Less than or equal</value>
+</data>
+
+<data name="OperatorAfter" xml:space="preserve">
+  <value>After</value>
+</data>
+
+<data name="OperatorOnOrAfter" xml:space="preserve">
+  <value>On or after</value>
+</data>
+
+<data name="OperatorBefore" xml:space="preserve">
+  <value>Before</value>
+</data>
+
+<data name="OperatorOnOrBefore" xml:space="preserve">
+  <value>On or before</value>
+</data>
+
+<data name="ProfessionalProfile" xml:space="preserve">
+  <value>Professional Profile</value>
+</data>
+
+<data name="ConciseIntroductionPlaceholder" xml:space="preserve">
+  <value>A concise introduction that will appear on your CV.</value>
+</data>
+  <data name="ForgotPasswordLink" xml:space="preserve">
+    <value>Forgot your password?</value>
+  </data>
+  <data name="CreateAccount" xml:space="preserve">
+    <value>Create Account</value>
+  </data>
+  <data name="OrContinueWith" xml:space="preserve">
+    <value>Or continue with</value>
+  </data>
+  <data name="PasswordPlaceholder" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="AccountBlocked" xml:space="preserve">
+    <value>Account blocked.</value>
+  </data>
+  <data name="AccountBlockedMessage" xml:space="preserve">
+    <value>This account has been blocked by an administrator. Please contact an administrator for assistance.</value>
+  </data>
+  <data name="CreateYourAccount" xml:space="preserve">
+    <value>Create your account</value>
+  </data>
+  <data name="RegisterDescription" xml:space="preserve">
+    <value>Create a Candidate account and start building your professional profile.</value>
+  </data>
+  <data name="CreatePassword" xml:space="preserve">
+    <value>Create a password</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm password</value>
+  </data>
+  <data name="AccountType" xml:space="preserve">
+    <value>Account type</value>
+  </data>
+  <data name="RegisterRoleHelp" xml:space="preserve">
+    <value>Candidates manage profiles, projects and CVs. Recruiters manage positions and attributes and review candidate CVs.</value>
+  </data>
+  <data name="AlreadyHaveAccount" xml:space="preserve">
+    <value>Already have an account?</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="LoggedOutMessage" xml:space="preserve">
+    <value>You have successfully logged out of the application.</value>
+  </data>
+  <data name="Hello" xml:space="preserve">
+    <value>Hello</value>
+  </data>
+  <data name="ExternalLogin" xml:space="preserve">
+    <value>External Login</value>
+  </data>
+  <data name="ContinueWithProvider" xml:space="preserve">
+    <value>Continue with</value>
+  </data>
+  <data name="ExternalLoginDescription" xml:space="preserve">
+    <value>Enter your email address to finish creating your account.</value>
+  </data>
+  <data name="LoginDescription" xml:space="preserve">
+    <value>Sign in to your CvMaster account.</value>
+  </data>
+  <data name="EmailLabel" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="PasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="ConfirmPasswordLabel" xml:space="preserve">
+    <value>Confirm password</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>name@example.com</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Remember me</value>
+  </data>
 </root>

@@ -60,7 +60,7 @@
           content="width=device-width, initial-scale=1.0" />
 
     <title>
-        @ViewData["Title"] - @L["AppName"]
+        @ViewData["Title"] - @L["CvMaster"]
     </title>
 
     <link rel="stylesheet"
@@ -106,7 +106,7 @@
                         <span class="corner br"></span>
                         CV
                     </span>
-                    <span>@L["AppName"]</span>
+                    <span>@L["CvMaster"]</span>
 
                 </a>
 
@@ -118,7 +118,7 @@
                         data-bs-target="#mainNavbar"
                         aria-controls="mainNavbar"
                         aria-expanded="false"
-                        aria-label="Toggle navigation">
+                        aria-label="@L["ToggleNavigation"]">
 
                     <span class="navbar-toggler-icon"></span>
 
@@ -356,10 +356,12 @@
 
                         <button type="button"
                                 id="themeToggle"
-                                class="btn btn-outline-secondary btn-sm">
+                                class="btn btn-outline-secondary btn-sm"
+                                data-light-text="@L["Light"]"
+                                data-dark-text="@L["Dark"]">
 
                             <span id="themeToggleText">
-                                @L["Dark"]
+                                @(currentTheme == "dark" ? @L["Light"] : @L["Dark"])
                             </span>
 
                         </button>
@@ -376,7 +378,7 @@
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false">
 
-                                    @(User.Identity?.Name ?? "Account")
+                                    @(User.Identity?.Name ?? L["Account"])
 
                                 </button>
 
@@ -558,7 +560,7 @@
                 <div class="text-muted small">
 
                     &copy; @DateTime.UtcNow.Year
-                    @L["AppName"]
+                    @L["CvMaster"]
 
                 </div>
 
@@ -568,7 +570,7 @@
                        asp-controller="Home"
                        asp-action="Privacy">
 
-                        Privacy
+                        @L["Privacy"]
 
                     </a>
 
@@ -594,13 +596,13 @@
             @if (!string.IsNullOrWhiteSpace(toastSuccess))
             {
                 <div class="toast align-items-center text-bg-success border-0" role="status" data-auto-toast="true">
-                    <div class="d-flex"><div class="toast-body">@toastSuccess</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>
+                    <div class="d-flex"><div class="toast-body">@toastSuccess</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="@L["Close"]"></button></div>
                 </div>
             }
             @if (!string.IsNullOrWhiteSpace(toastError))
             {
                 <div class="toast align-items-center text-bg-danger border-0" role="alert" data-auto-toast="true">
-                    <div class="d-flex"><div class="toast-body">@toastError</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>
+                    <div class="d-flex"><div class="toast-body">@toastError</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="@L["Close"]"></button></div>
                 </div>
             }
         </div>
@@ -655,8 +657,8 @@
 
                 text.textContent =
                     theme === "dark"
-                        ? "Light"
-                        : "Dark";
+                        ? button.dataset.lightText
+                        : button.dataset.darkText;
             }
 
             button.addEventListener(

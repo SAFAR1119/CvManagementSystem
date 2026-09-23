@@ -16,18 +16,18 @@
 
         <div>
             <h1 class="h3 mb-1">
-                @(isAdministratorView ? "Candidate Projects" : "My Projects")
+                @(isAdministratorView ? L["CandidateProjects"] : L["MyProjects"])
             </h1>
 
             <p class="text-muted mb-0">
-                Manage projects that can be selected for position-specific CVs.
+                @L["ManageProjectsDescription"]
             </p>
         </div>
 
         <a asp-action="Create"
            asp-route-userId="@(isAdministratorView ? targetUserId : null)"
            class="btn btn-primary">
-            Add Project
+            @L["AddProject"]
         </a>
 
     </div>
@@ -56,35 +56,39 @@
 
             <div class="card-body">
 
-                <div class="d-flex flex-wrap align-items-center gap-2">
+                <div class="d-flex flex-wrap align-items-center gap-2"
+                     data-select-one-message="@L["SelectExactlyOneProject"]"
+                     data-select-min-message="@L["SelectAtLeastOneProject"]"
+                     data-confirm-delete-message="@L["ConfirmDeleteProjects"]"
+                     data-selected-count-format="@L["SelectedCount"]">
 
                     <button type="button"
                             id="editSelected"
                             class="btn btn-outline-primary">
-                        Edit Selected
+                        @L["EditSelected"]
                     </button>
 
                     <button type="submit"
                             class="btn btn-outline-danger"
                             onclick="return confirmDelete()">
-                        Delete Selected
+                        @L["DeleteSelected"]
                     </button>
 
                     <button type="button"
                             id="selectAllButton"
                             class="btn btn-outline-secondary">
-                        Select All
+                        @L["SelectAll"]
                     </button>
 
                     <button type="button"
                             id="clearSelectionButton"
                             class="btn btn-outline-secondary">
-                        Clear Selection
+                        @L["ClearSelection"]
                     </button>
 
                     <span id="selectedCount"
                           class="text-muted small">
-                        0 selected
+                        @string.Format(L["SelectedCount"].Value, 0)
                     </span>
 
                 </div>
@@ -114,19 +118,19 @@
                                 </th>
 
                                 <th>
-                                    Project
+                                    @L["Project"]
                                 </th>
 
                                 <th>
-                                    Period
+                                    @L["Period"]
                                 </th>
 
                                 <th>
-                                    Technology Tags
+                                    @L["TechnologyTags"]
                                 </th>
 
                                 <th>
-                                    Description
+                                    @L["Description"]
                                 </th>
 
                             </tr>
@@ -142,7 +146,7 @@
                                     <td colspan="5"
                                         class="text-center text-muted py-5">
 
-                                        No projects have been added yet.
+                                        @L["NoProjects"]
 
                                     </td>
 
@@ -221,12 +225,19 @@
     const selectedCount =
         document.getElementById("selectedCount");
 
+    const toolbar =
+        document.getElementById("projectForm")
+            .querySelector("[data-selected-count-format]");
+
     function updateCount()
     {
-        selectedCount.textContent =
+        const count =
             document.querySelectorAll(
                 ".project-check:checked"
-            ).length + " selected";
+            ).length;
+
+        selectedCount.textContent =
+            toolbar.dataset.selectedCountFormat.replace("{0}", count);
     }
 
     function setAll(value)
@@ -306,7 +317,7 @@
                 if (selected.length !== 1)
                 {
                     alert(
-                        "Select exactly one project to edit."
+                        toolbar.dataset.selectOneMessage
                     );
 
                     return;
@@ -342,14 +353,14 @@
         if (count === 0)
         {
             alert(
-                "Select at least one project."
+                toolbar.dataset.selectMinMessage
             );
 
             return false;
         }
 
         return confirm(
-            "Delete the selected project(s)?"
+            toolbar.dataset.confirmDeleteMessage
         );
     }
 

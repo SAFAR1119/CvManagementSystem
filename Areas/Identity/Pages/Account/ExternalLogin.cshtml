@@ -1,7 +1,7 @@
-@page
+﻿@page
 @model ExternalLoginModel
 @{
-    ViewData["Title"] = "External Login";
+    ViewData["Title"] = L["ExternalLogin"].Value;
 }
 
 <div class="container py-5">
@@ -12,11 +12,11 @@
                 <div class="card-body p-4">
 
                     <h2 class="text-center mb-3">
-                        Continue with @Model.ProviderDisplayName
+                        @L["ContinueWithProvider"] @Model.ProviderDisplayName
                     </h2>
 
                     <p class="text-center text-muted mb-4">
-                        Enter your email address to finish creating your account.
+                        @L["ExternalLoginDescription"]
                     </p>
 
                     <form asp-page-handler="Confirmation"
@@ -29,11 +29,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Input.Email" class="form-label"></label>
+                            <label asp-for="Input.Email" class="form-label">@L["Email"]</label>
                             <input asp-for="Input.Email"
                                    class="form-control"
                                    autocomplete="email"
-                                   placeholder="you@example.com" />
+                                   placeholder="@L["EmailPlaceholder"]" />
                             <span asp-validation-for="Input.Email"
                                   class="text-danger">
                             </span>
@@ -41,7 +41,7 @@
 
                         <button type="submit"
                                 class="btn btn-primary w-100">
-                            Create account
+                            @L["CreateAccount"]
                         </button>
                     </form>
 

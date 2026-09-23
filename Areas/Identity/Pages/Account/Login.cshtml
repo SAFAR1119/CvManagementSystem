@@ -2,7 +2,7 @@
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Log in";
+    ViewData["Title"] = L["Login"].Value;
 }
 
 <div class="container py-5">
@@ -18,11 +18,11 @@
                     <div class="text-center mb-4">
 
                         <h1 class="h3 mb-2">
-                            Log in
+                            @L["Login"]
                         </h1>
 
                         <p class="text-muted mb-0">
-                            Sign in to your CV Management System account.
+                            @L["LoginDescription"]
                         </p>
 
                     </div>
@@ -30,9 +30,9 @@
                     @if (Request.Query["blocked"] == "true")
                     {
                         <div class="alert alert-danger">
-                            <strong>Account blocked.</strong>
-                            This account has been blocked by an administrator.
-                            Please contact an administrator for assistance.
+                            <strong>@L["AccountBlocked"]</strong>
+                            @L["AccountBlockedMessage"]
+
                         </div>
                     }
 
@@ -48,14 +48,13 @@
                         <div class="mb-3">
 
                             <label asp-for="Input.Email"
-                                   class="form-label">
-                            </label>
+                                   class="form-label">@L["Email"]</label>
 
                             <input asp-for="Input.Email"
                                    class="form-control"
                                    autocomplete="username"
                                    aria-required="true"
-                                   placeholder="name@example.com" />
+                                   placeholder="@L["EmailPlaceholder"]" />
 
                             <span asp-validation-for="Input.Email"
                                   class="text-danger">
@@ -66,14 +65,13 @@
                         <div class="mb-3">
 
                             <label asp-for="Input.Password"
-                                   class="form-label">
-                            </label>
+                                   class="form-label">@L["Password"]</label>
 
                             <input asp-for="Input.Password"
                                    class="form-control"
                                    autocomplete="current-password"
                                    aria-required="true"
-                                   placeholder="Password" />
+                                   placeholder="@L["PasswordPlaceholder"]" />
 
                             <span asp-validation-for="Input.Password"
                                   class="text-danger">
@@ -86,16 +84,14 @@
                             <input class="form-check-input"
                                    asp-for="Input.RememberMe" />
 
-                            <label class="form-check-label"
-                                   asp-for="Input.RememberMe">
-                            </label>
+                            <label class="form-check-label" asp-for="Input.RememberMe">@L["RememberMe"]</label>
 
                         </div>
 
                         <button id="login-submit"
                                 type="submit"
                                 class="w-100 btn btn-primary">
-                            Log in
+                            @L["Login"]
                         </button>
 
                     </form>
@@ -103,7 +99,7 @@
                     <div class="text-center mt-4">
 
                         <a asp-page="./ForgotPassword">
-                            Forgot your password?
+                            @L["ForgotPasswordLink"]
                         </a>
 
                     </div>
@@ -112,7 +108,7 @@
 
                         <a asp-page="./Register"
                            asp-route-returnUrl="@Model.ReturnUrl">
-                            Create a new account
+                            @L["CreateAccount"]
                         </a>
 
                     </div>
@@ -124,7 +120,7 @@
                         <div class="text-center mb-3">
 
                             <span class="text-muted">
-                                Or continue with
+                                @L["OrContinueWith"]
                             </span>
 
                         </div>

@@ -1,7 +1,7 @@
 @model CvManagementSystem.ViewModels.ProjectViewModel
 
 @{
-    ViewData["Title"] = "Add Project";
+    ViewData["Title"] = L["AddProject"].Value;
 
     bool isAdministratorView =
         ViewBag.IsAdministratorView is bool value && value;
@@ -12,11 +12,11 @@
     <div class="mb-4">
 
         <h1 class="h3 mb-1">
-            Add Project
+            @L["AddProject"]
         </h1>
 
         <p class="text-muted mb-0">
-            Add a reusable project to your profile.
+            @L["AddProjectDescription"]
         </p>
 
     </div>
@@ -40,7 +40,7 @@
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Project Information</strong>
+                <strong>@L["ProjectInformation"]</strong>
             </div>
 
             <div class="card-body">
@@ -53,7 +53,7 @@
 
                     <input asp-for="Name"
                            class="form-control"
-                           placeholder="Example: E-commerce Website" />
+                           placeholder="@L["ProjectNamePlaceholder"]" />
 
                     <span asp-validation-for="Name"
                           class="text-danger">
@@ -94,7 +94,7 @@
                         </span>
 
                         <div class="form-text">
-                            Leave empty for an ongoing project.
+                            @L["LeaveEmptyOngoing"]
                         </div>
 
                     </div>
@@ -110,14 +110,14 @@
                     <textarea asp-for="DescriptionMarkdown"
                               class="form-control"
                               rows="8"
-                              placeholder="Describe the project using Markdown..."></textarea>
+                              placeholder="@L["DescribeProjectMarkdown"]"></textarea>
 
                     <span asp-validation-for="DescriptionMarkdown"
                           class="text-danger">
                     </span>
 
                     <div class="form-text">
-                        Markdown formatting is supported.
+                        @L["MarkdownSupported"]
                     </div>
 
                 </div>
@@ -131,14 +131,13 @@
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Technology Tags</strong>
+                <strong>@L["TechnologyTags"]</strong>
             </div>
 
             <div class="card-body">
 
                 <p class="text-muted">
-                    Enter technologies used in this project.
-                    Previously entered tags are suggested automatically.
+                    @L["TechnologyTagsHelp"]
                 </p>
 
                 <div id="tagContainer"
@@ -149,7 +148,7 @@
                        id="tagInput"
                        class="form-control"
                        autocomplete="off"
-                       placeholder="Type a technology, e.g. Java..." />
+                       placeholder="@L["TechnologyPlaceholder"]" />
 
                 <div id="tagSuggestions"
                      class="list-group mt-2">
@@ -159,8 +158,7 @@
                 </div>
 
                 <div class="form-text">
-                    Press Enter to add a tag. Select a suggestion to reuse
-                    an existing technology tag.
+                    @L["PressEnterToAddTag"]
                 </div>
 
             </div>
@@ -171,13 +169,13 @@
 
             <button type="submit"
                     class="btn btn-primary">
-                Save Project
+                @L["SaveProject"]
             </button>
 
             <a asp-action="Index"
                asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
                class="btn btn-outline-secondary">
-                Cancel
+                @L["Cancel"]
             </a>
 
         </div>

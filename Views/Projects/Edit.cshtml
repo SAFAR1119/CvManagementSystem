@@ -1,7 +1,7 @@
 @model CvManagementSystem.ViewModels.ProjectViewModel
 
 @{
-    ViewData["Title"] = "Edit Project";
+    ViewData["Title"] = L["EditProject"].Value;
 
     bool isAdministratorView =
         ViewBag.IsAdministratorView is bool value && value;
@@ -12,11 +12,11 @@
     <div class="mb-4">
 
         <h1 class="h3 mb-1">
-            Edit Project
+            @L["EditProject"]
         </h1>
 
         <p class="text-muted mb-0">
-            Update the project information and technology tags.
+            @L["UpdateProjectDescription"]
         </p>
 
     </div>
@@ -43,7 +43,7 @@
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Project Information</strong>
+                <strong>@L["ProjectInformation"]</strong>
             </div>
 
             <div class="card-body">
@@ -118,7 +118,7 @@
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Technology Tags</strong>
+                <strong>@L["TechnologyTags"]</strong>
             </div>
 
             <div class="card-body">
@@ -131,7 +131,7 @@
                        id="tagInput"
                        class="form-control"
                        autocomplete="off"
-                       placeholder="Type a technology..." />
+                       placeholder="@L["TypeTechnologyPlaceholder"]" />
 
                 <div id="tagSuggestions"
                      class="list-group mt-2">
@@ -148,13 +148,13 @@
 
             <button type="submit"
                     class="btn btn-primary">
-                Save Changes
+                @L["SaveChanges"]
             </button>
 
             <a asp-action="Index"
                asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
                class="btn btn-outline-secondary">
-                Cancel
+                @L["Cancel"]
             </a>
 
         </div>

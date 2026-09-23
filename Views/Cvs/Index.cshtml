@@ -1,7 +1,7 @@
 @model IReadOnlyList<CvManagementSystem.ViewModels.CvListViewModel>
 
 @{
-    ViewData["Title"] = "CVs";
+    ViewData["Title"] = L["CVs"].Value;
 
     var positions =
         ViewBag.Positions as IEnumerable<dynamic>
@@ -17,18 +17,18 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 mb-1">CVs</h1>
+            <h1 class="h3 mb-1">@L["CVs"]</h1>
             <p class="text-muted mb-0">
                 @(isRecruiter || isAdministrator
-                    ? "Browse candidate CVs."
-                    : "Manage your CVs.")
+                    ? L["BrowseCandidateCvs"]
+                    : L["ManageYourCvs"])
             </p>
         </div>
 
         <a asp-controller="Positions"
            asp-action="Index"
            class="btn btn-outline-primary">
-            Browse Positions
+            @L["BrowsePositions"]
         </a>
     </div>
 
@@ -56,14 +56,14 @@
                 <div class="col-md-6">
                     <label for="search"
                            class="form-label">
-                        Search CVs
+                        @L["SearchCvs"]
                     </label>
 
                     <input id="search"
                            name="search"
                            value="@search"
                            class="form-control"
-                           placeholder="CV title, position, or candidate..." />
+                           placeholder="@L["CvSearchPlaceholder"]" />
                            <input type="hidden"
                                name="tag"
                                value="@ViewBag.Tag" />
@@ -72,7 +72,7 @@
                 <div class="col-md-4">
                     <label for="positionId"
                            class="form-label">
-                        Position
+                        @L["Position"]
                     </label>
 
                     <select id="positionId"
@@ -80,7 +80,7 @@
                             class="form-select">
 
                         <option value="">
-                            All positions
+                            @L["AllPositions"]
                         </option>
 
                         @foreach (var position in positions)
@@ -99,12 +99,12 @@
 
                         <button type="submit"
                                 class="btn btn-primary flex-grow-1">
-                            Search
+                            @L["Search"]
                         </button>
 
                         <a asp-action="Index"
                            class="btn btn-outline-secondary">
-                            Clear
+                            @L["Clear"]
                         </a>
 
                     </div>
@@ -118,7 +118,7 @@
     @if (!string.IsNullOrWhiteSpace(ViewBag.Tag as string))
     {
         <div class="alert alert-info">
-            Showing results for technology tag: <strong>@ViewBag.Tag</strong>
+            @L["ShowingResultsForTag"] <strong>@ViewBag.Tag</strong>
         </div>
     }
 
@@ -129,15 +129,15 @@
             @if (Model.Count == 0)
             {
                 <div class="p-4 text-center">
-                    <h5 class="mb-2">No CVs found</h5>
+                    <h5 class="mb-2">@L["NoCvsFound"]</h5>
                     <p class="text-muted mb-3">
-                        There are no CVs matching the current filters.
+                        @L["NoCvsMatchingFilters"]
                     </p>
 
                     <a asp-controller="Positions"
                        asp-action="Index"
                        class="btn btn-primary">
-                        View Positions
+                        @L["ViewPositions"]
                     </a>
                 </div>
             }
@@ -149,16 +149,16 @@
 
                         <thead class="table-light">
                             <tr>
-                                <th>CV</th>
-                                <th>Position</th>
+                                <th>@L["CV"]</th>
+                                <th>@L["Position"]</th>
                                 @if (isRecruiter || isAdministrator)
                                 {
-                                    <th>Candidate</th>
+                                    <th>@L["Candidate"]</th>
                                 }
 
-                                <th>Status</th>
-                                <th>Likes</th>
-                                <th>Updated</th>
+                                <th>@L["Status"]</th>
+                                <th>@L["Likes"]</th>
+                                <th>@L["Updated"]</th>
                             </tr>
                         </thead>
 
@@ -192,13 +192,13 @@
                                         @if (item.IsPublished)
                                         {
                                             <span class="badge text-bg-success">
-                                                Published
+                                                @L["Published"]
                                             </span>
                                         }
                                         else
                                         {
                                             <span class="badge text-bg-secondary">
-                                                Draft
+                                                @L["Draft"]
                                             </span>
                                         }
                                     </td>

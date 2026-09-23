@@ -2,7 +2,7 @@
 @model CvManagementSystem.Areas.Identity.Pages.Account.RegisterModel
 
 @{
-    ViewData["Title"] = "Create Account";
+    ViewData["Title"] = L["CreateAccount"].Value;
 }
 
 <div class="container py-5">
@@ -11,16 +11,16 @@
 
             <div class="text-center mb-4">
                 <span class="badge text-bg-primary mb-3">
-                    CV Management Platform
+                    @L["CvMaster"]
                 </span>
 
                 <h1 class="fw-bold">
-                    Create your account
+                    @L["CreateYourAccount"]
                 </h1>
 
                 <p class="text-secondary">
-                    Create a Candidate account and start building your
-                    professional profile.
+                    @L["RegisterDescription"]
+
                 </p>
             </div>
 
@@ -36,13 +36,12 @@
 
                         <div class="mb-3">
                             <label asp-for="Input.Email"
-                                   class="form-label">
-                            </label>
+                                   class="form-label">@L["Email"]</label>
 
                             <input asp-for="Input.Email"
                                    class="form-control"
                                    autocomplete="email"
-                                   placeholder="you@example.com" />
+                                   placeholder="@L["EmailPlaceholder"]" />
 
                             <span asp-validation-for="Input.Email"
                                   class="text-danger">
@@ -51,13 +50,12 @@
 
                         <div class="mb-3">
                             <label asp-for="Input.Password"
-                                   class="form-label">
-                            </label>
+                                   class="form-label">@L["Password"]</label>
 
                             <input asp-for="Input.Password"
                                    class="form-control"
                                    autocomplete="new-password"
-                                   placeholder="Create a password" />
+                                   placeholder="@L["CreatePassword"]" />
 
                             <span asp-validation-for="Input.Password"
                                   class="text-danger">
@@ -66,13 +64,12 @@
 
                         <div class="mb-4">
                             <label asp-for="Input.ConfirmPassword"
-                                   class="form-label">
-                            </label>
+                                   class="form-label">@L["ConfirmPassword"]</label>
 
                             <input asp-for="Input.ConfirmPassword"
                                    class="form-control"
                                    autocomplete="new-password"
-                                   placeholder="Repeat your password" />
+                                   placeholder="@L["ConfirmPassword"]" />
 
                             <span asp-validation-for="Input.ConfirmPassword"
                                   class="text-danger">
@@ -81,29 +78,29 @@
 
                         <button type="submit"
                                 class="btn btn-primary w-100">
-                            Create Account
+                            @L["CreateAccount"]
                         </button>
 
                         <div class="mb-3">
                           <label asp-for="SelectedRole"
                               class="form-label">
-                               Account type
+                               @L["AccountType"]
                           </label>
 
                           <select asp-for="SelectedRole"
                                class="form-select">
                              <option value="Candidate">
-                                 Candidate
+                                 @L["Candidate"]
                               </option>
 
                              <option value="Recruiter">
-                                  Recruiter
+                                  @L["Recruiter"]
                              </option>
                            </select>
 
                            <div class="form-text">
-                              Candidates manage profiles, projects and CVs.
-                              Recruiters manage positions and attributes and review candidate CVs.
+                              @L["RegisterRoleHelp"]
+
                             </div>
 
                             <span asp-validation-for="SelectedRole"
@@ -115,12 +112,12 @@
 
                     <div class="text-center mt-4">
                         <span class="text-secondary">
-                            Already have an account?
+                            @L["AlreadyHaveAccount"]
                         </span>
 
                         <a asp-page="./Login"
                            asp-route-returnUrl="@Model.ReturnUrl">
-                            Sign in
+                            @L["SignIn"]
                         </a>
                     </div>
 

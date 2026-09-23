@@ -12,12 +12,12 @@
         <div class="col-md-6">
             <label asp-for="Department"
                    class="form-label">
-                Department
+                @L["Department"]
             </label>
 
             <input asp-for="Department"
                    class="form-control"
-                   placeholder="e.g. Engineering, HR, Marketing" />
+                   placeholder="@L["DepartmentPlaceholder"]" />
 
             <span asp-validation-for="Department"
                   class="text-danger"></span>
@@ -26,23 +26,23 @@
         <div class="col-md-6">
             <label asp-for="Experience"
                    class="form-label">
-                Experience
+                @L["ExperienceLabel"]
             </label>
 
             <select asp-for="Experience"
                     class="form-select">
 
-                <option value="0">Fresher</option>
-                <option value="1">1 Year</option>
-                <option value="2">2 Years</option>
-                <option value="3">3 Years</option>
-                <option value="4">4 Years</option>
-                <option value="5">5 Years</option>
-                <option value="6">6 Years</option>
-                <option value="7">7 Years</option>
-                <option value="8">8 Years</option>
-                <option value="9">9 Years</option>
-                <option value="10">10 Years</option>
+                <option value="0">@L["Fresher"]</option>
+                <option value="1">@L["OneYear"]</option>
+                <option value="2">@string.Format(L["YearsFormat"].Value, 2)</option>
+                <option value="3">@string.Format(L["YearsFormat"].Value, 3)</option>
+                <option value="4">@string.Format(L["YearsFormat"].Value, 4)</option>
+                <option value="5">@string.Format(L["YearsFormat"].Value, 5)</option>
+                <option value="6">@string.Format(L["YearsFormat"].Value, 6)</option>
+                <option value="7">@string.Format(L["YearsFormat"].Value, 7)</option>
+                <option value="8">@string.Format(L["YearsFormat"].Value, 8)</option>
+                <option value="9">@string.Format(L["YearsFormat"].Value, 9)</option>
+                <option value="10">@string.Format(L["YearsFormat"].Value, 10)</option>
 
             </select>
         </div>
@@ -50,14 +50,14 @@
         <div class="col-md-6">
             <label asp-for="EmploymentType"
                    class="form-label">
-                Employment Type
+                @L["EmploymentTypeLabel"]
             </label>
 
             <select asp-for="EmploymentType"
                     class="form-select">
 
-                <option value="1">Full Time</option>
-                <option value="2">Part Time</option>
+                <option value="1">@L["FullTimeOption"]</option>
+                <option value="2">@L["PartTimeOption"]</option>
 
             </select>
         </div>
@@ -65,15 +65,15 @@
         <div class="col-md-6">
             <label asp-for="WorkMode"
                    class="form-label">
-                Work Mode
+                @L["WorkModeLabel"]
             </label>
 
             <select asp-for="WorkMode"
                     class="form-select">
 
-                <option value="1">On-site</option>
-                <option value="2">Remote</option>
-                <option value="3">Hybrid</option>
+                <option value="1">@L["OnSite"]</option>
+                <option value="2">@L["RemoteOption"]</option>
+                <option value="3">@L["HybridOption"]</option>
 
             </select>
         </div>
@@ -86,7 +86,7 @@ else
 
         <div class="col-md-6">
             <label class="form-label">
-                Department
+                @L["Department"]
             </label>
             <div class="form-control bg-body-secondary">
                 @Model.Department
@@ -95,49 +95,39 @@ else
 
         <div class="col-md-6">
             <label class="form-label">
-                Experience
+                @L["ExperienceLabel"]
             </label>
             <div class="form-control bg-body-secondary">
-                @Model.Experience switch
-                {
-                    ExperienceLevel.Fresher => "Fresher",
-                    ExperienceLevel.OneYear => "1 Year",
-                    ExperienceLevel.TwoYears => "2 Years",
-                    ExperienceLevel.ThreeYears => "3 Years",
-                    ExperienceLevel.FourYears => "4 Years",
-                    ExperienceLevel.FiveYears => "5 Years",
-                    ExperienceLevel.SixYears => "6 Years",
-                    ExperienceLevel.SevenYears => "7 Years",
-                    ExperienceLevel.EightYears => "8 Years",
-                    ExperienceLevel.NineYears => "9 Years",
-                    ExperienceLevel.TenYears => "10 Years",
-                    _ => "Fresher"
-                }
+                @(Model.Experience == ExperienceLevel.Fresher
+                    ? L["Fresher"].Value
+                    : Model.Experience == ExperienceLevel.OneYear
+                        ? L["OneYear"].Value
+                        : string.Format(L["YearsFormat"].Value, (int)Model.Experience))
             </div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">
-                Employment Type
+                @L["EmploymentTypeLabel"]
             </label>
             <div class="form-control bg-body-secondary">
                 @(Model.EmploymentType == EmploymentType.FullTime
-                    ? "Full Time"
-                    : "Part Time")
+                    ? L["FullTimeOption"]
+                    : L["PartTimeOption"])
             </div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">
-                Work Mode
+                @L["WorkModeLabel"]
             </label>
             <div class="form-control bg-body-secondary">
                 @(Model.WorkMode switch
                 {
-                    WorkMode.OnSite => "On-site",
-                    WorkMode.Remote => "Remote",
-                    WorkMode.Hybrid => "Hybrid",
-                    _ => "On-site"
+                    WorkMode.OnSite => L["OnSite"],
+                    WorkMode.Remote => L["RemoteOption"],
+                    WorkMode.Hybrid => L["HybridOption"],
+                    _ => L["OnSite"]
                 })
             </div>
         </div>
@@ -176,7 +166,7 @@ else
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Basic Information</strong>
+                <strong>@L["BasicInformation"]</strong>
             </div>
 
             <div class="card-body">
@@ -249,7 +239,7 @@ else
                             </div>
 
                             <div class="form-text">
-                                Public positions do not use candidate access filters.
+                                @L["PublicPositionsHelp"]
                             </div>
 
                         </div>
@@ -272,12 +262,13 @@ else
                 <div class="d-flex justify-content-between align-items-center">
 
                     <strong>
-                        CV Attributes
+                        @L["CvAttributes"]
                     </strong>
 
                     <span id="attributeCount"
-                          class="badge text-bg-secondary">
-                        0 selected
+                          class="badge text-bg-secondary"
+                          data-selected-count-format="@L["SelectedCount"]">
+                        @string.Format(L["SelectedCount"].Value, 0)
                     </span>
 
                 </div>
@@ -292,13 +283,13 @@ else
                         <input type="text"
                                id="attributeSearch"
                                class="form-control"
-                               placeholder="Search attributes by name..." />
+                               placeholder="@L["SearchByAttributePrefix"]" />
                     </div>
 
                     <div class="col-md-4">
                         <select id="attributeCategoryFilter"
                                 class="form-select">
-                            <option value="">All categories</option>
+                            <option value="">@L["AllCategories"]</option>
                             @foreach (var category in Model.AttributeCategories)
                             {
                                 <option value="@category.Id">@category.Name</option>
@@ -326,19 +317,19 @@ else
                                 </th>
 
                                 <th>
-                                    Attribute
+                                    @L["Attribute"]
                                 </th>
 
                                 <th>
-                                    Category
+                                    @L["Category"]
                                 </th>
 
                                 <th>
-                                    Type
+                                    @L["Type"]
                                 </th>
 
                                 <th>
-                                    Required
+                                    @L["Required"]
                                 </th>
 
                             </tr>
@@ -419,12 +410,13 @@ else
                 <div class="d-flex justify-content-between align-items-center">
 
                     <strong>
-                        Project Technology Tags
+                        @L["ProjectTechnologyTags"]
                     </strong>
 
                     <span id="tagCount"
-                          class="badge text-bg-secondary">
-                        0 selected
+                          class="badge text-bg-secondary"
+                          data-selected-count-format="@L["SelectedCount"]">
+                        @string.Format(L["SelectedCount"].Value, 0)
                     </span>
 
                 </div>
@@ -472,21 +464,39 @@ else
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Access Rules</strong>
+                <strong>@L["AccessRules"]</strong>
             </div>
 
             <div class="card-body">
 
                 <div id="restrictedNotice"
                      class="alert alert-light border">
-                    Public positions do not require access rules.
+                    @L["PublicPositionsNoAccessRules"]
                 </div>
 
-                <div id="accessRulesSection">
+                <div id="accessRulesSection"
+                     data-attribute-label="@L["Attribute"]"
+                     data-operator-label="@L["Operator"]"
+                     data-value-label="@L["Value"]"
+                     data-remove-label="@L["Remove"]"
+                     data-select-attribute="@L["SelectAttributeEllipsis"]"
+                     data-select-operator="@L["SelectOperatorEllipsis"]"
+                     data-filter-value-placeholder="@L["FilterValuePlaceholder"]"
+                     data-op-equals="@L["OperatorEquals"]"
+                     data-op-not-equals="@L["OperatorNotEquals"]"
+                     data-op-contains="@L["OperatorContains"]"
+                     data-op-starts-with="@L["OperatorStartsWith"]"
+                     data-op-greater-than="@L["OperatorGreaterThan"]"
+                     data-op-greater-than-or-equal="@L["OperatorGreaterThanOrEqual"]"
+                     data-op-less-than="@L["OperatorLessThan"]"
+                     data-op-less-than-or-equal="@L["OperatorLessThanOrEqual"]"
+                     data-op-after="@L["OperatorAfter"]"
+                     data-op-on-or-after="@L["OperatorOnOrAfter"]"
+                     data-op-before="@L["OperatorBefore"]"
+                     data-op-on-or-before="@L["OperatorOnOrBefore"]">
 
                     <p class="text-muted">
-                        Candidates must satisfy these rules to create
-                        a CV for this position.
+                        @L["CandidatesMustSatisfyRules"]
                     </p>
 
                     <div id="accessRulesContainer">
@@ -507,7 +517,7 @@ else
                                     <div class="col-md-4">
 
                                         <label class="form-label">
-                                            Attribute
+                                            @L["Attribute"]
                                         </label>
 
                                         <select class="form-select rule-attribute"
@@ -540,7 +550,7 @@ else
                                     <div class="col-md-3">
 
                                         <label class="form-label">
-                                            Operator
+                                            @L["Operator"]
                                         </label>
 
                                         <select class="form-select rule-operator"
@@ -557,14 +567,14 @@ else
                                     <div class="col-md-4">
 
                                         <label class="form-label">
-                                            Value
+                                            @L["Value"]
                                         </label>
 
                                         <input type="text"
                                                class="form-control rule-value"
                                                name="AccessRules[@i].Value"
                                                value="@rule.Value"
-                                               placeholder="Filter value..." />
+                                               placeholder="@L["FilterValuePlaceholder"]" />
 
                                     </div>
 
@@ -587,7 +597,7 @@ else
                     <button type="button"
                             id="addRuleButton"
                             class="btn btn-outline-primary">
-                        Add Access Rule
+                        @L["AddAccessRule"]
                     </button>
 
                 </div>
@@ -603,12 +613,12 @@ else
 
             <button type="submit"
                     class="btn btn-primary">
-                Save Changes
+                @L["SaveChanges"]
             </button>
 
             <a asp-action="Index"
                class="btn btn-outline-secondary">
-                Cancel
+                @L["Cancel"]
             </a>
 
         </div>
@@ -637,10 +647,13 @@ else
 
     function updateAttributeCount()
     {
-        attributeCount.textContent =
+        const count =
             document.querySelectorAll(
                 ".attribute-check:checked"
-            ).length + " selected";
+            ).length;
+
+        attributeCount.textContent =
+            attributeCount.dataset.selectedCountFormat.replace("{0}", count);
     }
 
     selectAllAttributes.addEventListener(
@@ -773,10 +786,13 @@ else
 
     function updateTagCount()
     {
-        tagCount.textContent =
+        const count =
             document.querySelectorAll(
                 ".technology-check:checked"
-            ).length + " selected";
+            ).length;
+
+        tagCount.textContent =
+            tagCount.dataset.selectedCountFormat.replace("{0}", count);
     }
 
     document
@@ -852,66 +868,69 @@ else
     ];
 
 
+    const opText =
+        accessRulesSection.dataset;
+
     const operators =
     {
         String:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["Contains", "Contains"],
-            ["StartsWith", "Starts with"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["Contains", opText.opContains],
+            ["StartsWith", opText.opStartsWith]
         ],
 
         Text:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["Contains", "Contains"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["Contains", opText.opContains]
         ],
 
         Numeric:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["GreaterThan", "Greater than"],
-            ["GreaterThanOrEqual", "Greater than or equal"],
-            ["LessThan", "Less than"],
-            ["LessThanOrEqual", "Less than or equal"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["GreaterThan", opText.opGreaterThan],
+            ["GreaterThanOrEqual", opText.opGreaterThanOrEqual],
+            ["LessThan", opText.opLessThan],
+            ["LessThanOrEqual", opText.opLessThanOrEqual]
         ],
 
         Date:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["GreaterThan", "After"],
-            ["GreaterThanOrEqual", "On or after"],
-            ["LessThan", "Before"],
-            ["LessThanOrEqual", "On or before"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["GreaterThan", opText.opAfter],
+            ["GreaterThanOrEqual", opText.opOnOrAfter],
+            ["LessThan", opText.opBefore],
+            ["LessThanOrEqual", opText.opOnOrBefore]
         ],
 
         Boolean:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals]
         ],
 
         Dropdown:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["Contains", "Contains"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["Contains", opText.opContains]
         ],
 
         Image:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals]
         ],
 
         Period:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals]
         ]
     };
 
@@ -929,7 +948,7 @@ else
                 : null;
 
         operatorSelect.innerHTML =
-            '<option value="">Select operator...</option>';
+            `<option value="">${opText.selectOperator}</option>`;
 
         if (!type ||
             !operators[type])
@@ -1115,14 +1134,14 @@ else
                         <div class="col-md-4">
 
                             <label class="form-label">
-                                Attribute
+                                ${opText.attributeLabel}
                             </label>
 
                             <select class="form-select rule-attribute"
                                     name="AccessRules[${index}].AttributeDefinitionId">
 
                                 <option value="">
-                                    Select attribute...
+                                    ${opText.selectAttribute}
                                 </option>
 
                                 ${attributes
@@ -1142,14 +1161,14 @@ else
                         <div class="col-md-3">
 
                             <label class="form-label">
-                                Operator
+                                ${opText.operatorLabel}
                             </label>
 
                             <select class="form-select rule-operator"
                                     name="AccessRules[${index}].Operator">
 
                                 <option value="">
-                                    Select operator...
+                                    ${opText.selectOperator}
                                 </option>
 
                             </select>
@@ -1159,13 +1178,13 @@ else
                         <div class="col-md-4">
 
                             <label class="form-label">
-                                Value
+                                ${opText.valueLabel}
                             </label>
 
                             <input type="text"
                                    class="form-control rule-value"
                                    name="AccessRules[${index}].Value"
-                                   placeholder="Filter value..."
+                                   placeholder="${opText.filterValuePlaceholder}"
                                    required />
 
                         </div>

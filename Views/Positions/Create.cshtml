@@ -34,12 +34,12 @@
         <div class="col-md-6">
             <label asp-for="Department"
                    class="form-label">
-                Department
+                @L["Department"]
             </label>
 
             <input asp-for="Department"
                    class="form-control"
-                   placeholder="e.g. Engineering, HR, Marketing" />
+                   placeholder="@L["DepartmentPlaceholder"]" />
 
             <span asp-validation-for="Department"
                   class="text-danger"></span>
@@ -48,23 +48,23 @@
         <div class="col-md-6">
             <label asp-for="Experience"
                    class="form-label">
-                Experience
+                @L["ExperienceLabel"]
             </label>
 
             <select asp-for="Experience"
                     class="form-select">
 
-                <option value="0">Fresher</option>
-                <option value="1">1 Year</option>
-                <option value="2">2 Years</option>
-                <option value="3">3 Years</option>
-                <option value="4">4 Years</option>
-                <option value="5">5 Years</option>
-                <option value="6">6 Years</option>
-                <option value="7">7 Years</option>
-                <option value="8">8 Years</option>
-                <option value="9">9 Years</option>
-                <option value="10">10 Years</option>
+                <option value="0">@L["Fresher"]</option>
+                <option value="1">@L["OneYear"]</option>
+                <option value="2">@string.Format(L["YearsFormat"].Value, 2)</option>
+                <option value="3">@string.Format(L["YearsFormat"].Value, 3)</option>
+                <option value="4">@string.Format(L["YearsFormat"].Value, 4)</option>
+                <option value="5">@string.Format(L["YearsFormat"].Value, 5)</option>
+                <option value="6">@string.Format(L["YearsFormat"].Value, 6)</option>
+                <option value="7">@string.Format(L["YearsFormat"].Value, 7)</option>
+                <option value="8">@string.Format(L["YearsFormat"].Value, 8)</option>
+                <option value="9">@string.Format(L["YearsFormat"].Value, 9)</option>
+                <option value="10">@string.Format(L["YearsFormat"].Value, 10)</option>
 
             </select>
         </div>
@@ -72,14 +72,14 @@
         <div class="col-md-6">
             <label asp-for="EmploymentType"
                    class="form-label">
-                Employment Type
+                @L["EmploymentTypeLabel"]
             </label>
 
             <select asp-for="EmploymentType"
                     class="form-select">
 
-                <option value="1">Full Time</option>
-                <option value="2">Part Time</option>
+                <option value="1">@L["FullTimeOption"]</option>
+                <option value="2">@L["PartTimeOption"]</option>
 
             </select>
         </div>
@@ -87,15 +87,15 @@
         <div class="col-md-6">
             <label asp-for="WorkMode"
                    class="form-label">
-                Work Mode
+                @L["WorkModeLabel"]
             </label>
 
             <select asp-for="WorkMode"
                     class="form-select">
 
-                <option value="1">On-site</option>
-                <option value="2">Remote</option>
-                <option value="3">Hybrid</option>
+                <option value="1">@L["OnSite"]</option>
+                <option value="2">@L["RemoteOption"]</option>
+                <option value="3">@L["HybridOption"]</option>
 
             </select>
         </div>
@@ -108,7 +108,7 @@ else
 
         <div class="col-md-6">
             <label class="form-label">
-                Department
+                @L["Department"]
             </label>
             <div class="form-control bg-body-secondary">
                 @Model.Department
@@ -117,49 +117,39 @@ else
 
         <div class="col-md-6">
             <label class="form-label">
-                Experience
+                @L["ExperienceLabel"]
             </label>
             <div class="form-control bg-body-secondary">
-                @Model.Experience switch
-                {
-                    ExperienceLevel.Fresher => "Fresher",
-                    ExperienceLevel.OneYear => "1 Year",
-                    ExperienceLevel.TwoYears => "2 Years",
-                    ExperienceLevel.ThreeYears => "3 Years",
-                    ExperienceLevel.FourYears => "4 Years",
-                    ExperienceLevel.FiveYears => "5 Years",
-                    ExperienceLevel.SixYears => "6 Years",
-                    ExperienceLevel.SevenYears => "7 Years",
-                    ExperienceLevel.EightYears => "8 Years",
-                    ExperienceLevel.NineYears => "9 Years",
-                    ExperienceLevel.TenYears => "10 Years",
-                    _ => "Fresher"
-                }
+                @(Model.Experience == ExperienceLevel.Fresher
+                    ? L["Fresher"].Value
+                    : Model.Experience == ExperienceLevel.OneYear
+                        ? L["OneYear"].Value
+                        : string.Format(L["YearsFormat"].Value, (int)Model.Experience))
             </div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">
-                Employment Type
+                @L["EmploymentTypeLabel"]
             </label>
             <div class="form-control bg-body-secondary">
                 @(Model.EmploymentType == EmploymentType.FullTime
-                    ? "Full Time"
-                    : "Part Time")
+                    ? L["FullTimeOption"]
+                    : L["PartTimeOption"])
             </div>
         </div>
 
         <div class="col-md-6">
             <label class="form-label">
-                Work Mode
+                @L["WorkModeLabel"]
             </label>
             <div class="form-control bg-body-secondary">
                 @(Model.WorkMode switch
                 {
-                    WorkMode.OnSite => "On-site",
-                    WorkMode.Remote => "Remote",
-                    WorkMode.Hybrid => "Hybrid",
-                    _ => "On-site"
+                    WorkMode.OnSite => L["OnSite"],
+                    WorkMode.Remote => L["RemoteOption"],
+                    WorkMode.Hybrid => L["HybridOption"],
+                    _ => L["OnSite"]
                 })
             </div>
         </div>
@@ -187,7 +177,7 @@ else
 
                     <input asp-for="Title"
                            class="form-control"
-                           placeholder="Example: Backend Developer" />
+                           placeholder="@L["PositionTitlePlaceholderExample"]" />
 
                     <span asp-validation-for="Title"
                           class="text-danger">
@@ -231,7 +221,7 @@ else
                         </span>
 
                         <div class="form-text">
-                            Maximum relevant projects included in generated CVs.
+                            @L["MaxProjectsHelp"]
                         </div>
 
                     </div>
@@ -253,8 +243,7 @@ else
                             </div>
 
                             <div class="form-text">
-                                Public positions are available to all authenticated
-                                candidates. Restricted positions use access rules.
+                                @L["PublicPositionsHelp"]
                             </div>
 
                         </div>
@@ -277,11 +266,12 @@ else
 
                 <div class="d-flex justify-content-between align-items-center">
 
-                    <strong>CV Attributes</strong>
+                    <strong>@L["CvAttributes"]</strong>
 
                     <span id="attributeCount"
-                          class="badge text-bg-secondary">
-                        0 selected
+                          class="badge text-bg-secondary"
+                          data-selected-count-format="@L["SelectedCount"]">
+                        @string.Format(L["SelectedCount"].Value, 0)
                     </span>
 
                 </div>
@@ -291,15 +281,13 @@ else
             <div class="card-body">
 
                 <p class="text-muted">
-                    Select reusable attributes from the shared Attribute Library.
-                    Required attributes must be completed before a candidate can
-                    publish the CV.
+                    @L["SelectAttributesFromLibrary"]
                 </p>
 
                 @if (Model.AvailableAttributes.Count == 0)
                 {
                     <div class="alert alert-light border">
-                        No attributes exist in the Attribute Library yet.
+                        @L["NoAttributesInLibrary"]
                     </div>
                 }
                 else
@@ -310,13 +298,13 @@ else
                             <input type="text"
                                    id="attributeSearch"
                                    class="form-control"
-                                   placeholder="Search attributes by name..." />
+                                   placeholder="@L["SearchByAttributePrefix"]" />
                         </div>
 
                         <div class="col-md-4">
                             <select id="attributeCategoryFilter"
                                     class="form-select">
-                                <option value="">All categories</option>
+                                <option value="">@L["AllCategories"]</option>
                                 @foreach (var category in Model.AttributeCategories)
                                 {
                                     <option value="@category.Id">@category.Name</option>
@@ -344,19 +332,19 @@ else
                                     </th>
 
                                     <th>
-                                        Attribute
+                                        @L["Attribute"]
                                     </th>
 
                                     <th>
-                                        Category
+                                        @L["Category"]
                                     </th>
 
                                     <th>
-                                        Type
+                                        @L["Type"]
                                     </th>
 
                                     <th style="width:100px;">
-                                        Required
+                                        @L["Required"]
                                     </th>
 
                                 </tr>
@@ -438,11 +426,12 @@ else
 
                 <div class="d-flex justify-content-between align-items-center">
 
-                    <strong>Project Technology Tags</strong>
+                    <strong>@L["ProjectTechnologyTags"]</strong>
 
                     <span id="tagCount"
-                          class="badge text-bg-secondary">
-                        0 selected
+                          class="badge text-bg-secondary"
+                          data-selected-count-format="@L["SelectedCount"]">
+                        @string.Format(L["SelectedCount"].Value, 0)
                     </span>
 
                 </div>
@@ -452,14 +441,13 @@ else
             <div class="card-body">
 
                 <p class="text-muted">
-                    Candidate projects matching these tags can be considered
-                    when generating the CV.
+                    @L["CandidateProjectsMatchingTags"]
                 </p>
 
                 @if (Model.AvailableTechnologyTags.Count == 0)
                 {
                     <div class="alert alert-light border">
-                        No technology tags have been created yet.
+                        @L["NoTechnologyTagsCreated"]
                     </div>
                 }
                 else
@@ -505,7 +493,7 @@ else
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Access Rules</strong>
+                <strong>@L["AccessRules"]</strong>
             </div>
 
             <div class="card-body">
@@ -513,17 +501,34 @@ else
                 <div id="restrictedNotice"
                      class="alert alert-light border">
 
-                    Public positions do not require access rules.
-                    Select Restricted above to configure candidate filters.
+                    @L["PublicPositionsNoAccessRules"]
 
                 </div>
 
                 <div id="accessRulesSection"
-                     style="display:none;">
+                     style="display:none;"
+                     data-attribute-label="@L["Attribute"]"
+                     data-operator-label="@L["Operator"]"
+                     data-value-label="@L["Value"]"
+                     data-remove-label="@L["Remove"]"
+                     data-select-attribute="@L["SelectAttributeEllipsis"]"
+                     data-select-operator="@L["SelectOperatorEllipsis"]"
+                     data-filter-value-placeholder="@L["FilterValuePlaceholder"]"
+                     data-op-equals="@L["OperatorEquals"]"
+                     data-op-not-equals="@L["OperatorNotEquals"]"
+                     data-op-contains="@L["OperatorContains"]"
+                     data-op-starts-with="@L["OperatorStartsWith"]"
+                     data-op-greater-than="@L["OperatorGreaterThan"]"
+                     data-op-greater-than-or-equal="@L["OperatorGreaterThanOrEqual"]"
+                     data-op-less-than="@L["OperatorLessThan"]"
+                     data-op-less-than-or-equal="@L["OperatorLessThanOrEqual"]"
+                     data-op-after="@L["OperatorAfter"]"
+                     data-op-on-or-after="@L["OperatorOnOrAfter"]"
+                     data-op-before="@L["OperatorBefore"]"
+                     data-op-on-or-before="@L["OperatorOnOrBefore"]">
 
                     <p class="text-muted">
-                        Candidates must satisfy these rules to create a CV
-                        for this position.
+                        @L["CandidatesMustSatisfyRules"]
                     </p>
 
                     <div id="accessRulesContainer"></div>
@@ -531,7 +536,7 @@ else
                     <button type="button"
                             id="addRuleButton"
                             class="btn btn-outline-primary">
-                        Add Access Rule
+                        @L["AddAccessRule"]
                     </button>
 
                 </div>
@@ -548,12 +553,12 @@ else
 
             <button type="submit"
                     class="btn btn-primary">
-                Create Position
+                @L["CreatePosition"]
             </button>
 
             <a asp-action="Index"
                class="btn btn-outline-secondary">
-                Cancel
+                @L["Cancel"]
             </a>
 
         </div>
@@ -588,7 +593,7 @@ else
             ).length;
 
         attributeCount.textContent =
-            count + " selected";
+            attributeCount.dataset.selectedCountFormat.replace("{0}", count);
     }
 
     selectAllAttributes.addEventListener(
@@ -725,10 +730,13 @@ else
 
     function updateTagCount()
     {
-        tagCount.textContent =
+        const count =
             document.querySelectorAll(
                 ".technology-check:checked"
-            ).length + " selected";
+            ).length;
+
+        tagCount.textContent =
+            tagCount.dataset.selectedCountFormat.replace("{0}", count);
     }
 
     technologyChecks.forEach(
@@ -781,66 +789,69 @@ else
     ];
 
 
+    const opText =
+        accessRulesSection.dataset;
+
     const operators =
     {
         String:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["Contains", "Contains"],
-            ["StartsWith", "Starts with"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["Contains", opText.opContains],
+            ["StartsWith", opText.opStartsWith]
         ],
 
         Text:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["Contains", "Contains"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["Contains", opText.opContains]
         ],
 
         Numeric:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["GreaterThan", "Greater than"],
-            ["GreaterThanOrEqual", "Greater than or equal"],
-            ["LessThan", "Less than"],
-            ["LessThanOrEqual", "Less than or equal"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["GreaterThan", opText.opGreaterThan],
+            ["GreaterThanOrEqual", opText.opGreaterThanOrEqual],
+            ["LessThan", opText.opLessThan],
+            ["LessThanOrEqual", opText.opLessThanOrEqual]
         ],
 
         Date:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["GreaterThan", "After"],
-            ["GreaterThanOrEqual", "On or after"],
-            ["LessThan", "Before"],
-            ["LessThanOrEqual", "On or before"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["GreaterThan", opText.opAfter],
+            ["GreaterThanOrEqual", opText.opOnOrAfter],
+            ["LessThan", opText.opBefore],
+            ["LessThanOrEqual", opText.opOnOrBefore]
         ],
 
         Boolean:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals]
         ],
 
         Dropdown:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"],
-            ["Contains", "Contains"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals],
+            ["Contains", opText.opContains]
         ],
 
         Image:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals]
         ],
 
         Period:
         [
-            ["Equals", "Equals"],
-            ["NotEquals", "Not equals"]
+            ["Equals", opText.opEquals],
+            ["NotEquals", opText.opNotEquals]
         ]
     };
 
@@ -889,7 +900,7 @@ else
             "form-label";
 
         attributeLabel.textContent =
-            "Attribute";
+            opText.attributeLabel;
 
 
         const attributeSelect =
@@ -912,7 +923,7 @@ else
             "";
 
         emptyOption.textContent =
-            "Select attribute...";
+            opText.selectAttribute;
 
         attributeSelect.appendChild(
             emptyOption);
@@ -967,7 +978,7 @@ else
             "form-label";
 
         operatorLabel.textContent =
-            "Operator";
+            opText.operatorLabel;
 
 
         const operatorSelect =
@@ -990,7 +1001,7 @@ else
             "";
 
         emptyOperator.textContent =
-            "Select operator...";
+            opText.selectOperator;
 
         operatorSelect.appendChild(
             emptyOperator);
@@ -1017,7 +1028,7 @@ else
             "form-label";
 
         valueLabel.textContent =
-            "Value";
+            opText.valueLabel;
 
 
         const valueInput =
@@ -1036,7 +1047,7 @@ else
             true;
 
         valueInput.placeholder =
-            "Filter value...";
+            opText.filterValuePlaceholder;
 
 
         valueColumn.appendChild(
@@ -1063,7 +1074,7 @@ else
             "btn btn-outline-danger w-100";
 
         removeButton.textContent =
-            "Remove";
+            opText.removeLabel;
 
 
         removeButton.addEventListener(
@@ -1118,7 +1129,7 @@ else
                 "";
 
             empty.textContent =
-                "Select operator...";
+                opText.selectOperator;
 
             operatorSelect.appendChild(
                 empty);

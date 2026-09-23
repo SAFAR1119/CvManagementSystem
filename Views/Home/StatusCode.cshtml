@@ -1,13 +1,13 @@
 @{
     var statusCode = ViewData["StatusCode"] as int? ?? 500;
-    ViewData["Title"] = statusCode == 404 ? "Page not found" : "Something went wrong";
+    ViewData["Title"] = statusCode == 404 ? L["PageNotFoundTitle"].Value : L["SomethingWentWrongTitle"].Value;
 }
 
 <section class="text-center py-5 my-5">
-    <p class="text-primary fw-semibold text-uppercase mb-2">Error @statusCode</p>
-    <h1 class="display-6">@(statusCode == 404 ? "We couldn't find that page." : "We couldn't complete that request.")</h1>
+    <p class="text-primary fw-semibold text-uppercase mb-2">@string.Format(L["ErrorCodeLabel"].Value, statusCode)</p>
+    <h1 class="display-6">@(statusCode == 404 ? L["PageNotFoundHeading"] : L["RequestFailedHeading"])</h1>
     <p class="text-muted mx-auto mt-3" style="max-width: 38rem;">
-        @(statusCode == 404 ? "The link may be outdated, or the page may have moved." : "Please try again. If the issue continues, contact an administrator.")
+        @(statusCode == 404 ? L["PageNotFoundMessage"] : L["RequestFailedMessage"])
     </p>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Return to home</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">@L["ReturnToHome"]</a>
 </section>

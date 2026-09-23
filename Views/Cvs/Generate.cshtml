@@ -1,7 +1,7 @@
 @model CvManagementSystem.ViewModels.GeneratedCvViewModel
 
 @{
-    ViewData["Title"] = $"{Model.PositionTitle} CV";
+    ViewData["Title"] = $"{Model.PositionTitle} {L["CV"]}";
 }
 
 <div class="container py-4">
@@ -10,11 +10,11 @@
 
         <div>
             <h1 class="h3 mb-1">
-                @Model.PositionTitle CV
+                @Model.PositionTitle @L["CV"]
             </h1>
 
             <p class="text-muted mb-0">
-                Generated from your profile and the selected position template.
+                @L["GeneratedFromProfileDescription"]
             </p>
         </div>
 
@@ -23,14 +23,14 @@
             <a asp-controller="Positions"
                asp-action="Index"
                class="btn btn-outline-secondary">
-                Back to Positions
+                @L["BackToPositions"]
             </a>
 
             @if (Model.CanPublish)
             {
                 <button type="button"
                         class="btn btn-success">
-                    Publish CV
+                    @L["PublishCv"]
                 </button>
             }
             else
@@ -38,7 +38,7 @@
                 <button type="button"
                         class="btn btn-secondary"
                         disabled>
-                    Publish CV
+                    @L["PublishCv"]
                 </button>
             }
 
@@ -49,8 +49,7 @@
     @if (Model.MissingRequiredAttributes > 0)
     {
         <div class="alert alert-warning">
-            @Model.MissingRequiredAttributes required attribute(s)
-            still need information before this CV can be published.
+            @string.Format(L["MissingRequiredAttributesMessage"].Value, Model.MissingRequiredAttributes)
         </div>
     }
 
@@ -78,7 +77,7 @@
             <section class="mb-4">
 
                 <h2 class="h5 border-bottom pb-2">
-                    Profile Information
+                    @L["ProfileInformation"]
                 </h2>
 
                 <div class="row g-3 mt-1">
@@ -107,7 +106,7 @@
                                 {
                                     <input type="text"
                                            class="form-control border-danger"
-                                           placeholder="Information required..." />
+                                           placeholder="@L["InformationRequiredPlaceholder"]" />
                                 }
                                 else
                                 {
@@ -130,13 +129,13 @@
             <section>
 
                 <h2 class="h5 border-bottom pb-2">
-                    Relevant Projects
+                    @L["RelevantProjects"]
                 </h2>
 
                 @if (Model.Projects.Count == 0)
                 {
                     <p class="text-muted">
-                        No relevant projects are available for this position.
+                        @L["NoRelevantProjects"]
                     </p>
                 }
                 else

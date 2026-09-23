@@ -1,7 +1,7 @@
 @model CvManagementSystem.ViewModels.AttributeDefinitionViewModel
 
 @{
-    ViewData["Title"] = "Edit Attribute";
+    ViewData["Title"] = L["EditAttribute"].Value;
     var categories =
         ViewBag.Categories
         as List<CvManagementSystem.Models.AttributeCategory>
@@ -11,10 +11,10 @@
 <div class="container py-4">
 
     <div class="mb-4">
-        <h1 class="fw-bold">Edit Attribute</h1>
+        <h1 class="fw-bold">@L["EditAttribute"]</h1>
 
         <p class="text-secondary">
-            Update the reusable attribute definition.
+            @L["EditAttributeDescription"]
         </p>
     </div>
 
@@ -97,7 +97,7 @@
 
                     <label asp-for="OptionsText"
                            class="form-label">
-                        Dropdown Options
+                        @L["DropdownOptions"]
                     </label>
 
                     <textarea asp-for="OptionsText"
@@ -106,7 +106,7 @@
                     </textarea>
 
                     <div class="form-text">
-                        One option per line.
+                        @L["OnePerLine"]
                     </div>
 
                 </div>
@@ -115,12 +115,12 @@
 
                     <button type="submit"
                             class="btn btn-primary">
-                        Save Changes
+                        @L["SaveChanges"]
                     </button>
 
                     <a asp-action="Index"
                        class="btn btn-outline-secondary">
-                        Cancel
+                        @L["Cancel"]
                     </a>
 
                 </div>

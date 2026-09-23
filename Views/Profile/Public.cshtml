@@ -1,7 +1,7 @@
 @model CvManagementSystem.Models.CandidateProfile
 
 @{
-    ViewData["Title"] = "Candidate Profile";
+    ViewData["Title"] = L["CandidateProfileTitle"].Value;
 
     var displayName =
         $"{Model.FirstName} {Model.LastName}".Trim();
@@ -9,7 +9,7 @@
     if (string.IsNullOrWhiteSpace(displayName))
     {
         displayName =
-            ViewBag.DisplayName as string ?? "Candidate";
+            ViewBag.DisplayName as string ?? L["Candidate"].Value;
     }
 }
 
@@ -87,7 +87,7 @@
 
             <div class="card-header">
                 <h2 class="h5 mb-0">
-                    Professional Summary
+                    @L["ProfessionalSummary"]
                 </h2>
             </div>
 
@@ -110,7 +110,7 @@
         <div class="card-header">
 
             <h2 class="h5 mb-0">
-                Contact & Links
+                @L["ContactAndLinks"]
             </h2>
 
         </div>
@@ -124,7 +124,7 @@
                     <div class="col-md-6">
 
                         <div class="small text-muted">
-                            Email
+                            @L["Email"]
                         </div>
 
                         <a href="mailto:@Model.Email">
@@ -139,7 +139,7 @@
                     <div class="col-md-6">
 
                         <div class="small text-muted">
-                            Phone
+                            @L["Phone"]
                         </div>
 
                         <div>
@@ -154,13 +154,13 @@
                     <div class="col-md-4">
 
                         <div class="small text-muted">
-                            LinkedIn
+                            @L["LinkedIn"]
                         </div>
 
                         <a href="@Model.LinkedInUrl"
                            target="_blank"
                            rel="noopener noreferrer">
-                            View LinkedIn
+                            @L["ViewLinkedIn"]
                         </a>
 
                     </div>
@@ -171,13 +171,13 @@
                     <div class="col-md-4">
 
                         <div class="small text-muted">
-                            GitHub
+                            @L["GitHub"]
                         </div>
 
                         <a href="@Model.GitHubUrl"
                            target="_blank"
                            rel="noopener noreferrer">
-                            View GitHub
+                            @L["ViewGitHub"]
                         </a>
 
                     </div>
@@ -188,13 +188,13 @@
                     <div class="col-md-4">
 
                         <div class="small text-muted">
-                            Portfolio
+                            @L["Portfolio"]
                         </div>
 
                         <a href="@Model.PortfolioUrl"
                            target="_blank"
                            rel="noopener noreferrer">
-                            View Portfolio
+                            @L["ViewPortfolio"]
                         </a>
 
                     </div>
@@ -214,7 +214,7 @@
         <div class="card-header">
 
             <h2 class="h5 mb-0">
-                Skills & Attributes
+                @L["SkillsAndAttributes"]
             </h2>
 
         </div>
@@ -224,7 +224,7 @@
             @if (Model.AttributeValues.Count == 0)
             {
                 <div class="p-4 text-muted">
-                    No profile attributes added.
+                    @L["NoProfileAttributesAdded"]
                 </div>
             }
             else
@@ -238,15 +238,15 @@
                             <tr>
 
                                 <th>
-                                    Attribute
+                                    @L["Attribute"]
                                 </th>
 
                                 <th>
-                                    Category
+                                    @L["Category"]
                                 </th>
 
                                 <th>
-                                    Value
+                                    @L["Value"]
                                 </th>
 
                             </tr>
@@ -269,7 +269,7 @@
 
                                     <td>
                                         @(attribute.AttributeDefinition.Category?.Name
-                                            ?? "General")
+                                            ?? L["General"].Value)
                                     </td>
 
                                     <td>
@@ -300,7 +300,7 @@
         <div class="card-header">
 
             <h2 class="h5 mb-0">
-                Work Experience
+                @L["WorkExperience"]
             </h2>
 
         </div>
@@ -310,7 +310,7 @@
             @if (Model.WorkExperiences.Count == 0)
             {
                 <div class="text-muted">
-                    No work experience added.
+                    @L["NoWorkExperienceAdded"]
                 </div>
             }
             else
@@ -343,7 +343,7 @@
                                 @experience.StartDate.ToString("MMM yyyy")
                                 -
                                 @(experience.EndDate?.ToString("MMM yyyy")
-                                    ?? "Present")
+                                    ?? L["Present"].Value)
 
                             </div>
 
@@ -363,7 +363,7 @@
                             <div class="small">
 
                                 <span class="text-muted">
-                                    Technologies:
+                                    @L["TechnologiesLabel"]
                                 </span>
 
                                 @experience.Technologies
@@ -387,7 +387,7 @@
         <div class="card-header">
 
             <h2 class="h5 mb-0">
-                Education
+                @L["Education"]
             </h2>
 
         </div>
@@ -397,7 +397,7 @@
             @if (Model.EducationEntries.Count == 0)
             {
                 <div class="text-muted">
-                    No education information added.
+                    @L["NoEducationAdded"]
                 </div>
             }
             else
@@ -430,7 +430,7 @@
                                 @education.StartDate.ToString("MMM yyyy")
                                 -
                                 @(education.EndDate?.ToString("MMM yyyy")
-                                    ?? "Present")
+                                    ?? L["Present"].Value)
 
                             </div>
 
@@ -460,7 +460,7 @@
         <div class="card-header">
 
             <h2 class="h5 mb-0">
-                Projects
+                @L["Projects"]
             </h2>
 
         </div>
@@ -470,7 +470,7 @@
             @if (Model.Projects.Count == 0)
             {
                 <div class="text-muted">
-                    No projects added.
+                    @L["NoProjects"]
                 </div>
             }
             else
@@ -494,7 +494,7 @@
                                 @project.StartDate.ToString("MMM yyyy")
                                 -
                                 @(project.EndDate?.ToString("MMM yyyy")
-                                    ?? "Present")
+                                    ?? L["Present"].Value)
 
                             </div>
 
@@ -534,7 +534,7 @@
 
 
     <div class="text-muted small">
-        Candidate profile — read only
+        @L["CandidateProfileReadOnly"]
     </div>
 
 </div>

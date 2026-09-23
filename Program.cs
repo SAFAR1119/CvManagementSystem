@@ -10,10 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 
-builder.Services.AddLocalization(options =>
-{
-    options.ResourcesPath = "Resources";
-});
+// Resources/SharedResource.cs is itself in the CvManagementSystem.Resources
+// namespace, so the resource base name is already fully qualified. Setting
+// ResourcesPath here would make the localizer factory double up the
+// "Resources" segment (CvManagementSystem.Resources.Resources.SharedResource)
+// and fail to find any translation, for every culture.
+builder.Services.AddLocalization();
 
 builder.Services
     .AddControllersWithViews()

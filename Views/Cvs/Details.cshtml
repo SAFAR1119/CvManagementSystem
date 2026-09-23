@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] =
-        $"{Model.PositionTitle} CV";
+        $"{Model.PositionTitle} {L["CV"]}";
 }
 
 @if (User.IsInRole("Recruiter") ||
@@ -30,18 +30,18 @@
                         : "btn-outline-danger")">
 
                 @(Model.IsLikedByCurrentUser
-                    ? "Unlike"
-                    : "Like")
+                    ? L["Unlike"]
+                    : L["Like"])
 
             </button>
 
         </form>
 
-        <span>
+        <span data-like-text="@L["Like"]" data-unlike-text="@L["Unlike"]">
             <strong id="like-count">
                 @Model.LikeCount
             </strong>
-            like(s)
+            @L["LikesSuffix"]
         </span>
 
     </div>
@@ -55,12 +55,11 @@
         <div>
 
             <h1 class="h3 mb-1">
-                @(Model.PositionTitle) CV
+                @(Model.PositionTitle) @L["CV"]
             </h1>
 
             <p class="text-muted mb-0">
-                Tailored CV generated from the candidate profile
-                and the position template.
+                @L["TailoredCvDescription"]
             </p>
 
         </div>
@@ -68,14 +67,14 @@
         <div class="d-flex flex-wrap gap-2">
 
             <button type="button" class="btn btn-outline-primary" data-print-cv>
-                Print CV
+                @L["PrintCv"]
             </button>
 
             <a asp-controller="Positions"
                asp-action="Details"
                asp-route-id="@Model.PositionId"
                class="btn btn-outline-secondary">
-                View Position
+                @L["ViewPosition"]
             </a>
 
             @if (!Model.IsReadOnly &&
@@ -93,7 +92,7 @@
 
                     <button type="submit"
                             class="btn btn-success">
-                        Publish CV
+                        @L["PublishCv"]
                     </button>
 
                 </form>
@@ -120,16 +119,14 @@
     @if (Model.MissingRequiredAttributes > 0)
     {
         <div class="alert alert-warning">
-            @(Model.MissingRequiredAttributes)
-            required attribute(s) are still missing.
-            They must be completed before the CV can be published.
+            @string.Format(L["MissingRequiredAttributesFull"].Value, Model.MissingRequiredAttributes)
         </div>
     }
 
             @if (Model.IsPublished)
     {
         <div class="alert alert-success">
-            This CV is published. Changes you save below are immediately visible to recruiters.
+            @L["CvPublishedNotice"]
         </div>
     }
 
@@ -140,47 +137,47 @@
             <span class="corner bl"></span>
             <span class="corner br"></span>
             <header class="cv-header">
-                <div class="cv-eyebrow">Professional resume</div>
+                <div class="cv-eyebrow">@L["ProfessionalResume"]</div>
                 <h1>@Model.CandidateFirstName @Model.CandidateLastName</h1>
                 @if (!string.IsNullOrWhiteSpace(Model.ProfessionalTitle)) { <div class="cv-role">@Model.ProfessionalTitle</div> }
                 <div class="cv-contact">
                     @string.Join(" | ", new[] { Model.Location, Model.PhoneNumber, Model.Email }.Where(x => !string.IsNullOrWhiteSpace(x)))
                 </div>
                 <div class="cv-links">
-                    @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl)) { <a href="@Model.LinkedInUrl" target="_blank" rel="noopener">LinkedIn</a> }
-                    @if (!string.IsNullOrWhiteSpace(Model.GitHubUrl)) { <span class="mx-1">|</span><a href="@Model.GitHubUrl" target="_blank" rel="noopener">GitHub</a> }
-                    @if (!string.IsNullOrWhiteSpace(Model.PortfolioUrl)) { <span class="mx-1">|</span><a href="@Model.PortfolioUrl" target="_blank" rel="noopener">Portfolio</a> }
+                    @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl)) { <a href="@Model.LinkedInUrl" target="_blank" rel="noopener">@L["LinkedIn"]</a> }
+                    @if (!string.IsNullOrWhiteSpace(Model.GitHubUrl)) { <span class="mx-1">|</span><a href="@Model.GitHubUrl" target="_blank" rel="noopener">@L["GitHub"]</a> }
+                    @if (!string.IsNullOrWhiteSpace(Model.PortfolioUrl)) { <span class="mx-1">|</span><a href="@Model.PortfolioUrl" target="_blank" rel="noopener">@L["Portfolio"]</a> }
                 </div>
             </header>
 
             @if (!string.IsNullOrWhiteSpace(Model.ProfessionalSummary))
             {
-                <section class="cv-section"><h2>Professional Summary</h2><p class="mb-0" style="white-space: pre-line">@Model.ProfessionalSummary</p></section>
+                <section class="cv-section"><h2>@L["ProfessionalSummary"]</h2><p class="mb-0" style="white-space: pre-line">@Model.ProfessionalSummary</p></section>
             }
 
             @if (Model.Attributes.Count > 0)
             {
-                <section class="cv-section"><h2>Core Skills & Relevant Information</h2><div class="d-flex flex-wrap gap-2">
+                <section class="cv-section"><h2>@L["CoreSkills"]</h2><div class="d-flex flex-wrap gap-2">
                     @foreach (var resumeItem in Model.Attributes.Where(x => !string.IsNullOrWhiteSpace(x.Value))) { <span class="cv-skill"><span>@resumeItem.Name:</span> @resumeItem.Value</span> }
                 </div></section>
             }
 
             @if (Model.WorkExperiences.Count > 0)
             {
-                <section class="cv-section"><h2>Work Experience</h2>
-                    @foreach (var experience in Model.WorkExperiences) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@experience.JobTitle</strong><div>@experience.CompanyName</div></div><small class="text-muted text-nowrap">@experience.StartDate.ToString("MMM yyyy") – @(experience.EndDate?.ToString("MMM yyyy") ?? "Present")</small></div>@if (!string.IsNullOrWhiteSpace(experience.Description)) { <p class="mb-1 mt-2" style="white-space:pre-line">@experience.Description</p> }@if (!string.IsNullOrWhiteSpace(experience.Technologies)) { <div class="small"><strong>Technologies:</strong> @experience.Technologies</div> }</article> }
+                <section class="cv-section"><h2>@L["WorkExperience"]</h2>
+                    @foreach (var experience in Model.WorkExperiences) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@experience.JobTitle</strong><div>@experience.CompanyName</div></div><small class="text-muted text-nowrap">@experience.StartDate.ToString("MMM yyyy") – @(experience.EndDate?.ToString("MMM yyyy") ?? L["Present"].Value)</small></div>@if (!string.IsNullOrWhiteSpace(experience.Description)) { <p class="mb-1 mt-2" style="white-space:pre-line">@experience.Description</p> }@if (!string.IsNullOrWhiteSpace(experience.Technologies)) { <div class="small"><strong>@L["TechnologiesLabel"]</strong> @experience.Technologies</div> }</article> }
                 </section>
             }
 
             @if (Model.EducationEntries.Count > 0)
             {
-                <section class="cv-section"><h2>Education</h2>
-                    @foreach (var education in Model.EducationEntries) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@education.Degree</strong><div>@education.Institution</div></div><small class="text-muted text-nowrap">@education.StartDate.ToString("MMM yyyy") – @(education.EndDate?.ToString("MMM yyyy") ?? "Present")</small></div>@if (!string.IsNullOrWhiteSpace(education.Description)) { <p class="mb-0 mt-2" style="white-space:pre-line">@education.Description</p> }</article> }
+                <section class="cv-section"><h2>@L["Education"]</h2>
+                    @foreach (var education in Model.EducationEntries) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><div><strong>@education.Degree</strong><div>@education.Institution</div></div><small class="text-muted text-nowrap">@education.StartDate.ToString("MMM yyyy") – @(education.EndDate?.ToString("MMM yyyy") ?? L["Present"].Value)</small></div>@if (!string.IsNullOrWhiteSpace(education.Description)) { <p class="mb-0 mt-2" style="white-space:pre-line">@education.Description</p> }</article> }
                 </section>
             }
 
-            <section class="cv-section mb-0"><h2>Selected Projects</h2>
-                @if (Model.Projects.Count == 0) { <p class="text-muted mb-0">No projects matched this position's technology requirements.</p> }
+            <section class="cv-section mb-0"><h2>@L["SelectedProjects"]</h2>
+                @if (Model.Projects.Count == 0) { <p class="text-muted mb-0">@L["NoProjectsMatched"]</p> }
                 @foreach (var project in Model.Projects) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><strong>@project.Name</strong><small class="text-muted text-nowrap">@project.Period</small></div><p class="mb-1 mt-1" style="white-space:pre-line">@project.DescriptionMarkdown</p><div class="small text-muted">@string.Join(", ", project.TechnologyTags)</div></article> }
             </section>
         </div>
@@ -190,8 +187,8 @@
     {
     <section class="cv-editor">
         <div class="d-flex align-items-center justify-content-between mb-3">
-            <div><div class="section-kicker">Manage</div><h2 class="h4 mb-0">Edit CV details</h2></div>
-            <span class="text-muted small">Changes update this CV preview immediately after saving.</span>
+            <div><div class="section-kicker">@L["Manage"]</div><h2 class="h4 mb-0">@L["EditCvDetails"]</h2></div>
+            <span class="text-muted small">@L["ChangesUpdatePreview"]</span>
         </div>
     <form asp-action="Save"
           method="post">
@@ -221,7 +218,7 @@
 
                         <label asp-for="CandidateFirstName"
                                class="form-label">
-                            First Name
+                            @L["FirstName"]
                         </label>
 
                         @if (Model.IsReadOnly)
@@ -240,64 +237,64 @@
 
                     <div class="col-md-6">
 
-                        <label asp-for="ProfessionalTitle" class="form-label">Professional title</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.ProfessionalTitle ?? "Not provided")</div> }
+                        <label asp-for="ProfessionalTitle" class="form-label">@L["ProfessionalTitleLabel"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.ProfessionalTitle ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="ProfessionalTitle" class="form-control" /> }
 
                     </div>
 
                     <div class="col-md-6">
 
-                        <label asp-for="PhoneNumber" class="form-label">Phone number</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PhoneNumber ?? "Not provided")</div> }
+                        <label asp-for="PhoneNumber" class="form-label">@L["PhoneNumber"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PhoneNumber ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="PhoneNumber" class="form-control" /> }
 
                     </div>
 
                     <div class="col-md-6">
 
-                        <label asp-for="Email" class="form-label">Email</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.Email ?? "Not provided")</div> }
+                        <label asp-for="Email" class="form-label">@L["Email"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.Email ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="Email" type="email" class="form-control" /> }
 
                     </div>
 
                     <div class="col-md-6">
 
-                        <label asp-for="LinkedInUrl" class="form-label">LinkedIn URL</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.LinkedInUrl ?? "Not provided")</div> }
+                        <label asp-for="LinkedInUrl" class="form-label">@L["LinkedInUrl"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.LinkedInUrl ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="LinkedInUrl" type="url" class="form-control" /> }
 
                     </div>
 
                     <div class="col-md-6">
 
-                        <label asp-for="GitHubUrl" class="form-label">GitHub URL</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.GitHubUrl ?? "Not provided")</div> }
+                        <label asp-for="GitHubUrl" class="form-label">@L["GitHubUrl"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.GitHubUrl ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="GitHubUrl" type="url" class="form-control" /> }
 
                     </div>
 
                     <div class="col-md-6">
 
-                        <label asp-for="PortfolioUrl" class="form-label">Portfolio URL</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PortfolioUrl ?? "Not provided")</div> }
+                        <label asp-for="PortfolioUrl" class="form-label">@L["PortfolioUrl"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PortfolioUrl ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="PortfolioUrl" type="url" class="form-control" /> }
 
                     </div>
 
                     <div class="col-md-6">
 
-                        <label asp-for="PhotoUrl" class="form-label">Photo URL</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PhotoUrl ?? "Not provided")</div> }
+                        <label asp-for="PhotoUrl" class="form-label">@L["PhotoUrl"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light">@(Model.PhotoUrl ?? L["NotProvided"].Value)</div> }
                         else { <input asp-for="PhotoUrl" type="url" class="form-control" /> }
 
                     </div>
 
                     <div class="col-12">
 
-                        <label asp-for="ProfessionalSummary" class="form-label">Professional summary</label>
-                        @if (Model.IsReadOnly) { <div class="form-control bg-light" style="white-space:pre-line">@(Model.ProfessionalSummary ?? "Not provided")</div> }
+                        <label asp-for="ProfessionalSummary" class="form-label">@L["ProfessionalSummary"]</label>
+                        @if (Model.IsReadOnly) { <div class="form-control bg-light" style="white-space:pre-line">@(Model.ProfessionalSummary ?? L["NotProvided"].Value)</div> }
                         else { <textarea asp-for="ProfessionalSummary" class="form-control" rows="5"></textarea> }
 
                     </div>
@@ -306,7 +303,7 @@
 
                         <label asp-for="CandidateLastName"
                                class="form-label">
-                            Last Name
+                            @L["LastName"]
                         </label>
 
                         @if (Model.IsReadOnly)
@@ -327,13 +324,13 @@
 
                         <label asp-for="Location"
                                class="form-label">
-                            Location
+                            @L["Location"]
                         </label>
 
                         @if (Model.IsReadOnly)
                         {
                             <div class="form-control bg-light">
-                                @(Model.Location ?? "Not provided")
+                                @(Model.Location ?? L["NotProvided"].Value)
                             </div>
                         }
                         else
@@ -347,26 +344,26 @@
                     <div class="col-md-6">
 
                         <div class="small text-muted">
-                            Status
+                            @L["Status"]
                         </div>
 
                         @if (Model.IsPublished)
                         {
                             <span class="badge text-bg-success">
-                                Published
+                                @L["Published"]
                             </span>
                         }
                         else
                         {
                             <span class="badge text-bg-secondary">
-                                Draft
+                                @L["Draft"]
                             </span>
                         }
 
                         <div class="mt-3">
 
                             <span class="small text-muted">
-                                Likes:
+                                @L["LikesLabel"]
                             </span>
 
                             <strong>
@@ -390,7 +387,7 @@
         <div class="card shadow-sm mb-4">
 
             <div class="card-header">
-                <strong>Relevant Information</strong>
+                <strong>@L["RelevantInformation"]</strong>
             </div>
 
             <div class="card-body">
@@ -429,7 +426,7 @@
                             @if (attribute.IsRequired)
                             {
                                 <span class="badge text-bg-danger">
-                                    Required
+                                    @L["Required"]
                                 </span>
                             }
 
@@ -451,7 +448,7 @@
                                 @if (attribute.IsMissing)
                                 {
                                     <span class="text-danger">
-                                        Information missing
+                                        @L["InformationMissing"]
                                     </span>
                                 }
                                 else if (attribute.DataType == CvManagementSystem.Models.AttributeDataType.Text)
@@ -462,7 +459,7 @@
                                 }
                                 else if (attribute.DataType == CvManagementSystem.Models.AttributeDataType.Boolean)
                                 {
-                                    @(string.Equals(attribute.Value, "true", StringComparison.OrdinalIgnoreCase) ? "Yes" : "No")
+                                    @(string.Equals(attribute.Value, "true", StringComparison.OrdinalIgnoreCase) ? L["Yes"] : L["No"])
                                 }
                                 else if (attribute.DataType == CvManagementSystem.Models.AttributeDataType.Image)
                                 {
@@ -512,7 +509,7 @@
 
                                         <label class="form-check-label"
                                                for="cv_boolean_@i">
-                                            Checked
+                                            @L["Checked"]
                                         </label>
 
                                     </div>
@@ -542,7 +539,7 @@
                                             class="form-select">
 
                                         <option value="">
-                                            Select...
+                                            @L["SelectEllipsis"]
                                         </option>
 
                                         @foreach (var option
@@ -588,9 +585,15 @@
                                          data-input-id="cv-attribute-image-@i"
                                          data-cloud-name="@Configuration["Cloudinary:CloudName"]"
                                          data-upload-preset="@Configuration["Cloudinary:UploadPreset"]"
+                                         data-msg-choose-file="@L["ChooseImageFile"]"
+                                         data-msg-size-limit="@L["ImageSizeLimit"]"
+                                         data-msg-not-configured="@L["CloudUploadNotConfigured"]"
+                                         data-msg-uploading="@L["UploadingImage"]"
+                                         data-msg-upload-failed="@L["UploadFailed"]"
+                                         data-msg-uploaded="@L["ImageUploadedReady"]"
                                          tabindex="0">
                                         <input type="file" accept="image/*" class="d-none cloud-image-file" />
-                                        <div class="small text-muted">Drag an image here, or <button type="button" class="btn btn-link btn-sm p-0 cloud-image-browse">choose a file</button>. Images are uploaded directly to configured cloud storage.</div>
+                                        <div class="small text-muted">@L["DragImageHere"] <button type="button" class="btn btn-link btn-sm p-0 cloud-image-browse">@L["ChooseFile"]</button>. @L["ImagesUploadedDirectly"]</div>
                                         <div class="small mt-1 cloud-image-status"></div>
                                     </div>
 
@@ -608,7 +611,7 @@
                                  attribute.IsRequired)
                             {
                                 <div class="text-danger small mt-1">
-                                    This required field must be completed.
+                                    @L["FieldRequiredMessage"]
                                 </div>
                             }
                         }
@@ -627,7 +630,7 @@
         <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-                <strong>Projects from Profile</strong>
+                <strong>@L["ProjectsFromProfile"]</strong>
             </div>
 
             <div class="card-body">
@@ -635,7 +638,7 @@
                 @if (Model.Projects.Count == 0)
                 {
                     <div class="text-muted">
-                        No projects have been added to this profile yet.
+                        @L["NoProjectsAddedToProfile"]
                     </div>
                 }
                 else
@@ -679,7 +682,7 @@
                 @if (!Model.IsReadOnly)
                 {
                     <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-primary btn-sm">
-                        Manage projects in profile
+                        @L["ManageProjectsInProfile"]
                     </a>
                 }
 
@@ -693,7 +696,7 @@
 
                 <button type="submit"
                         class="btn btn-primary">
-                    Save CV
+                    @L["SaveCv"]
                 </button>
 
             </div>
@@ -726,6 +729,8 @@
         const count =
             document.getElementById("like-count");
 
+        const likeText = count.closest("[data-like-text]");
+
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
 
@@ -755,7 +760,7 @@
                 if (result.liked)
                 {
                     button.textContent =
-                        "Unlike";
+                        likeText.dataset.unlikeText;
 
                     button.classList.remove(
                         "btn-outline-danger");
@@ -766,7 +771,7 @@
                 else
                 {
                     button.textContent =
-                        "Like";
+                        likeText.dataset.likeText;
 
                     button.classList.remove(
                         "btn-danger");
@@ -807,22 +812,22 @@
 
         const upload = async file => {
             if (!file || !file.type.startsWith("image/")) {
-                setStatus("Please choose an image file.", true);
+                setStatus(dropzone.dataset.msgChooseFile, true);
                 return;
             }
             if (file.size > 10 * 1024 * 1024) {
-                setStatus("Images must be 10 MB or smaller.", true);
+                setStatus(dropzone.dataset.msgSizeLimit, true);
                 return;
             }
             if (!cloudName || !uploadPreset) {
-                setStatus("Cloud upload is not configured. Paste an external image URL instead.", true);
+                setStatus(dropzone.dataset.msgNotConfigured, true);
                 return;
             }
 
             const formData = new FormData();
             formData.append("file", file);
             formData.append("upload_preset", uploadPreset);
-            setStatus("Uploading image…");
+            setStatus(dropzone.dataset.msgUploading);
 
             try {
                 const response = await fetch(
@@ -830,14 +835,14 @@
                     { method: "POST", body: formData });
                 const result = await response.json();
                 if (!response.ok || !result.secure_url) {
-                    throw new Error(result.error?.message || "Upload failed.");
+                    throw new Error(result.error?.message || dropzone.dataset.msgUploadFailed);
                 }
                 input.value = result.secure_url;
                 input.dispatchEvent(new Event("input", { bubbles: true }));
                 input.dispatchEvent(new Event("change", { bubbles: true }));
-                setStatus("Uploaded. The external image URL is ready to save.");
+                setStatus(dropzone.dataset.msgUploaded);
             } catch (error) {
-                setStatus(error.message || "Upload failed.", true);
+                setStatus(error.message || dropzone.dataset.msgUploadFailed, true);
             }
         };
 

@@ -31,6 +31,10 @@ public class LanguageController : Controller
             cookieValue,
             new CookieOptions
             {
+                // The language switch endpoint is under /Language. Keep the
+                // culture cookie available to every page in the application.
+                Path = "/",
+
                 Expires =
                     DateTimeOffset.UtcNow.AddYears(1),
 

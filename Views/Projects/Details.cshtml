@@ -1,7 +1,7 @@
 @model CvManagementSystem.ViewModels.ProjectViewModel
 
 @{
-    ViewData["Title"] = "Project Details";
+    ViewData["Title"] = L["ProjectDetails"].Value;
 
     bool isAdministratorView =
         ViewBag.IsAdministratorView is bool value && value;
@@ -24,7 +24,7 @@
         <a asp-action="Index"
            asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
            class="btn btn-outline-secondary">
-            Back to Projects
+            @L["BackToProjects"]
         </a>
 
     </div>
@@ -32,7 +32,7 @@
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <strong>Project Information</strong>
+            <strong>@L["ProjectInformation"]</strong>
         </div>
 
         <div class="card-body">
@@ -40,7 +40,7 @@
             <dl class="row mb-0">
 
                 <dt class="col-sm-3">
-                    Project Name
+                    @L["ProjectName"]
                 </dt>
 
                 <dd class="col-sm-9">
@@ -48,7 +48,7 @@
                 </dd>
 
                 <dt class="col-sm-3">
-                    Period
+                    @L["Period"]
                 </dt>
 
                 <dd class="col-sm-9">
@@ -56,7 +56,7 @@
                 </dd>
 
                 <dt class="col-sm-3">
-                    Start Date
+                    @L["StartDate"]
                 </dt>
 
                 <dd class="col-sm-9">
@@ -64,7 +64,7 @@
                 </dd>
 
                 <dt class="col-sm-3">
-                    End Date
+                    @L["EndDate"]
                 </dt>
 
                 <dd class="col-sm-9">
@@ -76,7 +76,7 @@
                     else
                     {
                         <span class="text-muted">
-                            Present
+                            @L["Present"]
                         </span>
                     }
 
@@ -91,7 +91,7 @@
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <strong>Description</strong>
+            <strong>@L["Description"]</strong>
         </div>
 
         <div class="card-body">
@@ -101,8 +101,7 @@
             </div>
 
             <div class="form-text mt-2">
-                This content is stored as Markdown. Markdown rendering can
-                be added when we build the final CV renderer.
+                @L["DescriptionMarkdownNote"]
             </div>
 
         </div>
@@ -112,7 +111,7 @@
     <div class="card shadow-sm mb-4">
 
         <div class="card-header">
-            <strong>Technology Tags</strong>
+            <strong>@L["TechnologyTags"]</strong>
         </div>
 
         <div class="card-body">
@@ -120,7 +119,7 @@
             @if (Model.TechnologyTags.Count == 0)
             {
                 <span class="text-muted">
-                    No technology tags have been added.
+                    @L["NoTechnologyTagsAdded"]
                 </span>
             }
             else
