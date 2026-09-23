@@ -263,6 +263,7 @@ public class CvsController : Controller
                 .ThenInclude(x => x.Projects)
                     .ThenInclude(x => x.TechnologyTags)
                         .ThenInclude(x => x.TechnologyTag)
+            .Include(x => x.Projects)
             .FirstOrDefaultAsync(x => x.Id == id);
 
         if (cv == null)
@@ -374,6 +375,19 @@ if (isRecruiter || isAdmin)
                 .Select(x => x.TechnologyTagId)
                 .ToHashSet();
 
+        var hasAnyProjects =
+            cv.CandidateProfile.Projects.Count > 0;
+
+        var selectedProjectIds =
+            cv.Projects
+                .Select(x => x.ProjectId)
+                .ToHashSet();
+
+        // Every eligible (tag-matching) project is listed here — not just
+        // the top MaxProjects by recency — so a project the candidate adds
+        // to their profile after the CV was generated always shows up for
+        // selection. MaxProjects instead caps how many may be *selected*
+        // (enforced below and in Save), not which ones are visible.
         var projects = cv.CandidateProfile.Projects
             .Where(x =>
                 positionProjectTagIds.Count == 0 ||
@@ -381,7 +395,6 @@ if (isRecruiter || isAdmin)
                     positionProjectTagIds.Contains(t.TechnologyTagId)))
             .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
             .ThenByDescending(x => x.StartDate)
-            .Take(cv.Position.MaxProjects)
             .Select(x => new CvProjectViewModel
             {
                 ProjectId = x.Id,
@@ -395,7 +408,9 @@ if (isRecruiter || isAdmin)
                     x.TechnologyTags
                         .OrderBy(t => t.TechnologyTag.Name)
                         .Select(t => t.TechnologyTag.Name)
-                        .ToList()
+                        .ToList(),
+                IsSelected =
+                    selectedProjectIds.Contains(x.Id)
             })
             .ToList();
 
@@ -441,6 +456,8 @@ if (isRecruiter || isAdmin)
                 missingRequired,
             Attributes = attributes,
             Projects = projects,
+            HasAnyProjects = hasAnyProjects,
+            MaxProjects = cv.Position.MaxProjects,
             EducationEntries = cv.CandidateProfile.EducationEntries
                 .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
                 .ThenByDescending(x => x.StartDate)
@@ -475,10 +492,16 @@ if (isRecruiter || isAdmin)
 
         var cv = await _context.Cvs
             .Include(x => x.Position)
-            .ThenInclude(x => x.Attributes)
-            .ThenInclude(x => x.AttributeDefinition)
+                .ThenInclude(x => x.Attributes)
+                    .ThenInclude(x => x.AttributeDefinition)
+            .Include(x => x.Position)
+                .ThenInclude(x => x.ProjectTags)
             .Include(x => x.CandidateProfile)
                 .ThenInclude(x => x.AttributeValues)
+            .Include(x => x.CandidateProfile)
+                .ThenInclude(x => x.Projects)
+                    .ThenInclude(x => x.TechnologyTags)
+            .Include(x => x.Projects)
             .FirstOrDefaultAsync(x => x.Id == model.Id);
 
         if (cv == null)
@@ -580,6 +603,75 @@ if (isRecruiter || isAdmin)
 
         cv.CandidateProfile.UpdatedAt = DateTime.UtcNow;
         cv.CandidateProfile.Version = Guid.NewGuid();
+
+        // -----------------------------------------------------
+        // Projects
+        //
+        // The eligible pool (tag match, every candidate project — not
+        // capped) is recomputed from the position's technology tags here,
+        // exactly as it is when the editor is rendered. This means a
+        // tampered request can never attach a project that does not
+        // belong to the candidate or does not match this position's
+        // technology tags. MaxProjects is then applied only to how many of
+        // the candidate's checked projects are kept, favouring the most
+        // recent ones, matching the pool's own display order.
+        // -----------------------------------------------------
+
+        var positionTagIds = cv.Position.ProjectTags
+            .Select(x => x.TechnologyTagId)
+            .ToHashSet();
+
+        var eligibleProjectIds = cv.CandidateProfile.Projects
+            .Where(x =>
+                positionTagIds.Count == 0 ||
+                x.TechnologyTags.Any(t =>
+                    positionTagIds.Contains(t.TechnologyTagId)))
+            .OrderByDescending(x => x.EndDate ?? DateOnly.MaxValue)
+            .ThenByDescending(x => x.StartDate)
+            .Select(x => x.Id)
+            .ToList();
+
+        var checkedProjectIds = (model.Projects ?? new List<CvProjectViewModel>())
+            .Where(x => x.IsSelected)
+            .Select(x => x.ProjectId)
+            .ToHashSet();
+
+        var selectedProjectIds = eligibleProjectIds
+            .Where(id => checkedProjectIds.Contains(id))
+            .Take(cv.Position.MaxProjects)
+            .ToList();
+
+        var projectsToRemove = cv.Projects
+            .Where(x => !selectedProjectIds.Contains(x.ProjectId))
+            .ToList();
+
+        foreach (var link in projectsToRemove)
+        {
+            cv.Projects.Remove(link);
+        }
+
+        for (var i = 0; i < selectedProjectIds.Count; i++)
+        {
+            var projectId = selectedProjectIds[i];
+
+            var existingLink = cv.Projects
+                .FirstOrDefault(x => x.ProjectId == projectId);
+
+            if (existingLink == null)
+            {
+                cv.Projects.Add(
+                    new CvProject
+                    {
+                        Cv = cv,
+                        ProjectId = projectId,
+                        SortOrder = i
+                    });
+            }
+            else
+            {
+                existingLink.SortOrder = i;
+            }
+        }
 
         cv.UpdatedAt = DateTime.UtcNow;
         cv.Version = Guid.NewGuid();

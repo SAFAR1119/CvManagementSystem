@@ -84,6 +84,16 @@ public class PositionAccessService
             return false;
         }
 
+        // A public position never requires an access-rule evaluation, so it
+        // must not require a CandidateProfile row either. A brand-new
+        // candidate has no profile until they first save one (see
+        // ProfileController.Index), and should still be able to access
+        // public positions in the meantime.
+        if (position.IsPublic)
+        {
+            return true;
+        }
+
         var profile =
             await _context.CandidateProfiles
                 .AsNoTracking()
@@ -96,10 +106,9 @@ public class PositionAccessService
             return false;
         }
 
-        return position.IsPublic ||
-               IsAuthorized(
-                   position,
-                   profile);
+        return IsAuthorized(
+            position,
+            profile);
     }
 
     public static bool IsAuthorized(

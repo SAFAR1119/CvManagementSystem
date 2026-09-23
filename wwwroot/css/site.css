@@ -259,14 +259,84 @@ footer { border-color: var(--color-divider) !important; }
 
 [data-bs-theme="dark"] .cv-skill { background: var(--color-accent-100); color: var(--color-accent-800); }
 
+/* A non-zero @page margin gives Chrome's print engine room to draw its own
+   header/footer (date, title, URL, page numbers); a zero margin leaves no
+   room for them, so Chrome omits them entirely. The CV sheet's own padding
+   (below) replaces that page margin visually. */
+@page { size: A4; margin: 0; }
+
 @media print {
-  body { background: #fff !important; }
-  header, footer, .cv-editor, .cv-feedback, .btn, .alert, .toast-container { display: none !important; }
-  .app-main, main, .container { margin: 0 !important; max-width: none !important; padding: 0 !important; }
-  .cv-resume { max-width: none; }
-  .cv-sheet { background: #fff; border: 0; box-shadow: none; padding: 0; }
-  .blueprint > .corner { display: none; }
-  .cv-section, .cv-section article { break-inside: avoid; }
+  body.cv-printing > header,
+  body.cv-printing > footer,
+  body.cv-printing .cv-feedback { display: none !important; }
+  body.cv-printing main > :not(:has(.cv-resume)) { display: none !important; }
+  body.cv-printing main :has(> .cv-resume) > :not(.cv-resume) { display: none !important; }
+  body.cv-printing,
+  body.cv-printing main { min-height: 0 !important; }
+
+  /* .cv-resume sits inside a Bootstrap .container, and .container's
+     max-width breakpoints are not print-aware — against the printable
+     page width they were resolving to a ~540px cap, which is what made
+     the resume render at roughly 60% width, centered with large side
+     margins. Nothing below previously reset .container itself. */
+  body.cv-printing .container:has(> .cv-resume) {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.cv-printing .cv-resume {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    min-height: auto !important;
+  }
+
+  /* The on-screen surface background/border reads as a website card in a
+     printout. Print gets a plain white sheet with its own fixed padding
+     instead of the on-screen clamp(...)/vw padding, which scales
+     unpredictably against a fixed page size. */
+  body.cv-printing .cv-sheet {
+    background: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 14mm !important;
+    box-sizing: border-box;
+    min-height: auto !important;
+    font-size: 10.5pt;
+    line-height: 1.35;
+  }
+  body.cv-printing .blueprint > .corner { display: none !important; }
+
+  /* Print-friendly sizing: the on-screen rem/vw/clamp values are tuned for
+     a browser viewport, not a fixed A4 page. */
+  body.cv-printing .cv-header { margin-bottom: 1.25rem; padding-bottom: 1rem; break-inside: avoid; }
+  body.cv-printing .cv-header h1 { font-size: 20pt; }
+  body.cv-printing .cv-role { font-size: 11pt; }
+  body.cv-printing .cv-contact,
+  body.cv-printing .cv-links { font-size: 9.5pt; }
+  body.cv-printing .cv-section h2 { font-size: 12pt; }
+  body.cv-printing .cv-skill { font-size: 9.5pt; }
+
+  /* break-inside: avoid on the *whole* section (Work Experience, Education,
+     ...) was the cause of the large empty gap at the bottom of page 1:
+     once a section no longer fully fit in the remaining space, the browser
+     pushed the entire section — heading and every entry — onto the next
+     page instead of letting it split. Only a single entry needs to stay
+     intact, and only a heading needs to stay glued to what follows it. */
+  body.cv-printing .cv-section { break-inside: auto; margin-bottom: 1.1rem; }
+  body.cv-printing .cv-section h2 { break-after: avoid; }
+  body.cv-printing .cv-section article { break-inside: avoid; }
+
+  /* Colour is only worth forcing past the browser's ink-saving defaults
+     where it is part of the content, not page chrome. */
+  body.cv-printing .cv-eyebrow,
+  body.cv-printing .cv-role,
+  body.cv-printing .cv-links a,
+  body.cv-printing .cv-skill {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 @media (max-width: 991.98px) {

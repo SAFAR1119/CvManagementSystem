@@ -48,6 +48,19 @@ public class CvDetailsViewModel
     public List<CvProjectViewModel> Projects { get; set; }
         = new();
 
+    // True when the candidate's profile has at least one project at all,
+    // regardless of whether any of them match this position's technology
+    // tags. The Projects section is hidden entirely when this is false, so
+    // a candidate with no projects never sees an empty section or heading.
+    public bool HasAnyProjects { get; set; }
+
+    // The position's MaxProjects value, surfaced so the editor can tell the
+    // candidate how many of the eligible (tag-matching) projects listed in
+    // Projects they may select. The pool itself is not capped to this
+    // count — every eligible project is shown so a newly added one is
+    // always visible — only the number the candidate may check is.
+    public int MaxProjects { get; set; }
+
     public List<EducationViewModel> EducationEntries { get; set; } = new();
 
     public List<WorkExperienceViewModel> WorkExperiences { get; set; } = new();
@@ -95,4 +108,8 @@ public class CvProjectViewModel
 
     public List<string> TechnologyTags { get; set; }
         = new();
+
+    // Whether this project is currently attached to the CV via the
+    // CvProjects relationship. Editable by the candidate before publishing.
+    public bool IsSelected { get; set; }
 }

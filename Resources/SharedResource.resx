@@ -819,6 +819,14 @@
   <value>Relevant Projects</value>
 </data>
 
+<data name="SelectRelevantProjectsHelp" xml:space="preserve">
+  <value>Select up to {0} of these position-relevant projects to include in this CV.</value>
+</data>
+
+<data name="ProjectSelectionLimitReached" xml:space="preserve">
+  <value>You've reached the maximum number of projects for this position. Uncheck one to select another.</value>
+</data>
+
 <data name="NoRelevantProjects" xml:space="preserve">
   <value>No relevant projects are available for this position.</value>
 </data>

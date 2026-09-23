@@ -59,7 +59,23 @@ public class CvGenerationService
 
         if (profile == null)
         {
-            return null;
+            // A brand-new candidate may never have opened their Profile
+            // page, so no CandidateProfile row exists yet. That must not
+            // block generating a draft CV for a public position: create the
+            // same empty profile ProfileController.Index would, with every
+            // attribute and project starting out missing/empty as usual.
+            profile = new CandidateProfile
+            {
+                UserId = userId,
+                FirstName = string.Empty,
+                LastName = string.Empty,
+                UpdatedAt = DateTime.UtcNow,
+                Version = Guid.NewGuid()
+            };
+
+            _context.CandidateProfiles.Add(profile);
+
+            await _context.SaveChangesAsync();
         }
 
         if (!PositionAccessService.IsAuthorized(

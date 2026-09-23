@@ -818,6 +818,14 @@
   <value>প্রাসঙ্গিক প্রজেক্ট</value>
 </data>
 
+<data name="SelectRelevantProjectsHelp" xml:space="preserve">
+  <value>এই সিভিতে অন্তর্ভুক্ত করতে এই পজিশন-সম্পর্কিত প্রজেক্টগুলোর মধ্য থেকে সর্বোচ্চ {0}টি নির্বাচন করুন।</value>
+</data>
+
+<data name="ProjectSelectionLimitReached" xml:space="preserve">
+  <value>আপনি এই পজিশনের জন্য সর্বোচ্চ সংখ্যক প্রজেক্ট নির্বাচন করেছেন। আরেকটি নির্বাচন করতে একটি বাদ দিন।</value>
+</data>
+
 <data name="NoRelevantProjects" xml:space="preserve">
   <value>এই পজিশনের জন্য কোনো প্রাসঙ্গিক প্রজেক্ট নেই।</value>
 </data>

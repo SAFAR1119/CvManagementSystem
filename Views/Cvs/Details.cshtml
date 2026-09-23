@@ -176,10 +176,16 @@
                 </section>
             }
 
-            <section class="cv-section mb-0"><h2>@L["SelectedProjects"]</h2>
-                @if (Model.Projects.Count == 0) { <p class="text-muted mb-0">@L["NoProjectsMatched"]</p> }
-                @foreach (var project in Model.Projects) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><strong>@project.Name</strong><small class="text-muted text-nowrap">@project.Period</small></div><p class="mb-1 mt-1" style="white-space:pre-line">@project.DescriptionMarkdown</p><div class="small text-muted">@string.Join(", ", project.TechnologyTags)</div></article> }
-            </section>
+            @{
+                var selectedProjects = Model.Projects.Where(x => x.IsSelected).ToList();
+            }
+            @if (Model.HasAnyProjects)
+            {
+                <section class="cv-section mb-0"><h2>@L["SelectedProjects"]</h2>
+                    @if (selectedProjects.Count == 0) { <p class="text-muted mb-0">@L["NoProjectsMatched"]</p> }
+                    @foreach (var project in selectedProjects) { <article class="mb-3"><div class="d-flex justify-content-between gap-3"><strong>@project.Name</strong><small class="text-muted text-nowrap">@project.Period</small></div><p class="mb-1 mt-1" style="white-space:pre-line">@project.DescriptionMarkdown</p><div class="small text-muted">@string.Join(", ", project.TechnologyTags)</div></article> }
+                </section>
+            }
         </div>
     </article>
 
@@ -627,68 +633,98 @@
         <!-- PROJECTS -->
         <!-- ================================================= -->
 
-        <div class="card shadow-sm mb-4">
+        @if (Model.HasAnyProjects)
+        {
+            <div class="card shadow-sm mb-4"
+                 id="projectsCard"
+                 data-max-projects="@Model.MaxProjects">
 
-        <div class="card-header">
-                <strong>@L["ProjectsFromProfile"]</strong>
-            </div>
+            <div class="card-header">
+                    <strong>@L["RelevantProjects"]</strong>
+                </div>
 
-            <div class="card-body">
+                <div class="card-body">
 
-                @if (Model.Projects.Count == 0)
-                {
-                    <div class="text-muted">
-                        @L["NoProjectsAddedToProfile"]
-                    </div>
-                }
-                else
-                {
-                    @foreach (var project in Model.Projects)
+                    @if (Model.Projects.Count == 0)
                     {
-                        <article class="border rounded p-3 mb-3">
-
-                            <div class="d-flex flex-wrap justify-content-between gap-2">
-
-                                <h2 class="h6 mb-1">
-                                    @(project.Name)
-                                </h2>
-
-                                <span class="text-muted small">
-                                    @(project.Period)
-                                </span>
-
-                            </div>
-
-                            <p class="mb-2">
-                                @(project.DescriptionMarkdown)
-                            </p>
-
-                            <div class="d-flex flex-wrap gap-1">
-
-                                @foreach (var tag
-                                         in project.TechnologyTags)
-                                {
-                                    <span class="badge text-bg-light">
-                                        @(tag)
-                                    </span>
-                                }
-
-                            </div>
-
-                        </article>
+                        <div class="text-muted mb-3">
+                            @L["NoProjectsMatched"]
+                        </div>
                     }
-                }
+                    else
+                    {
+                        <p class="text-muted">
+                            @string.Format(L["SelectRelevantProjectsHelp"].Value, Model.MaxProjects)
+                        </p>
 
-                @if (!Model.IsReadOnly)
-                {
-                    <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-primary btn-sm">
-                        @L["ManageProjectsInProfile"]
-                    </a>
-                }
+                        <div class="alert alert-warning py-2 px-3 small mb-3"
+                             id="projectsLimitNotice"
+                             hidden>
+                            @L["ProjectSelectionLimitReached"]
+                        </div>
+
+                        for (var i = 0; i < Model.Projects.Count; i++)
+                        {
+                            var project = Model.Projects[i];
+
+                            <article class="border rounded p-3 mb-3">
+
+                                <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start">
+
+                                    <div class="form-check">
+
+                                        <input type="hidden"
+                                               asp-for="Projects[i].ProjectId" />
+
+                                        <input type="checkbox"
+                                               class="form-check-input cv-project-select"
+                                               asp-for="Projects[i].IsSelected"
+                                               id="cv_project_@i" />
+
+                                        <label class="form-check-label h6 mb-1"
+                                               for="cv_project_@i">
+                                            @(project.Name)
+                                        </label>
+
+                                    </div>
+
+                                    <span class="text-muted small">
+                                        @(project.Period)
+                                    </span>
+
+                                </div>
+
+                                <p class="mb-2">
+                                    @(project.DescriptionMarkdown)
+                                </p>
+
+                                <div class="d-flex flex-wrap gap-1">
+
+                                    @foreach (var tag
+                                             in project.TechnologyTags)
+                                    {
+                                        <span class="badge text-bg-light">
+                                            @(tag)
+                                        </span>
+                                    }
+
+                                </div>
+
+                            </article>
+                        }
+                    }
+
+                    @if (!Model.IsReadOnly)
+                    {
+                        <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-primary btn-sm">
+                            @L["ManageProjectsInProfile"]
+                        </a>
+                    }
+
+                </div>
 
             </div>
-
-        </div>
+        }
 
         @if (!Model.IsReadOnly)
         {
@@ -710,7 +746,62 @@
 
 @section Scripts {
 <script>
-    document.querySelector('[data-print-cv]')?.addEventListener('click', () => window.print());
+    window.addEventListener('beforeprint', () => {
+        document.body.classList.add('cv-printing');
+    });
+
+    document.querySelector('[data-print-cv]')?.addEventListener('click', () => {
+        document.body.classList.add('cv-printing');
+        window.print();
+    });
+
+    window.addEventListener('afterprint', () => {
+        document.body.classList.remove('cv-printing');
+    });
+</script>
+
+<script>
+    (() => {
+        const card =
+            document.getElementById("projectsCard");
+
+        if (!card) {
+            return;
+        }
+
+        const max =
+            parseInt(card.dataset.maxProjects, 10) || 0;
+
+        const checkboxes =
+            Array.from(
+                card.querySelectorAll(".cv-project-select"));
+
+        const notice =
+            document.getElementById("projectsLimitNotice");
+
+        function updateState() {
+            const checkedCount =
+                checkboxes.filter(x => x.checked).length;
+
+            const atLimit =
+                max > 0 && checkedCount >= max;
+
+            checkboxes.forEach(checkbox => {
+                if (!checkbox.checked) {
+                    checkbox.disabled = atLimit;
+                }
+            });
+
+            if (notice) {
+                notice.hidden = !atLimit;
+            }
+        }
+
+        checkboxes.forEach(checkbox =>
+            checkbox.addEventListener("change", updateState));
+
+        updateState();
+    })();
 </script>
 }
 
