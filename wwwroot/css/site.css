@@ -259,11 +259,8 @@ footer { border-color: var(--color-divider) !important; }
 
 [data-bs-theme="dark"] .cv-skill { background: var(--color-accent-100); color: var(--color-accent-800); }
 
-/* A non-zero @page margin gives Chrome's print engine room to draw its own
-   header/footer (date, title, URL, page numbers); a zero margin leaves no
-   room for them, so Chrome omits them entirely. The CV sheet's own padding
-   (below) replaces that page margin visually. */
-@page { size: A4; margin: 0; }
+/* Keep print content within a normal professional page margin. */
+@page { size: A4; margin: 14mm; }
 
 @media print {
   body.cv-printing > header,
@@ -272,7 +269,45 @@ footer { border-color: var(--color-divider) !important; }
   body.cv-printing main > :not(:has(.cv-resume)) { display: none !important; }
   body.cv-printing main :has(> .cv-resume) > :not(.cv-resume) { display: none !important; }
   body.cv-printing,
-  body.cv-printing main { min-height: 0 !important; }
+  body.cv-printing main {
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Bootstrap derives text and muted colors from data-bs-theme. Pin the
+     printable document to a light palette regardless of the active theme. */
+  body.cv-printing,
+  body.cv-printing main,
+  body.cv-printing .cv-resume,
+  body.cv-printing .cv-sheet {
+    color: #17191b !important;
+    background: #fff !important;
+    --color-text: #17191b;
+    --color-accent: #244b70;
+    --color-accent-700: #244b70;
+    --color-accent-800: #202a33;
+    --color-divider: #b8bec4;
+    --bs-body-color: #17191b;
+    --bs-secondary-color: #343a40;
+    --bs-tertiary-color: #454c53;
+    --bs-link-color: #244b70;
+  }
+  body.cv-printing .cv-sheet,
+  body.cv-printing .cv-sheet * {
+    color: #17191b !important;
+    opacity: 1 !important;
+    text-shadow: none !important;
+  }
+  body.cv-printing .cv-sheet a { color: #173f65 !important; }
+  body.cv-printing .cv-sheet .cv-eyebrow,
+  body.cv-printing .cv-sheet .cv-role { color: #244b70 !important; }
+  body.cv-printing .cv-sheet .cv-skill {
+    background: #f2f5f7 !important;
+    border-color: #aeb8c1 !important;
+  }
 
   /* .cv-resume sits inside a Bootstrap .container, and .container's
      max-width breakpoints are not print-aware — against the printable
@@ -284,25 +319,33 @@ footer { border-color: var(--color-divider) !important; }
     width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
   body.cv-printing .cv-resume {
     max-width: none !important;
     width: 100% !important;
     margin: 0 !important;
+    padding: 0 !important;
     min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
-  /* The on-screen surface background/border reads as a website card in a
-     printout. Print gets a plain white sheet with its own fixed padding
-     instead of the on-screen clamp(...)/vw padding, which scales
-     unpredictably against a fixed page size. */
+  /* Page margins come from @page; remove screen-card padding so the usable
+     area is not reduced twice and page transitions stay compact. */
   body.cv-printing .cv-sheet {
     background: #fff !important;
     border: none !important;
     box-shadow: none !important;
-    padding: 14mm !important;
+    padding: 0 !important;
     box-sizing: border-box;
     min-height: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    transform: none !important;
     font-size: 10.5pt;
     line-height: 1.35;
   }
@@ -317,6 +360,10 @@ footer { border-color: var(--color-divider) !important; }
   body.cv-printing .cv-links { font-size: 9.5pt; }
   body.cv-printing .cv-section h2 { font-size: 12pt; }
   body.cv-printing .cv-skill { font-size: 9.5pt; }
+  body.cv-printing .cv-section p,
+  body.cv-printing .cv-section article,
+  body.cv-printing .cv-section .small { font-size: 10.5pt; }
+  body.cv-printing .cv-section article small { font-size: 9.5pt; }
 
   /* break-inside: avoid on the *whole* section (Work Experience, Education,
      ...) was the cause of the large empty gap at the bottom of page 1:
@@ -324,9 +371,27 @@ footer { border-color: var(--color-divider) !important; }
      pushed the entire section — heading and every entry — onto the next
      page instead of letting it split. Only a single entry needs to stay
      intact, and only a heading needs to stay glued to what follows it. */
-  body.cv-printing .cv-section { break-inside: auto; margin-bottom: 1.1rem; }
+  body.cv-printing .cv-section {
+    break-inside: auto;
+    page-break-inside: auto;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 0 .8rem !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
   body.cv-printing .cv-section h2 { break-after: avoid; }
-  body.cv-printing .cv-section article { break-inside: avoid; }
+  /* Let long entries fragment naturally. Keeping every entry intact can
+     strand the remaining page when an entry is taller than the space left. */
+  body.cv-printing .cv-section article {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-bottom: .65rem !important;
+    overflow: visible !important;
+  }
+  body.cv-printing .cv-section article > div:first-child { break-after: avoid; }
 
   /* Colour is only worth forcing past the browser's ink-saving defaults
      where it is part of the content, not page chrome. */
