@@ -1,0 +1,297 @@
+@model CvManagementSystem.ViewModels.SalesforceCreateAccountViewModel
+
+@{
+    ViewData["Title"] = "Salesforce CRM";
+}
+
+<div class="container py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="mb-4">
+
+                <h1 class="h3 mb-1">
+                    Salesforce CRM
+                </h1>
+
+                <p class="text-muted mb-0">
+                    Create a Salesforce Account with a linked Contact
+                    using the current user's information.
+                </p>
+
+            </div>
+
+
+            @if (ViewData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <strong>Salesforce integration failed.</strong>
+
+                    <div class="mt-2">
+                        @ViewData["Error"]
+                    </div>
+                </div>
+            }
+
+
+            <form asp-action="Create"
+                  asp-controller="Salesforce"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       asp-for="TargetUserId" />
+
+                <input type="hidden"
+                       asp-for="Role" />
+
+
+                <!-- =============================== -->
+                <!-- Current User Information -->
+                <!-- =============================== -->
+
+                <div class="card shadow-sm mb-4">
+
+                    <div class="card-header">
+
+                        <h2 class="h5 mb-0">
+                            Current User
+                        </h2>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    First Name
+                                </label>
+
+                                <input asp-for="FirstName"
+                                       class="form-control"
+                                       readonly />
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Last Name
+                                </label>
+
+                                <input asp-for="LastName"
+                                       class="form-control"
+                                       readonly />
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Email
+                                </label>
+
+                                <input asp-for="Email"
+                                       class="form-control"
+                                       readonly />
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Phone
+                                </label>
+
+                                <input asp-for="Phone"
+                                       class="form-control"
+                                       readonly />
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Location
+                                </label>
+
+                                <input asp-for="Location"
+                                       class="form-control"
+                                       readonly />
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    Role
+                                </label>
+
+                                <input asp-for="Role"
+                                       class="form-control"
+                                       readonly />
+
+                            </div>
+
+
+                            @if (!string.IsNullOrWhiteSpace(
+                                Model.PersonalPhotoUrl))
+                            {
+                                <div class="col-12">
+
+                                    <label class="form-label">
+                                        Personal Photo
+                                    </label>
+
+                                    <div>
+
+                                        <img src="@Model.PersonalPhotoUrl"
+                                             alt="Personal photo"
+                                             class="img-thumbnail"
+                                             style="max-width: 120px; max-height: 120px;" />
+
+                                    </div>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================== -->
+                <!-- Salesforce Information -->
+                <!-- =============================== -->
+
+                <div class="card shadow-sm mb-4">
+
+                    <div class="card-header">
+
+                        <h2 class="h5 mb-0">
+                            Salesforce Information
+                        </h2>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="mb-3">
+
+                            <label asp-for="AccountName"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="AccountName"
+                                   class="form-control" />
+
+                            <span asp-validation-for="AccountName"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label asp-for="JobTitle"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="JobTitle"
+                                   class="form-control" />
+
+                            <span asp-validation-for="JobTitle"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label asp-for="Department"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="Department"
+                                   class="form-control" />
+
+                            <span asp-validation-for="Department"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+
+                        <div class="mb-3">
+
+                            <label asp-for="AdditionalNotes"
+                                   class="form-label">
+                            </label>
+
+                            <textarea asp-for="AdditionalNotes"
+                                      class="form-control"
+                                      rows="5">
+                            </textarea>
+
+                            <span asp-validation-for="AdditionalNotes"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================== -->
+                <!-- Action -->
+                <!-- =============================== -->
+
+                <div class="d-flex gap-2">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        Continue with Salesforce
+
+                    </button>
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

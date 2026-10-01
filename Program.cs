@@ -12,9 +12,7 @@ builder.Configuration.AddUserSecrets<Program>(optional: true);
 
 // Resources/SharedResource.cs is itself in the CvManagementSystem.Resources
 // namespace, so the resource base name is already fully qualified. Setting
-// ResourcesPath here would make the localizer factory double up the
-// "Resources" segment (CvManagementSystem.Resources.Resources.SharedResource)
-// and fail to find any translation, for every culture.
+
 builder.Services.AddLocalization();
 
 builder.Services
@@ -23,6 +21,17 @@ builder.Services
     .AddDataAnnotationsLocalization();
 
 builder.Services.AddRazorPages();
+
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection");
@@ -94,6 +103,8 @@ builder.Services.AddScoped<PositionAccessService>();
 builder.Services.AddScoped<CvGenerationService>();
 builder.Services.AddScoped<BadgeService>();
 
+builder.Services.AddHttpClient<SalesforceService>();
+
 var app = builder.Build();
 
 var supportedCultures = new[]
@@ -129,6 +140,8 @@ app.UseHttpsRedirection();
 app.UseRequestLocalization(localizationOptions);
 
 app.UseRouting();
+
+app.UseSession();
 
 app.UseAuthentication();
 

@@ -73,6 +73,16 @@
 
             </a>
 
+        
+
+            <a asp-controller="Salesforce"
+                 asp-action="Create"
+                 asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
+                  class="btn btn-outline-secondary">
+
+                Add to Salesforce
+
+            </a>
         }
 
     </div>
