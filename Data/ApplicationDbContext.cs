@@ -115,6 +115,13 @@ public class ApplicationDbContext
         PositionDiscussions =>
         Set<PositionDiscussion>();
 
+    // =========================================================
+    // Position API Tokens
+    // =========================================================
+
+    public DbSet<PositionApiToken> PositionApiTokens { get; set; }
+    = null!;
+
 
     // =========================================================
     // MODEL CONFIGURATION
@@ -144,6 +151,16 @@ public class ApplicationDbContext
                         x.CategoryId)
                     .OnDelete(
                         DeleteBehavior.Restrict);
+
+                modelBuilder.Entity<PositionApiToken>()
+                     .HasIndex(x => x.PositionId)
+                      .IsUnique();
+ 
+                modelBuilder.Entity<PositionApiToken>()
+                     .HasOne(x => x.Position)
+                     .WithMany()
+                     .HasForeignKey(x => x.PositionId)
+                     .OnDelete(DeleteBehavior.Cascade);
             });
 
 

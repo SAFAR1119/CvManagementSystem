@@ -1,0 +1,183 @@
+@model CvManagementSystem.ViewModels.OdooApiTokenViewModel
+
+@{
+ViewData["Title"] = "Odoo API Integration";
+}
+
+<div class="container py-4">
+
+```
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Odoo API Integration</h2>
+        <p class="text-muted mb-0">
+            Position: <strong>@Model.PositionTitle</strong>
+        </p>
+    </div>
+
+    <a asp-controller="Positions"
+       asp-action="Edit"
+       asp-route-id="@Model.PositionId"
+       class="btn btn-outline-secondary">
+        Back to Position
+    </a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.GeneratedToken))
+{
+    <div class="alert alert-warning">
+        <h5 class="alert-heading">New API Token Generated</h5>
+
+        <p class="mb-2">
+            Copy this token now. For security, the full token is shown only after generation.
+        </p>
+
+        <div class="input-group">
+            <input id="generatedToken"
+                   type="text"
+                   class="form-control"
+                   value="@Model.GeneratedToken"
+                   readonly />
+
+            <button type="button"
+                    class="btn btn-outline-primary"
+                    onclick="copyToken()">
+                Copy
+            </button>
+        </div>
+    </div>
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <h5 class="card-title">Token Status</h5>
+
+        <div class="row g-3 mt-1">
+
+            <div class="col-md-4">
+                <div class="border rounded p-3">
+                    <div class="text-muted small">
+                        Position ID
+                    </div>
+                    <div class="fs-5">
+                        @Model.PositionId
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="border rounded p-3">
+                    <div class="text-muted small">
+                        Created At
+                    </div>
+                    <div class="fs-5">
+                        @(Model.CreatedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "Not generated")
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="border rounded p-3">
+                    <div class="text-muted small">
+                        Last Used
+                    </div>
+                    <div class="fs-5">
+                        @(Model.LastUsedAt?.ToLocalTime().ToString("yyyy-MM-dd HH:mm") ?? "Not used yet")
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <h5 class="card-title">Generate / Regenerate Token</h5>
+
+        <p class="text-muted">
+            Generating a new token will invalidate the previous token for this position.
+        </p>
+
+        <form asp-controller="OdooIntegration"
+              asp-action="GenerateApiToken"
+              asp-route-id="@Model.PositionId"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <button type="submit"
+                    class="btn btn-primary">
+                @(Model.CreatedAt.HasValue ? "Regenerate API Token" : "Generate API Token")
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <h5 class="card-title">Odoo Endpoint</h5>
+
+        <p class="text-muted">
+            Odoo can access this position's aggregated CV information through the API.
+        </p>
+
+        <div class="mb-3">
+            <label class="form-label">
+                Endpoint
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   value="/api/integration/position"
+                   readonly />
+        </div>
+
+        <div>
+            <label class="form-label">
+                Required Header
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   value="X-Position-Api-Token: YOUR_TOKEN"
+                   readonly />
+        </div>
+
+    </div>
+</div>
+```
+
+</div>
+
+@section Scripts { <script>
+function copyToken() {
+const tokenInput = document.getElementById("generatedToken");
+
+```
+        if (!tokenInput) {
+            return;
+        }
+
+        navigator.clipboard.writeText(tokenInput.value)
+            .then(() => {
+                const button = event.target;
+                const originalText = button.innerText;
+
+                button.innerText = "Copied!";
+
+                setTimeout(() => {
+                    button.innerText = originalText;
+                }, 1500);
+            });
+    }
+</script>
+```
+
+}
