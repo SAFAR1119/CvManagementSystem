@@ -131,6 +131,18 @@ public class SalesforceService
     }
 
 
+    // The redirect_uri sent to Salesforce must match the Connected App
+    // callback exactly; callers pass one built from the current request,
+    // and Salesforce:CallbackUrl is only a fallback.
+    private string ResolveRedirectUri(
+        string? redirectUri)
+    {
+        return string.IsNullOrWhiteSpace(redirectUri)
+            ? CallbackUrl
+            : redirectUri.Trim();
+    }
+
+
     // =========================================================
     // OAUTH STATE
     // =========================================================
@@ -176,7 +188,8 @@ public class SalesforceService
 
     public string BuildAuthorizationUrl(
         string state,
-        string codeChallenge)
+        string codeChallenge,
+        string? redirectUri = null)
     {
         if (string.IsNullOrWhiteSpace(state))
         {
@@ -202,7 +215,7 @@ public class SalesforceService
                     ClientId,
 
                 ["redirect_uri"] =
-                    CallbackUrl,
+                    ResolveRedirectUri(redirectUri),
 
                 ["scope"] =
                     "api refresh_token offline_access",
@@ -261,9 +274,13 @@ public class SalesforceService
         ExchangeCodeAsync(
             string code,
             string codeVerifier,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            string? redirectUri = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        var resolvedRedirectUri =
+            ResolveRedirectUri(redirectUri);
 
         if (string.IsNullOrWhiteSpace(code))
         {
@@ -298,7 +315,7 @@ public class SalesforceService
                     ClientSecret,
 
                 ["redirect_uri"] =
-                    CallbackUrl,
+                    resolvedRedirectUri,
 
                 ["code_verifier"] =
                     codeVerifier
@@ -324,7 +341,7 @@ public class SalesforceService
             $"Client Secret present: {!string.IsNullOrWhiteSpace(ClientSecret)}");
 
         Console.WriteLine(
-            $"Callback URL: {CallbackUrl}");
+            $"Callback URL: {resolvedRedirectUri}");
 
         Console.WriteLine(
             $"Authorization Code present: {!string.IsNullOrWhiteSpace(code)}");
@@ -480,6 +497,9 @@ public class SalesforceService
     // CREATE ACCOUNT + CONTACT
     // =========================================================
 
+    // Both records go in one Composite API call with allOrNone, so either
+    // the Account and its linked Contact are both created, or neither is
+    // (no orphaned Account when the Contact is rejected).
     public async Task<SalesforceIntegrationResultViewModel>
         CreateAccountAndContactAsync(
             SalesforceTokenResponse token,
@@ -488,17 +508,8 @@ public class SalesforceService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (token == null)
-        {
-            throw new ArgumentNullException(
-                nameof(token));
-        }
-
-        if (model == null)
-        {
-            throw new ArgumentNullException(
-                nameof(model));
-        }
+        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(model);
 
         if (string.IsNullOrWhiteSpace(
                 token.AccessToken))
@@ -514,20 +525,139 @@ public class SalesforceService
                 "Salesforce instance URL is empty.");
         }
 
-        var accountId =
-            await CreateAccountAsync(
-                token,
-                model,
+        var accountName =
+            Limit(
+                string.IsNullOrWhiteSpace(model.AccountName)
+                    ? BuildDefaultAccountName(model)
+                    : model.AccountName,
+                255)!;
+
+        var sobjectsPath =
+            $"/services/data/{ApiVersion}/sobjects";
+
+        // Field limits follow the standard Salesforce field sizes; longer
+        // values make Salesforce reject the record with STRING_TOO_LONG.
+        var payload =
+            new
+            {
+                allOrNone = true,
+
+                compositeRequest = new object[]
+                {
+                    new
+                    {
+                        method = "POST",
+                        url = $"{sobjectsPath}/Account",
+                        referenceId = "newAccount",
+                        body = new
+                        {
+                            Name =
+                                accountName,
+
+                            Phone =
+                                Limit(model.Phone, 40),
+
+                            Description =
+                                Limit(BuildAccountDescription(model), 32000)
+                        }
+                    },
+                    new
+                    {
+                        method = "POST",
+                        url = $"{sobjectsPath}/Contact",
+                        referenceId = "newContact",
+                        body = new
+                        {
+                            FirstName =
+                                Limit(model.FirstName, 40),
+
+                            LastName =
+                                Limit(model.LastName, 80) ?? "User",
+
+                            Email =
+                                CleanEmail(Limit(model.Email, 80)),
+
+                            Phone =
+                                Limit(model.Phone, 40),
+
+                            Title =
+                                Limit(model.JobTitle, 128),
+
+                            Department =
+                                Limit(model.Department, 80),
+
+                            Description =
+                                Limit(BuildContactDescription(model), 32000),
+
+                            AccountId =
+                                "@{newAccount.id}"
+                        }
+                    }
+                }
+            };
+
+        var url =
+            $"{token.InstanceUrl.TrimEnd('/')}" +
+            $"/services/data/{ApiVersion}/composite";
+
+        Console.WriteLine(
+            "=================================================");
+
+        Console.WriteLine(
+            "SALESFORCE ACCOUNT + CONTACT CREATE (COMPOSITE)");
+
+        Console.WriteLine(
+            $"POST: {url}");
+
+        Console.WriteLine(
+            "=================================================");
+
+        using var request =
+            new HttpRequestMessage(
+                HttpMethod.Post,
+                url);
+
+        AddBearerToken(
+            request,
+            token.AccessToken);
+
+        // Serialize with the runtime types so the nested anonymous
+        // bodies are written in full, with null fields omitted.
+        request.Content =
+            new StringContent(
+                JsonSerializer.Serialize<object>(
+                    payload,
+                    RecordJsonOptions),
+                Encoding.UTF8,
+                "application/json");
+
+        var response =
+            await _httpClient.SendAsync(
+                request,
                 cancellationToken);
 
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var contactId =
-            await CreateContactAsync(
-                token,
-                model,
-                accountId,
+        var responseText =
+            await response.Content.ReadAsStringAsync(
                 cancellationToken);
+
+        Console.WriteLine(
+            $"Composite HTTP Status: " +
+            $"{(int)response.StatusCode} " +
+            $"{response.StatusCode}");
+
+        Console.WriteLine(
+            $"Composite response: {responseText}");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException(
+                "Salesforce rejected the request " +
+                $"(HTTP {(int)response.StatusCode}). " +
+                DescribeErrors(responseText));
+        }
+
+        var (accountId, contactId) =
+            ParseCompositeResponse(responseText);
 
         return new SalesforceIntegrationResultViewModel
         {
@@ -548,292 +678,163 @@ public class SalesforceService
                     contactId),
 
             DisplayName =
-                string.IsNullOrWhiteSpace(
-                    model.AccountName)
-                    ? BuildDefaultAccountName(
-                        model)
-                    : model.AccountName.Trim()
+                accountName
         };
     }
 
 
-    // =========================================================
-    // CREATE ACCOUNT
-    // =========================================================
-
-    private async Task<string>
-        CreateAccountAsync(
-            SalesforceTokenResponse token,
-            SalesforceCreateAccountViewModel model,
-            CancellationToken cancellationToken)
+    private static (string AccountId, string ContactId)
+        ParseCompositeResponse(
+            string responseText)
     {
-        var url =
-            $"{token.InstanceUrl.TrimEnd('/')}" +
-            $"/services/data/{ApiVersion}/sobjects/Account";
+        var ids =
+            new Dictionary<string, string>();
 
-        var description =
-            BuildAccountDescription(model);
+        var failures =
+            new List<string>();
 
-        var payload =
-            new
+        try
+        {
+            using var document =
+                JsonDocument.Parse(responseText);
+
+            foreach (var item in document.RootElement
+                         .GetProperty("compositeResponse")
+                         .EnumerateArray())
             {
-                Name =
-                    string.IsNullOrWhiteSpace(
-                        model.AccountName)
-                        ? BuildDefaultAccountName(
-                            model)
-                        : model.AccountName.Trim(),
+                var referenceId =
+                    GetJsonString(item, "referenceId");
 
-                Phone =
-                    CleanNullable(
-                        model.Phone),
+                var objectName =
+                    referenceId == "newAccount"
+                        ? "Account"
+                        : "Contact";
 
-                Description =
-                    CleanNullable(
-                        description)
-            };
+                var status =
+                    item.TryGetProperty(
+                        "httpStatusCode",
+                        out var statusProperty)
+                        ? statusProperty.GetInt32()
+                        : 0;
 
-        Console.WriteLine(
-            "=================================================");
+                var body =
+                    item.GetProperty("body");
 
-        Console.WriteLine(
-            "SALESFORCE ACCOUNT CREATE");
+                if (status is >= 200 and < 300 &&
+                    body.ValueKind == JsonValueKind.Object)
+                {
+                    ids[referenceId] =
+                        GetJsonString(body, "id");
 
-        Console.WriteLine(
-            "=================================================");
+                    continue;
+                }
 
-        Console.WriteLine(
-            $"POST: {url}");
+                var message =
+                    DescribeErrorElement(body);
 
-        Console.WriteLine(
-            "=================================================");
-
-        using var request =
-            new HttpRequestMessage(
-                HttpMethod.Post,
-                url);
-
-        AddBearerToken(
-            request,
-            token.AccessToken);
-
-        request.Content =
-            JsonContent.Create(
-                payload,
-                options: RecordJsonOptions);
-
-        var response =
-            await _httpClient.SendAsync(
-                request,
-                cancellationToken);
-
-        var responseText =
-            await response.Content.ReadAsStringAsync(
-                cancellationToken);
-
-        Console.WriteLine(
-            $"Account HTTP Status: " +
-            $"{(int)response.StatusCode} " +
-            $"{response.StatusCode}");
-
-        Console.WriteLine(
-            $"Account response: " +
-            $"{RedactSensitiveValues(responseText)}");
-
-        if (!response.IsSuccessStatusCode)
+                // With allOrNone, the records that did not fail are
+                // reported as PROCESSING_HALTED; only the cause matters.
+                if (!message.Contains("PROCESSING_HALTED"))
+                {
+                    failures.Add($"{objectName}: {message}");
+                }
+            }
+        }
+        catch (Exception exception)
+            when (exception is JsonException
+                      or KeyNotFoundException
+                      or InvalidOperationException)
         {
             throw new InvalidOperationException(
-                "Salesforce Account creation failed. " +
-                $"HTTP {(int)response.StatusCode} " +
-                $"{response.StatusCode}. " +
-                $"Salesforce response: " +
-                $"{RedactSensitiveValues(responseText)}");
+                "Salesforce returned an unexpected response. " +
+                $"Response: {responseText}",
+                exception);
         }
 
-        var result =
-            ParseCreateRecordResponse(
-                responseText,
-                "Account");
+        if (failures.Count > 0 ||
+            !ids.TryGetValue("newAccount", out var accountId) ||
+            !ids.TryGetValue("newContact", out var contactId) ||
+            string.IsNullOrWhiteSpace(accountId) ||
+            string.IsNullOrWhiteSpace(contactId))
+        {
+            throw new InvalidOperationException(
+                "Salesforce did not create the records, " +
+                "so nothing was saved. " +
+                (failures.Count > 0
+                    ? string.Join(" ", failures)
+                    : $"Response: {responseText}"));
+        }
 
-        return result.Id;
+        return (accountId, contactId);
     }
 
 
-    // =========================================================
-    // CREATE CONTACT
-    // =========================================================
-
-    private async Task<string>
-        CreateContactAsync(
-            SalesforceTokenResponse token,
-            SalesforceCreateAccountViewModel model,
-            string accountId,
-            CancellationToken cancellationToken)
-    {
-        var url =
-            $"{token.InstanceUrl.TrimEnd('/')}" +
-            $"/services/data/{ApiVersion}/sobjects/Contact";
-
-        var payload =
-            new
-            {
-                FirstName =
-                    CleanNullable(
-                        model.FirstName),
-
-                LastName =
-                    string.IsNullOrWhiteSpace(
-                        model.LastName)
-                        ? "User"
-                        : model.LastName.Trim(),
-
-                Email =
-                    CleanEmail(
-                        model.Email),
-
-                Phone =
-                    CleanNullable(
-                        model.Phone),
-
-                Title =
-                    CleanNullable(
-                        model.JobTitle),
-
-                Department =
-                    CleanNullable(
-                        model.Department),
-
-                Description =
-                    CleanNullable(
-                        BuildContactDescription(model)),
-
-                AccountId =
-                    accountId
-            };
-
-        Console.WriteLine(
-            "=================================================");
-
-        Console.WriteLine(
-            "SALESFORCE CONTACT CREATE");
-
-        Console.WriteLine(
-            "=================================================");
-
-        Console.WriteLine(
-            $"POST: {url}");
-
-        Console.WriteLine(
-            "=================================================");
-
-        using var request =
-            new HttpRequestMessage(
-                HttpMethod.Post,
-                url);
-
-        AddBearerToken(
-            request,
-            token.AccessToken);
-
-        request.Content =
-            JsonContent.Create(
-                payload,
-                options: RecordJsonOptions);
-
-        var response =
-            await _httpClient.SendAsync(
-                request,
-                cancellationToken);
-
-        var responseText =
-            await response.Content.ReadAsStringAsync(
-                cancellationToken);
-
-        Console.WriteLine(
-            $"Contact HTTP Status: " +
-            $"{(int)response.StatusCode} " +
-            $"{response.StatusCode}");
-
-        Console.WriteLine(
-            $"Contact response: " +
-            $"{RedactSensitiveValues(responseText)}");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new InvalidOperationException(
-                "Salesforce Contact creation failed. " +
-                $"HTTP {(int)response.StatusCode} " +
-                $"{response.StatusCode}. " +
-                $"Salesforce response: " +
-                $"{RedactSensitiveValues(responseText)}");
-        }
-
-        var result =
-            ParseCreateRecordResponse(
-                responseText,
-                "Contact");
-
-        return result.Id;
-    }
-
-
-    // =========================================================
-    // RESPONSE PARSING
-    // =========================================================
-
-    private static SalesforceCreateRecordResponse
-        ParseCreateRecordResponse(
-            string responseText,
-            string objectName)
+    private static string
+        DescribeErrors(
+            string responseText)
     {
         try
         {
             using var document =
-                JsonDocument.Parse(
-                    responseText);
+                JsonDocument.Parse(responseText);
 
-            var root =
-                document.RootElement;
-
-            var id =
-                GetJsonString(
-                    root,
-                    "id");
-
-            var success =
-                root.TryGetProperty(
-                    "success",
-                    out var successProperty)
-                &&
-                successProperty.ValueKind ==
-                    JsonValueKind.True;
-
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                throw new InvalidOperationException(
-                    $"Salesforce returned a successful HTTP " +
-                    $"response for {objectName}, but no record ID " +
-                    $"was returned. Response: {responseText}");
-            }
-
-            return new SalesforceCreateRecordResponse
-            {
-                Id =
-                    id,
-
-                Success =
-                    success
-            };
+            return DescribeErrorElement(
+                document.RootElement);
         }
-        catch (JsonException exception)
+        catch (JsonException)
         {
-            throw new InvalidOperationException(
-                $"Salesforce returned invalid JSON while creating " +
-                $"{objectName}. Response: {responseText}",
-                exception);
+            return responseText;
         }
     }
 
+
+    // Salesforce errors are arrays of { errorCode, message, fields }.
+    private static string
+        DescribeErrorElement(
+            JsonElement element)
+    {
+        if (element.ValueKind != JsonValueKind.Array)
+        {
+            return element.ToString();
+        }
+
+        return string.Join(
+            " ",
+            element.EnumerateArray()
+                .Select(error =>
+                {
+                    var code =
+                        GetJsonString(error, "errorCode");
+
+                    var message =
+                        GetJsonString(error, "message");
+
+                    var fields =
+                        error.TryGetProperty(
+                            "fields",
+                            out var fieldsProperty) &&
+                        fieldsProperty.ValueKind == JsonValueKind.Array &&
+                        fieldsProperty.GetArrayLength() > 0
+                            ? $" (fields: {string.Join(", ", fieldsProperty.EnumerateArray())})"
+                            : string.Empty;
+
+                    return $"{code}: {message}{fields}";
+                }));
+    }
+
+
+    private static string?
+        Limit(
+            string? value,
+            int maxLength)
+    {
+        var cleaned =
+            CleanNullable(value);
+
+        return cleaned == null || cleaned.Length <= maxLength
+            ? cleaned
+            : cleaned[..maxLength];
+    }
 
     // =========================================================
     // DESCRIPTION

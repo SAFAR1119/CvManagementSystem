@@ -63,26 +63,28 @@
 
         {
 
-            <a asp-controller="Projects"
+            <div class="d-flex gap-3 justify-content-end ms-md-auto">
 
-               asp-action="Index"
+                <a asp-controller="Projects"
 
-               class="btn btn-outline-primary">
+                   asp-action="Index"
 
-                @L["MyProjects"]
+                   class="btn btn-outline-primary">
 
-            </a>
+                    @L["MyProjects"]
 
-        
+                </a>
 
-            <a asp-controller="Salesforce"
-                 asp-action="Create"
-                 asp-route-userId="@(isAdministratorView ? Model.UserId : null)"
-                  class="btn btn-outline-secondary">
+                <a href="@Url.Action("Create", "Salesforce")"
+                   id="add-to-salesforce"
+                   role="button"
+                   class="btn btn-outline-secondary">
 
-                Add to Salesforce
+                    Add to Salesforce
 
-            </a>
+                </a>
+
+            </div>
         }
 
     </div>
@@ -2509,6 +2511,34 @@
             7000
 
         );
+
+
+        // -----------------------------------------------------
+        // Add to Salesforce: flush pending changes, then open the
+        // Salesforce form, which starts the OAuth continuation flow.
+        // -----------------------------------------------------
+        const addToSalesforceButton =
+            document.getElementById("add-to-salesforce");
+
+        if (addToSalesforceButton) {
+            addToSalesforceButton.addEventListener("click", async event => {
+                event.preventDefault();
+
+                if (addToSalesforceButton.classList.contains("disabled")) {
+                    return;
+                }
+
+                addToSalesforceButton.classList.add("disabled");
+                addToSalesforceButton.setAttribute("aria-disabled", "true");
+                addToSalesforceButton.textContent = "Opening Salesforce…";
+
+                try {
+                    await autoSave();
+                } finally {
+                    window.location.href = addToSalesforceButton.href;
+                }
+            });
+        }
 
         // Image attributes are stored as URLs. When Cloudinary's unsigned
         // upload values are configured, files go directly from the browser to

@@ -1,9 +1,12 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 using CvManagementSystem.Data;
 using CvManagementSystem.Models;
 using CvManagementSystem.Services;
 using CvManagementSystem.ViewModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -46,21 +49,36 @@ public class SalesforceTokenResponse
 [Authorize]
 public class SalesforceController : Controller
 {
-    private const string SessionPrefix =
-        "Salesforce:OAuth:";
+    // The pending OAuth request is kept in an encrypted, time-limited
+    // cookie rather than in-memory session, so it survives an app restart
+    // while the user is signing in on Salesforce.
+    private const string OAuthCookieName =
+        "CvMaster.SalesforceOAuth";
+
+    private static readonly TimeSpan OAuthLifetime =
+        TimeSpan.FromMinutes(15);
+
+    private static readonly ChunkingCookieManager CookieManager =
+        new();
 
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SalesforceService _salesforceService;
+    private readonly ITimeLimitedDataProtector _oauthProtector;
 
     public SalesforceController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
-        SalesforceService salesforceService)
+        SalesforceService salesforceService,
+        IDataProtectionProvider dataProtectionProvider)
     {
         _context = context;
         _userManager = userManager;
         _salesforceService = salesforceService;
+        _oauthProtector =
+            dataProtectionProvider
+                .CreateProtector("Salesforce.OAuth")
+                .ToTimeLimitedDataProtector();
     }
 
     [HttpGet]
@@ -263,28 +281,59 @@ public class SalesforceController : Controller
             _salesforceService.GenerateCodeChallenge(
                 codeVerifier);
 
+        // Built from the host/port the app is actually serving, e.g.
+        // http://localhost:5254/Salesforce/Callback in development.
+        var redirectUri =
+            Url.Action(
+                nameof(Callback),
+                "Salesforce",
+                null,
+                Request.Scheme,
+                Request.Host.Value)!;
+
         var sessionData =
             new SalesforceOAuthSessionData
             {
+                State =
+                    state,
+
+                InitiatorUserId =
+                    currentUser.Id,
+
                 TargetUserId =
                     targetUserId,
 
                 CodeVerifier =
                     codeVerifier,
 
+                RedirectUri =
+                    redirectUri,
+
                 Form =
                     model
             };
 
-        HttpContext.Session.SetString(
-            SessionPrefix + state,
-            JsonSerializer.Serialize(
-                sessionData));
+        CookieManager.AppendResponseCookie(
+            HttpContext,
+            OAuthCookieName,
+            _oauthProtector.Protect(
+                JsonSerializer.Serialize(sessionData),
+                OAuthLifetime),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                IsEssential = true,
+                SameSite = SameSiteMode.Lax,
+                Path = "/",
+                MaxAge = OAuthLifetime
+            });
 
         var authorizationUrl =
             _salesforceService.BuildAuthorizationUrl(
                 state,
-                codeChallenge);
+                codeChallenge,
+                redirectUri);
 
         return Redirect(authorizationUrl);
     }
@@ -297,37 +346,28 @@ public class SalesforceController : Controller
         string? error_description,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(state))
-        {
-            return BadRequest(
-                "Missing Salesforce OAuth state.");
-        }
-
-        var sessionKey =
-            SessionPrefix + state;
-
-        var serialized =
-            HttpContext.Session.GetString(sessionKey);
-
-        HttpContext.Session.Remove(sessionKey);
-
-        if (string.IsNullOrWhiteSpace(serialized))
-        {
-            return BadRequest(
-                "The Salesforce authorization session expired. Start the integration again.");
-        }
-
         var sessionData =
-            JsonSerializer.Deserialize<
-                SalesforceOAuthSessionData>(
-                serialized);
+            ReadOAuthCookie();
 
-        if (sessionData == null ||
+        DeleteOAuthCookie();
+
+        if (string.IsNullOrWhiteSpace(state) ||
+            sessionData == null ||
             string.IsNullOrWhiteSpace(
-                sessionData.CodeVerifier))
+                sessionData.CodeVerifier) ||
+            !CryptographicOperations.FixedTimeEquals(
+                System.Text.Encoding.UTF8.GetBytes(state),
+                System.Text.Encoding.UTF8.GetBytes(sessionData.State)))
         {
-            return BadRequest(
-                "Invalid Salesforce authorization state.");
+            return RedirectToAction(
+                nameof(Create),
+                new
+                {
+                    userId = sessionData?.TargetUserId,
+                    error =
+                        "The Salesforce authorization session expired or did not match. " +
+                        "Please click \"Continue with Salesforce\" again."
+                });
         }
 
         if (!string.IsNullOrWhiteSpace(error))
@@ -343,8 +383,12 @@ public class SalesforceController : Controller
 
         if (string.IsNullOrWhiteSpace(code))
         {
-            return BadRequest(
-                "Salesforce did not return an authorization code.");
+            ViewData["Error"] =
+                "Salesforce did not return an authorization code.";
+
+            return View(
+                "Create",
+                sessionData.Form);
         }
 
         var currentUser =
@@ -360,9 +404,10 @@ public class SalesforceController : Controller
                 currentUser,
                 "Administrator");
 
-        if (!isAdministrator &&
-            sessionData.TargetUserId !=
-            currentUser.Id)
+        // The flow must finish in the same account that started it.
+        if (sessionData.InitiatorUserId != currentUser.Id ||
+            (!isAdministrator &&
+             sessionData.TargetUserId != currentUser.Id))
         {
             return Forbid();
         }
@@ -373,8 +418,8 @@ public class SalesforceController : Controller
                 await _salesforceService.ExchangeCodeAsync(
                     code,
                     sessionData.CodeVerifier,
-                    cancellationToken);
-                    
+                    cancellationToken,
+                    sessionData.RedirectUri);
 
             var result =
                 await _salesforceService.CreateAccountAndContactAsync(
@@ -406,12 +451,62 @@ public class SalesforceController : Controller
     }
     }
 
+    private SalesforceOAuthSessionData? ReadOAuthCookie()
+    {
+        var protectedValue =
+            CookieManager.GetRequestCookie(
+                HttpContext,
+                OAuthCookieName);
+
+        if (string.IsNullOrWhiteSpace(protectedValue))
+        {
+            return null;
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<
+                SalesforceOAuthSessionData>(
+                _oauthProtector.Unprotect(
+                    protectedValue));
+        }
+        catch (Exception exception)
+            when (exception is CryptographicException or JsonException)
+        {
+            // Expired, tampered with, or written with an old key.
+            return null;
+        }
+    }
+
+    private void DeleteOAuthCookie()
+    {
+        CookieManager.DeleteCookie(
+            HttpContext,
+            OAuthCookieName,
+            new CookieOptions
+            {
+                Secure = Request.IsHttps,
+                Path = "/"
+            });
+    }
+
     private sealed class SalesforceOAuthSessionData
     {
+        public string State { get; set; } =
+            string.Empty;
+
+        public string InitiatorUserId { get; set; } =
+            string.Empty;
+
         public string TargetUserId { get; set; } =
             string.Empty;
 
         public string CodeVerifier { get; set; } =
+            string.Empty;
+
+        // Token exchange must send the same redirect_uri as the
+        // authorization request.
+        public string RedirectUri { get; set; } =
             string.Empty;
 
         public SalesforceCreateAccountViewModel Form { get; set; } =
