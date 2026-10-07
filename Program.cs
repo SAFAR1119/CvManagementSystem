@@ -20,6 +20,8 @@ builder.Services
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
+builder.Services.AddHttpClient<IDropboxService, DropboxService>();
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddDistributedMemoryCache();
