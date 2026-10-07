@@ -2,6 +2,7 @@ using CvManagementSystem.Data;
 using CvManagementSystem.Middleware;
 using CvManagementSystem.Models;
 using CvManagementSystem.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -107,7 +108,24 @@ builder.Services.AddScoped<BadgeService>();
 
 builder.Services.AddHttpClient<SalesforceService>();
 
+// Render terminates HTTPS at its proxy and forwards plain HTTP to the
+// container. Honouring X-Forwarded-Proto makes Request.Scheme "https", so
+// absolute URLs such as the Salesforce OAuth redirect_uri are built as
+// https://<host>/Salesforce/Callback instead of http://. The proxy's
+// address is not fixed, so the known networks/proxies lists are cleared.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 var supportedCultures = new[]
 {

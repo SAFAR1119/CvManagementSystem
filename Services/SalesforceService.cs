@@ -49,13 +49,16 @@ public class SalesforceService
     {
         get
         {
+            // Salesforce:LoginUrl is accepted as an alias, e.g.
+            // https://login.salesforce.com or the org's My Domain URL.
             var value =
-                _configuration["Salesforce:BaseUrl"];
+                _configuration["Salesforce:BaseUrl"] ??
+                _configuration["Salesforce:LoginUrl"];
 
             if (string.IsNullOrWhiteSpace(value))
             {
                 throw new InvalidOperationException(
-                    "Salesforce:BaseUrl is not configured.");
+                    "Salesforce:BaseUrl (or Salesforce:LoginUrl) is not configured.");
             }
 
             return value.TrimEnd('/');

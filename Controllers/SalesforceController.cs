@@ -281,8 +281,11 @@ public class SalesforceController : Controller
             _salesforceService.GenerateCodeChallenge(
                 codeVerifier);
 
-        // Built from the host/port the app is actually serving, e.g.
-        // http://localhost:5254/Salesforce/Callback in development.
+        // Built from the current request, so it is
+        // http://localhost:5254/Salesforce/Callback in development and
+        // https://cv-management-system-kndu.onrender.com/Salesforce/Callback
+        // on Render (the https scheme comes from X-Forwarded-Proto, which
+        // Program.cs honours via UseForwardedHeaders).
         var redirectUri =
             Url.Action(
                 nameof(Callback),
